@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Adolescer com Saúde</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        saude: {
+                            light: '#f5f3ff', // Lilás bem claro e acolhedor para fundos
+                            prime: '#7c3aed', // Roxo/Violeta vibrante (topo da logo)
+                            dark: '#4c1d95',  // Roxo escuro para textos e contrastes fortes
+                            accent: '#22c55e' // Verde vivo (base da logo) para botões e destaques positivos
+                        }
+                    },
+                    animation: {
+                        'bounce-slow': 'bounce 4s infinite',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Esconde a barra de rolagem nativa para manter os carrosséis limpos */
+        #carousel-track::-webkit-scrollbar,
+        #course-carousel-track::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-700 font-sans antialiased">
+
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            
+            <div class="flex items-center space-x-4">
+                <a href="#" class="flex items-center border-r border-slate-200 pr-4">
+                    <img src="imagens/logo-extenso.png" alt="Adolescer com Saúde" class="h-9 w-auto onerror-fallback">
+                </a>
+                
+                <div class="hidden sm:flex items-center space-x-3">
+                    <img src="imagens/logo-fensg.png" alt="Logo FENSG" class="h-9 w-auto opacity-80 hover:opacity-100 transition">
+                    <img src="imagens/logo-upe.png" alt="Logo UPE" class="h-9 w-auto opacity-80 hover:opacity-100 transition">
+                </div>
+            </div>
+
+            <div class="hidden lg:flex space-x-8 font-medium text-slate-600">
+                <a href="#inicio" class="hover:text-saude-prime transition duration-300">Início</a>
+                <a href="#quem-somos" class="hover:text-saude-prime transition duration-300">Quem Somos</a>
+                <a href="#objetivos" class="hover:text-saude-prime transition duration-300">Eixos</a>
+                <a href="#editais" class="hover:text-saude-prime transition duration-300">Editais</a>
+                <a href="#eventos" class="hover:text-saude-prime transition duration-300">Eventos</a>
+                <a href="#cursos" class="hover:text-saude-prime transition duration-300">Cursos</a>
+            </div>
+
+            <div class="hidden lg:block">
+                <a href="login.html" class="bg-saude-prime hover:bg-saude-dark text-white px-5 py-2.5 rounded-full font-semibold shadow-md transition duration-300 flex items-center space-x-2">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Área de Membros</span>
+                </a>
+            </div>
+
+            <button id="menu-btn" class="lg:hidden text-slate-600 focus:outline-none">
+                <i class="fas fa-bars text-2xl"></i>
+            </button>
+        </nav>
+
+        <div id="mobile-menu" class="hidden lg:hidden bg-white border-t border-slate-100 px-6 py-4 space-y-4 shadow-inner">
+            <a href="#inicio" class="block text-slate-600 hover:text-saude-prime font-medium">Início</a>
+            <a href="#quem-somos" class="block text-slate-600 hover:text-saude-prime font-medium">Quem Somos</a>
+            <a href="#objetivos" class="block text-slate-600 hover:text-saude-prime font-medium">Eixos</a>
+            <a href="#editais" class="block text-slate-600 hover:text-saude-prime font-medium">Editais</a>
+            <a href="#eventos" class="block text-slate-600 hover:text-saude-prime font-medium">Eventos</a>
+            <a href="#cursos" class="block text-slate-600 hover:text-saude-prime font-medium">Cursos</a>
+            <hr class="border-slate-200">
+            <a href="login.html" class="w-full text-center bg-saude-prime hover:bg-saude-dark text-white block px-5 py-2.5 rounded-full font-semibold shadow-md transition duration-300">
+                <i class="fas fa-user-circle mr-2"></i>Área de Membros
+            </a>
+        </div>
+    </header>
+
+    <section id="inicio" class="relative bg-gradient-to-br from-purple-50 via-white to-emerald-50 py-20 lg:py-32 overflow-hidden">
+        <div class="container mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div class="space-y-6 max-w-xl">
+                <span class="bg-purple-100 text-saude-dark text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full">Projeto de Extensão Universitária</span>
+                <h1 class="text-4xl sm:text-5xl font-extrabold text-slate-800 leading-tight">
+                    Promovendo o bem-estar e a <span class="text-saude-prime">saúde na adolescência</span>
+                </h1>
+                <p class="text-lg text-slate-600 leading-relaxed">
+                    Um espaço informativo dedicado para participantes e extensionistas a apoiar jovens, educadores e famílias na jornada do desenvolvimento saudável. Conectando conhecimento acadêmico e impacto social.
+                </p>
+                <div class="pt-2">
+                    <a href="#quem-somos" class="bg-saude-accent hover:bg-green-600 text-white px-8 py-3.5 rounded-full font-semibold shadow-lg transition duration-300 inline-block text-center">
+                        Conheça o Projeto
+                    </a>
+                </div>
+            </div>
+            <div class="relative flex justify-center">
+                <div class="absolute w-72 h-72 sm:w-96 sm:h-96 bg-gradient-to-tr from-purple-300 to-emerald-300 opacity-20 rounded-full filter blur-xl -z-10 animate-pulse"></div>
+                <img src="imagens/logo-vetor.png" alt="Símbolo Oficial Adolescer" class="w-full max-w-md h-auto object-contain drop-shadow-2xl animate-bounce-slow onerror-fallback">
+            </div>
+        </div>
+    </section>
+
+    <section id="quem-somos" class="py-20 bg-white">
+        <div class="container mx-auto px-6">
+            <div class="text-center max-w-4xl mx-auto mb-16">
+                <h2 class="text-3xl font-bold text-slate-800 mb-4">Quem Somos</h2>
+                <div class="h-1 w-20 bg-saude-prime mx-auto mb-6 rounded-full"></div>
+                <p class="text-slate-600 leading-relaxed text-lg">
+                    O projeto <strong>Adolescer com Saúde</strong> nasceu no ambiente universitário com a missão de promover o Letramento em Saúde de adolescentes, fundamentadas na pedagogia freireana, no Processo de Enfermagem e na articulação intersetorial nos contextos clínico, escolar e digital, visando ao fortalecimento da autonomia, do protagonismo juvenil e da promoção da saúde integral.
+                </p>
+            </div>
+
+            <div class="relative max-w-6xl mx-auto mt-12 px-4 sm:px-12">
+                
+                <button id="prev-member" class="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white hover:bg-purple-100 text-saude-prime w-10 h-10 rounded-full shadow-md border border-slate-100 flex items-center justify-center transition focus:outline-none">
+                    <i class="fas fa-chevron-left text-lg"></i>
+                </button>
+
+                <div id="carousel-track" class="flex space-x-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 select-none" style="scrollbar-width: none; -ms-overflow-style: none;">
+                    
+                    <div class="min-w-full sm:min-w-[calc(50%-12px)] lg:min-w-[calc(25%-18px)] bg-slate-50 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition duration-300 text-center p-6 border border-slate-100 flex flex-col justify-between snap-start">
+                        <div>
+                            <div class="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-4 border-white shadow-md">
+                                <img src="imagens/equipe/ana-coord.png" alt="Profª Dra. Ana Virgínia Rodrigues" class="w-full h-full object-cover onerror-fallback">
+                            </div>
+                            <h4 class="font-bold text-base text-slate-800 line-clamp-2 min-h-[3rem] flex items-center justify-center">Profª Dra. Ana Virgínia Rodrigues</h4>
+                            <p class="text-xs text-saude-prime font-medium mb-2">Coordenadora Geral</p>
+                            <a href="http://lattes.cnpq.br/5838836387486591" target="_blank" class="inline-flex items-center space-x-1 text-[11px] bg-purple-100 text-saude-dark hover:bg-saude-prime hover:text-white px-2.5 py-1 rounded-full font-medium transition mb-3">
+                                <i class="fas fa-graduation-cap"></i><span>Currículo Lattes</span>
+                            </a>
+                        </div>
+                        <p class="text-[11px] text-slate-500 mt-2 leading-relaxed text-center">
+                            <span id="ana-desc-short">Doutora em Saúde da Criança e do Adolescente (UFPE), mestre em Enfermagem (PAPGEnf UPE/UEPB)...</span>
+                            <span id="ana-desc-full" class="hidden">Doutora em Saúde da Criança e do Adolescente (UFPE), mestre em Enfermagem (PAPGEnf UPE/UEPB), especialista em hebiatria (UFSCAr) e coordenadora de graduação (UPE).</span>
+                            <button id="btn-ana-more" class="text-saude-prime font-semibold hover:underline block mx-auto mt-1 focus:outline-none">Exibir mais</button>
+                        </p>
+                    </div>
+
+                    <div class="min-w-full sm:min-w-[calc(50%-12px)] lg:min-w-[calc(25%-18px)] bg-slate-50 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition duration-300 text-center p-6 border border-slate-100 flex flex-col justify-between snap-start">
+                        <div>
+                            <div class="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-4 border-white shadow-md">
+                                <img src="imagens/equipe/rivaldo-extensionista.png" alt="Rivaldo de Pontes" class="w-full h-full object-cover onerror-fallback">
+                            </div>
+                            <h4 class="font-bold text-base text-slate-800 line-clamp-2 min-h-[3rem] flex items-center justify-center">Rivaldo de Pontes</h4>
+                            <p class="text-xs text-saude-prime font-medium mb-2">Extensionista</p>
+                            <a href="http://lattes.cnpq.br/2962404526613136" target="_blank" class="inline-flex items-center space-x-1 text-[11px] bg-purple-100 text-saude-dark hover:bg-saude-prime hover:text-white px-2.5 py-1 rounded-full font-medium transition mb-3">
+                                <i class="fas fa-graduation-cap"></i><span>Currículo Lattes</span>
+                            </a>
+                        </div>
+                        <p class="text-[11px] text-slate-500 mt-2 leading-relaxed text-center flex-grow flex items-center justify-center min-h-[3.5rem]">Extensionista Adolescer do 3º módulo da FENSG.</p>
+                    </div>
+
+                    <div class="min-w-full sm:min-w-[calc(50%-12px)] lg:min-w-[calc(25%-18px)] bg-slate-50 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition duration-300 text-center p-6 border border-slate-100 flex flex-col justify-between snap-start">
+                        <div>
+                            <div class="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-4 border-white shadow-md">
+                                <img src="imagens/equipe/rayane-extensionista.png" alt="Rayane Vitoria" class="w-full h-full object-cover onerror-fallback">
+                            </div>
+                            <h4 class="font-bold text-base text-slate-800 line-clamp-2 min-h-[3rem] flex items-center justify-center">Rayane Vitoria</h4>
+                            <p class="text-xs text-saude-prime font-medium mb-2">Extensionista</p>
+                            <a href="http://lattes.cnpq.br/5865092379780403" target="_blank" class="inline-flex items-center space-x-1 text-[11px] bg-purple-100 text-saude-dark hover:bg-saude-prime hover:text-white px-2.5 py-1 rounded-full font-medium transition mb-3">
+                                <i class="fas fa-graduation-cap"></i><span>Currículo Lattes</span>
+                            </a>
+                        </div>
+                        <p class="text-[11px] text-slate-500 mt-2 leading-relaxed text-center flex-grow flex items-center justify-center min-h-[3.5rem]">Extensionista Adolescer do 8º módulo da FENSG.</p>
+                    </div>
+
+                    <div class="min-w-full sm:min-w-[calc(50%-12px)] lg:min-w-[calc(25%-18px)] bg-slate-50 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition duration-300 text-center p-6 border border-slate-100 flex flex-col justify-between snap-start">
+                        <div>
+                            <div class="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-4 border-white shadow-md">
+                                <img src="imagens/equipe/gabriela-extensionista.png" alt="Gabriela Lins" class="w-full h-full object-cover onerror-fallback">
+                            </div>
+                            <h4 class="font-bold text-base text-slate-800 line-clamp-2 min-h-[3rem] flex items-center justify-center">Gabriela Lins</h4>
+                            <p class="text-xs text-saude-prime font-medium mb-2">Extensionista</p>
+                            <a href="http://lattes.cnpq.br/3555341653759720" target="_blank" class="inline-flex items-center space-x-1 text-[11px] bg-purple-100 text-saude-dark hover:bg-saude-prime hover:text-white px-2.5 py-1 rounded-full font-medium transition mb-3">
+                                <i class="fas fa-graduation-cap"></i><span>Currículo Lattes</span>
+                            </a>
+                        </div>
+                        <p class="text-[11px] text-slate-500 mt-2 leading-relaxed text-center flex-grow flex items-center justify-center min-h-[3.5rem]">Extensionista Adolescer do 6º módulo da FENSG.</p>
+                    </div>
+
+                    <div class="min-w-full sm:min-w-[calc(50%-12px)] lg:min-w-[calc(25%-18px)] bg-slate-50 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition duration-300 text-center p-6 border border-slate-100 flex flex-col justify-between snap-start">
+                        <div>
+                            <div class="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-4 border-white shadow-md">
+                                <img src="imagens/equipe/Rhayssa-extensionista.png" alt="Rhayssa Almeida" class="w-full h-full object-cover onerror-fallback">
+                            </div>
+                            <h4 class="font-bold text-base text-slate-800 line-clamp-2 min-h-[3rem] flex items-center justify-center">Rhayssa Almeida</h4>
+                            <p class="text-xs text-saude-prime font-medium mb-2">Extensionista</p>
+                            <span class="inline-flex items-center space-x-1 text-[11px] bg-slate-200 text-slate-600 px-2.5 py-1 rounded-full font-medium mb-3">
+                                <i class="fas fa-user-grad"></i><span>FENSG / UPE</span>
+                            </span>
+                        </div>
+                        <p class="text-[11px] text-slate-500 mt-2 leading-relaxed text-center flex-grow flex items-center justify-center min-h-[3.5rem]">Extensionista Adolescer do 9º módulo da FENSG.</p>
+                    </div>
+
+                    <div class="min-w-full sm:min-w-[calc(50%-12px)] lg:min-w-[calc(25%-18px)] bg-slate-50 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition duration-300 text-center p-6 border border-slate-100 flex flex-col justify-between snap-start">
+                        <div>
+                            <div class="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-4 border-white shadow-md">
+                                <img src="imagens/equipe/julia-extensionista.png" alt="Júlia Vasconcelos" class="w-full h-full object-cover onerror-fallback">
+                            </div>
+                            <h4 class="font-bold text-base text-slate-800 line-clamp-2 min-h-[3rem] flex items-center justify-center">Júlia Vasconcelos</h4>
+                            <p class="text-xs text-saude-prime font-medium mb-2">Extensionista</p>
+                            <a href="http://lattes.cnpq.br/5965485036282942" target="_blank" class="inline-flex items-center space-x-1 text-[11px] bg-purple-100 text-saude-dark hover:bg-saude-prime hover:text-white px-2.5 py-1 rounded-full font-medium transition mb-3">
+                                <i class="fas fa-graduation-cap"></i><span>Currículo Lattes</span>
+                            </a>
+                        </div>
+                        <p class="text-[11px] text-slate-500 mt-2 leading-relaxed text-center flex-grow flex items-center justify-center min-h-[3.5rem]">Extensionista Adolescer do 7º módulo da FENSG.</p>
+                    </div>
+
+                </div>
+
+                <button id="next-member" class="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white hover:bg-purple-100 text-saude-prime w-10 h-10 rounded-full shadow-md border border-slate-100 flex items-center justify-center transition focus:outline-none">
+                    <i class="fas fa-chevron-right text-lg"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <section id="objetivos" class="py-20 bg-slate-50 overflow-hidden">
+        <div class="container mx-auto px-6 max-w-5xl">
+            <div class="flex flex-col lg:flex-row gap-12 items-stretch relative">
+                <div class="lg:w-1/3 flex flex-col justify-center items-center lg:items-start text-center lg:text-left relative z-10">
+                    <span class="text-xs font-bold uppercase tracking-widest text-saude-prime bg-purple-100 px-3 py-1 rounded-full mb-3">Metodologia</span>
+                    <h2 class="text-4xl font-extrabold text-slate-800 leading-tight">Nossos<br class="hidden lg:block"><span class="text-saude-prime"> Eixos</span></h2>
+                    <p class="text-sm text-slate-500 mt-4 max-w-xs">Clique em "Exibir mais" em cada ramificação lateral para detalhar nossas diretrizes fundamentais.</p>
+                </div>
+
+                <div class="lg:w-2/3 space-y-6 relative pl-4 lg:pl-12 border-l-2 border-dashed border-purple-200">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition duration-300 relative group">
+                        <div class="hidden lg:block absolute -left-[49px] top-1/2 -translate-y-1/2 w-12 h-0.5 bg-gradient-to-r from-purple-200 to-purple-400 group-hover:scale-x-110 transition origin-left"></div>
+                        <div class="hidden lg:block absolute -left-[53px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-saude-prime"></div>
+                        <div class="flex items-start space-x-4">
+                            <div class="bg-purple-100 text-saude-prime w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center text-xl shadow-inner"><i class="fas fa-school"></i></div>
+                            <div class="flex-grow">
+                                <h3 class="text-lg font-bold text-slate-800 mb-2">Eixo Escolar</h3>
+                                <p class="text-slate-600 text-sm leading-relaxed">
+                                    <span id="eixo-escolar-short">Realizado em escolas públicas do município de Recife e região metropolitana, em periodicidade semanal...</span>
+                                    <span id="eixo-escolar-full" class="hidden">Realizado em escolas públicas do município de Recife e região metropolitana, em periodicidade semanal. Baseia-se na pedagogia freireana e em metodologias participativas (Círculos de Cultura, rodas de conversa, oficinas lúdicas e debates) que promovem o diálogo, o protagonismo e o letramento em saúde dos adolescents.</span>
+                                </p>
+                                <button id="btn-escolar-more" class="text-saude-prime font-semibold hover:underline text-xs mt-2 focus:outline-none">Exibir mais</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition duration-300 relative group">
+                        <div class="hidden lg:block absolute -left-[49px] top-1/2 -translate-y-1/2 w-12 h-0.5 bg-gradient-to-r from-purple-200 to-purple-400 group-hover:scale-x-110 transition origin-left"></div>
+                        <div class="hidden lg:block absolute -left-[53px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-saude-prime"></div>
+                        <div class="flex items-start space-x-4">
+                            <div class="bg-amber-100 text-amber-600 w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center text-xl shadow-inner"><i class="fas fa-clinic-medical"></i></div>
+                            <div class="flex-grow">
+                                <h3 class="text-lg font-bold text-slate-800 mb-2">Eixo Clínico</h3>
+                                <p class="text-slate-600 text-sm leading-relaxed">
+                                    <span id="eixo-clinico-short">Realizado no ambulatório do Centro Integrado de Saúde Amaury de Medeiros (CISAM/UPE)...</span>
+                                    <span id="eixo-clinico-full" class="hidden">Realizado no ambulatório do Centro Integrado de Saúde Amaury de Medeiros (CISAM/UPE). Consiste na execução da Consulta de Enfermagem voltada ao adolescent, estruturada a partir do acolhimento, escuta e aplicação das etapas do Processo de Enfermagem de acordo com as diretrizes vigentes do COFEN.</span>
+                                </p>
+                                <button id="btn-clinico-more" class="text-saude-prime font-semibold hover:underline text-xs mt-2 focus:outline-none">Exibir mais</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition duration-300 relative group">
+                        <div class="hidden lg:block absolute -left-[49px] top-1/2 -translate-y-1/2 w-12 h-0.5 bg-gradient-to-r from-purple-200 to-purple-400 group-hover:scale-x-110 transition origin-left"></div>
+                        <div class="hidden lg:block absolute -left-[53px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-saude-prime"></div>
+                        <div class="flex items-start space-x-4">
+                            <div class="bg-emerald-100 text-saude-accent w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center text-xl shadow-inner"><i class="fab fa-instagram"></i></div>
+                            <div class="flex-grow">
+                                <h3 class="text-lg font-bold text-slate-800 mb-2">Eixo Digital</h3>
+                                <p class="text-slate-600 text-sm leading-relaxed">
+                                    <span id="eixo-digital-short">Uso de mídias sociais (Instagram) e Tecnologias de Informação e Comunicação para a difusão ampla...</span>
+                                    <span id="eixo-digital-full" class="hidden">Uso de mídias sociais (Instagram) e Tecnologias de Informação e Comunicação para a difusão ampla de conhecimentos validados, combate a desinformação e desenvolvimento do letramento em saúde digital dos jovens.</span>
+                                </p>
+                                <button id="btn-digital-more" class="text-saude-prime font-semibold hover:underline text-xs mt-2 focus:outline-none">Exibir mais</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="editais" class="py-20 bg-white border-b border-slate-100">
+        <div class="container mx-auto px-6 max-w-5xl">
+            <div class="text-center max-w-3xl mx-auto mb-12">
+                <span class="text-xs font-bold uppercase tracking-widest text-saude-prime bg-purple-100 px-3 py-1 rounded-full mb-3">Oportunidades</span>
+                <h2 class="text-3xl font-bold text-slate-800 mb-4">Editais e Processos Seletivos</h2>
+                <div class="h-1 w-20 bg-saude-prime mx-auto mb-4 rounded-full"></div>
+                <p class="text-slate-600 text-sm">Participe das atividades de extensão do projeto Adolescer com Saúde.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
+                <div class="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-3xl p-8 border border-purple-100 shadow-sm flex flex-col justify-between relative overflow-hidden group">
+                    <div class="absolute right-0 top-0 translate-x-8 -translate-y-8 w-24 h-24 bg-purple-200/30 rounded-full filter blur-xl group-hover:scale-125 transition duration-500"></div>
+                    <div class="space-y-4 relative z-10 flex-grow">
+                        <span class="inline-block bg-red-500 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">Último Edital - Encerrado</span>
+                        <h3 class="text-xl font-extrabold text-slate-800">Edital para novos extensionistas 01/2026</h3>
+                        <p class="text-sm text-slate-600 leading-relaxed">Vagas para estudantes de graduação interessados em atuar nos eixos escolar, clínico e digital. Confira os critérios de elegibilidade e o cronograma de entrevistas.</p>
+                    </div>
+                    <div class="pt-6 relative z-10">
+                        <a href="https://drive.google.com/drive/folders/1bv6wdE4BWcXUkbgQtm0qoRkDhyxp04_y?usp=drive_link" target="_blank" class="w-full bg-saude-prime hover:bg-saude-dark text-white text-sm font-semibold px-6 py-3.5 rounded-xl transition shadow-md flex items-center justify-center space-x-2">
+                            <i class="fas fa-external-link-alt"></i> <span>Ver Edital</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm flex flex-col justify-between relative overflow-hidden group">
+                    <div class="absolute right-0 top-0 translate-x-8 -translate-y-8 w-24 h-24 bg-emerald-100/20 rounded-full filter blur-xl group-hover:scale-125 transition duration-500"></div>
+                    <div class="space-y-4 relative z-10 flex-grow">
+                        <span class="inline-block bg-slate-100 text-slate-500 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Histórico</span>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-saude-prime text-xl"><i class="fas fa-folder-open"></i></span>
+                            <h3 class="text-xl font-extrabold text-slate-800">Processos Anteriores</h3>
+                        </div>
+                        <p class="text-sm text-slate-600 leading-relaxed">Deseja consultar editais encerrados e seus respectivos resultados de seleções passadas? Acesse nosso repositório público completo e oficial no Google Drive.</p>
+                    </div>
+                    <div class="pt-6 relative z-10">
+                        <a href="https://drive.google.com/drive/folders/1Rz7aBwO7ZcIUYxWr7Fx6vLyK_Nvgvttt?usp=drive_link" target="_blank" class="w-full inline-flex items-center justify-center space-x-2 text-sm font-bold text-saude-prime hover:text-saude-dark border-2 border-purple-100 hover:border-saude-prime px-6 py-3 rounded-xl transition duration-300 bg-white shadow-sm">
+                            <i class="fab fa-google-drive text-base text-purple-500"></i><span>Pasta de Editais Anteriores</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="eventos" class="py-20 bg-slate-50 overflow-hidden">
+        <div class="container mx-auto px-6 max-w-5xl">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="text-xs font-bold uppercase tracking-widest text-saude-prime bg-purple-100 px-3 py-1 rounded-full mb-3">Mídias & Atividades</span>
+                <h2 class="text-3xl font-bold text-slate-800 mb-4">Últimas Ações e Eventos</h2>
+                <div class="h-1 w-20 bg-saude-prime mx-auto mb-6 rounded-full"></div>
+                <p class="text-slate-600 text-sm">Fique por dentro das rodas de conversa, intervenções e atividades práticas que realizamos.</p>
+            </div>
+
+            <div class="relative bg-white border border-slate-100 rounded-3xl shadow-md overflow-hidden max-w-4xl mx-auto min-h-[380px] md:min-h-[300px]">
+                
+                <div class="news-slide flex flex-col md:flex-row items-stretch absolute inset-0 transition-opacity duration-1000 opacity-100 z-10">
+                    <div class="md:w-1/2 h-56 md:h-auto overflow-hidden bg-slate-200">
+                        <img src="imagens/eventos/evento1.jpg" alt="Ação Ansiedade na Vida Real" class="w-full h-full object-cover onerror-fallback">
+                    </div>
+                    <div class="md:w-1/2 p-8 flex flex-col justify-center space-y-4">
+                        <div class="flex items-center space-x-2">
+                            <span class="bg-purple-100 text-saude-prime text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-md"><i class="fas fa-heartbeat mr-1"></i> Ação Recente</span>
+                            <span class="text-xs text-slate-400 font-medium"><i class="fas fa-map-marker-alt mr-1 text-purple-400"></i> Ambulatório de Hebiatria do CISAM</span>
+                        </div>
+                        <h3 class="text-xl font-extrabold text-slate-800 leading-snug">Ansiedade na Vida Real</h3>
+                        <p class="text-sm text-slate-600 leading-relaxed">Intervenção interativa com dinâmicas de escuta ativa e letramento em saúde mental, aproximando o suporte psicossocial dos adolescentes acolhidos pela instituição.</p>
+                    </div>
+                </div>
+
+                <div class="news-slide flex flex-col md:flex-row items-stretch absolute inset-0 transition-opacity duration-1000 opacity-0 z-0">
+                    <div class="md:w-1/2 h-56 md:h-auto overflow-hidden bg-slate-200">
+                        <img src="imagens/eventos/evento2.jpg" alt="Oficina Escolar" class="w-full h-full object-cover onerror-fallback">
+                    </div>
+                    <div class="md:w-1/2 p-8 flex flex-col justify-center space-y-4">
+                        <div class="flex items-center space-x-2">
+                            <span class="bg-emerald-100 text-emerald-600 text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-md"><i class="fas fa-school mr-1"></i> Oficina</span>
+                            <span class="text-xs text-slate-400 font-medium"><i class="fas fa-map-marker-alt mr-1 text-emerald-400"></i> Escola Pública Parceira</span>
+                        </div>
+                        <h3 class="text-xl font-extrabold text-slate-800 leading-snug">Círculo de Cultura e Alimentação Saudável</h3>
+                        <p class="text-sm text-slate-600 leading-relaxed">Debate baseado na pedagogia freireana construído com os jovens secundaristas para desmistificar mitos alimentares e criar rotinas de nutrition sustentáveis.</p>
+                    </div>
+                </div>
+
+                <div class="news-slide flex flex-col md:flex-row items-stretch absolute inset-0 transition-opacity duration-1000 opacity-0 z-0">
+                    <div class="md:w-1/2 h-56 md:h-auto overflow-hidden bg-slate-200">
+                        <img src="imagens/eventos/evento3.jpg" alt="Letramento Digital" class="w-full h-full object-cover onerror-fallback">
+                    </div>
+                    <div class="md:w-1/2 p-8 flex flex-col justify-center space-y-4">
+                        <div class="flex items-center space-x-2">
+                            <span class="bg-blue-100 text-blue-600 text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-md"><i class="fab fa-instagram mr-1"></i> Campanha Digital</span>
+                            <span class="text-xs text-slate-400 font-medium"><i class="fas fa-globe mr-1 text-blue-400"></i> Redes Sociais</span>
+                        </div>
+                        <h3 class="text-xl font-extrabold text-slate-800 leading-snug">Combate à Desinformação na Web</h3>
+                        <p class="text-sm text-slate-600 leading-relaxed">Produção científica voltada para o Instagram focando no letramento em saúde digital, ensinando adolescentes a validarem fontes de notícias sobre saúde integral.</p>
+                    </div>
+                </div>
+
+                <button id="prev-slide" class="absolute left-3 top-1/2 md:top-auto md:bottom-6 -translate-y-1/2 md:translate-y-0 md:left-auto md:right-20 z-20 bg-white/90 hover:bg-purple-100 text-saude-prime w-8 h-10 md:w-9 md:h-9 rounded-xl shadow-md border border-slate-100 flex items-center justify-center transition focus:outline-none">
+                    <i class="fas fa-chevron-left text-sm"></i>
+                </button>
+                <button id="next-slide" class="absolute right-3 top-1/2 md:top-auto md:bottom-6 -translate-y-1/2 md:translate-y-0 z-20 bg-white/90 hover:bg-purple-100 text-saude-prime w-8 h-10 md:w-9 md:h-9 rounded-xl shadow-md border border-slate-100 flex items-center justify-center transition focus:outline-none">
+                    <i class="fas fa-chevron-right text-sm"></i>
+                </button>
+            </div>
+
+            <div class="flex justify-center space-x-2 mt-4" id="dots-container">
+                <span class="news-dot w-2 h-2 rounded-full bg-saude-prime cursor-pointer transition-all duration-300"></span>
+                <span class="news-dot w-2 h-2 rounded-full bg-purple-200 cursor-pointer transition-all duration-300"></span>
+                <span class="news-dot w-2 h-2 rounded-full bg-purple-200 cursor-pointer transition-all duration-300"></span>
+            </div>
+        </div>
+    </section>
+
+    <section id="cursos" class="py-20 bg-white">
+        <div class="container mx-auto px-6 max-w-5xl">
+            <div class="text-center max-w-3xl mx-auto mb-12">
+                <h2 class="text-3xl font-bold text-slate-800 mb-4">Cursos e Capacitações</h2>
+                <div class="h-1 w-20 bg-saude-prime mx-auto mb-6 rounded-full"></div>
+                <p class="text-slate-600 text-sm">Capacitações gratuitas com certificação universitária para enriquecer seu curriculum.</p>
+            </div>
+            
+            <div class="relative max-w-5xl mx-auto mt-12 px-4 sm:px-12">
+                <button id="prev-course" class="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white hover:bg-purple-100 text-saude-prime w-10 h-10 rounded-full shadow-md border border-slate-100 flex items-center justify-center transition focus:outline-none">
+                    <i class="fas fa-chevron-left text-lg"></i>
+                </button>
+
+                <div id="course-carousel-track" class="flex space-x-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 select-none" style="scrollbar-width: none; -ms-overflow-style: none;">
+                    <div class="min-w-full sm:min-w-[calc(50%-12px)] lg:min-w-[calc(33.333%-16px)] bg-slate-50 p-6 rounded-2xl border border-slate-100 flex flex-col justify-between h-full hover:shadow-md transition group snap-start">
+                        <div class="space-y-4">
+                            <div class="text-purple-400 text-3xl group-hover:scale-110 transition duration-300 transform origin-left"><i class="fas fa-graduation-cap"></i></div>
+                            <h3 class="text-base font-extrabold text-slate-800 leading-snug min-h-[3rem] flex items-center">Implementando o Programa de Saúde na Escola - PSE</h3>
+                            <p class="text-xs text-slate-500 leading-relaxed line-clamp-3">Capacitação voltada para a articulação entre saúde e educação, otimizando as ações do PSE no ambiente escolar.</p>
+                        </div>
+                        <div class="mt-6 pt-4 border-t border-slate-200/60 flex flex-col gap-3">
+                            <div class="flex justify-between items-center text-xs text-slate-500">
+                                <span><i class="far fa-clock mr-1 text-saude-prime"></i> 30 horas</span>
+                                <span class="text-saude-accent font-bold">Gratuito</span>
+                            </div>
+                            <a href="https://avasus.ufrn.br/local/avasplugin/cursos/curso.php?id=321" target="_blank" class="w-full bg-saude-prime hover:bg-saude-dark text-white text-xs font-semibold py-2.5 rounded-xl transition text-center flex items-center justify-center space-x-1">
+                                <span>Acessar Curso</span> <i class="fas fa-external-link-alt text-[10px] opacity-80 ml-1"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="min-w-full sm:min-w-[calc(50%-12px)] lg:min-w-[calc(33.333%-16px)] bg-slate-50 p-6 rounded-2xl border border-slate-100 flex flex-col justify-between h-full hover:shadow-md transition group snap-start">
+                        <div class="space-y-4">
+                            <div class="text-purple-400 text-3xl group-hover:scale-110 transition duration-300 transform origin-left"><i class="fas fa-baby"></i></div>
+                            <h3 class="text-base font-extrabold text-slate-800 leading-snug min-h-[3rem] flex items-center">Abordagem Cuidados para o desenvolvimento da criança na APS</h3>
+                            <p class="text-xs text-slate-500 leading-relaxed line-clamp-3">Práticas de acompanhamento integral e estímulo ao desenvolvimento na primeira infância no contexto do SUS.</p>
+                        </div>
+                        <div class="mt-6 pt-4 border-t border-slate-200/60 flex flex-col gap-3">
+                            <div class="flex justify-between items-center text-xs text-slate-500">
+                                <span><i class="far fa-clock mr-1 text-saude-prime"></i> 30 horas</span>
+                                <span class="text-saude-accent font-bold">Gratuito</span>
+                            </div>
+                            <a href="http://unasus.gov.br/cursos/curso/47054" target="_blank" class="w-full bg-saude-prime hover:bg-saude-dark text-white text-xs font-semibold py-2.5 rounded-xl transition text-center flex items-center justify-center space-x-1">
+                                <span>Acessar Curso</span> <i class="fas fa-external-link-alt text-[10px] opacity-80 ml-1"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="min-w-full sm:min-w-[calc(50%-12px)] lg:min-w-[calc(33.333%-16px)] bg-slate-50 p-6 rounded-2xl border border-slate-100 flex flex-col justify-between h-full hover:shadow-md transition group snap-start">
+                        <div class="space-y-4">
+                            <div class="text-purple-400 text-3xl group-hover:scale-110 transition duration-300 transform origin-left"><i class="fas fa-chart-line"></i></div>
+                            <h3 class="text-base font-extrabold text-slate-800 leading-snug min-h-[3rem] flex items-center">Saúde da Criança: Crescimento e Desenvolvimento</h3>
+                            <p class="text-xs text-slate-500 leading-relaxed line-clamp-3">Estudo aprofundado dos parâmetros de acompanhamento físico e neuropsicomotor infantojuvenil.</p>
+                        </div>
+                        <div class="mt-6 pt-4 border-t border-slate-200/60 flex flex-col gap-3">
+                            <div class="flex justify-between items-center text-xs text-slate-500">
+                                <span><i class="far fa-clock mr-1 text-saude-prime"></i> 30 horas</span>
+                                <span class="text-saude-accent font-bold">Especialização</span>
+                            </div>
+                            <a href="https://avasus.ufrn.br/local/avasplugin/cursos/curso.php?id=94" target="_blank" class="w-full bg-saude-prime hover:bg-saude-dark text-white text-xs font-semibold py-2.5 rounded-xl transition text-center flex items-center justify-center space-x-1">
+                                <span>Acessar Curso</span> <i class="fas fa-external-link-alt text-[10px] opacity-80 ml-1"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="min-w-full sm:min-w-[calc(50%-12px)] lg:min-w-[calc(33.333%-16px)] bg-slate-50 p-6 rounded-2xl border border-slate-100 flex flex-col justify-between h-full hover:shadow-md transition group snap-start">
+                        <div class="space-y-4">
+                            <div class="text-purple-400 text-3xl group-hover:scale-110 transition duration-300 transform origin-left"><i class="fas fa-globe-americas"></i></div>
+                            <h3 class="text-base font-extrabold text-slate-800 leading-snug min-h-[3rem] flex items-center">Saúde integral dos adolescentes</h3>
+                            <p class="text-xs text-slate-500 leading-relaxed line-clamp-3">Curso internacional chancelado pela OPAS abordando as diretrizes globais para a saúde e proteção do jovem.</p>
+                        </div>
+                        <div class="mt-6 pt-4 border-t border-slate-200/60 flex flex-col gap-3">
+                            <div class="flex justify-between items-center text-xs text-slate-500">
+                                <span><i class="fas fa-certificate mr-1 text-saude-prime"></i> Certificação OPAS</span>
+                                <span class="text-saude-accent font-bold">Gratuito</span>
+                            </div>
+                            <a href="https://campus.paho.org/pt-br/curso/saude-integral-adolescentes" target="_blank" class="w-full bg-saude-prime hover:bg-saude-dark text-white text-xs font-semibold py-2.5 rounded-xl transition text-center flex items-center justify-center space-x-1">
+                                <span>Acessar Curso</span> <i class="fas fa-external-link-alt text-[10px] opacity-80 ml-1"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="min-w-full sm:min-w-[calc(50%-12px)] lg:min-w-[calc(33.333%-16px)] bg-slate-50 p-6 rounded-2xl border border-slate-100 flex flex-col justify-between h-full hover:shadow-md transition group snap-start">
+                        <div class="space-y-4">
+                            <div class="text-purple-400 text-3xl group-hover:scale-110 transition duration-300 transform origin-left"><i class="fas fa-book"></i></div>
+                            <h3 class="text-base font-extrabold text-slate-800 leading-snug min-h-[3rem] flex items-center">EducaSUS – Metodologias de Educação em Saúde para a rede do PSE</h3>
+                            <p class="text-xs text-slate-500 leading-relaxed line-clamp-3">Ferramentas e dinâmicas pedagógicas voltadas especificamente para o engajamento de adolescentes do Ensino Médio.</p>
+                        </div>
+                        <div class="mt-6 pt-4 border-t border-slate-200/60 flex flex-col gap-3">
+                            <div class="flex justify-between items-center text-xs text-slate-500">
+                                <span><i class="far fa-clock mr-1 text-saude-prime"></i> 30 horas</span>
+                                <span class="text-saude-accent font-bold">Gratuito</span>
+                            </div>
+                            <a href="https://www.unasus.gov.br/cursos/curso/47114" target="_blank" class="w-full bg-saude-prime hover:bg-saude-dark text-white text-xs font-semibold py-2.5 rounded-xl transition text-center flex items-center justify-center space-x-1">
+                                <span>Acessar Curso</span> <i class="fas fa-external-link-alt text-[10px] opacity-80 ml-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="next-course" class="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white hover:bg-purple-100 text-saude-prime w-10 h-10 rounded-full shadow-md border border-slate-100 flex items-center justify-center transition focus:outline-none">
+                    <i class="fas fa-chevron-right text-lg"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <section id="certificados" class="py-20 bg-white">
+        <div class="container mx-auto px-6">
+            <div class="max-w-2xl mx-auto bg-gradient-to-br from-saude-light to-slate-50 border border-purple-100 rounded-3xl p-8 sm:p-12 shadow-md relative overflow-hidden">
+                <div class="relative z-10 text-center space-y-6">
+                    <div class="inline-block bg-white p-3 rounded-2xl shadow-sm text-saude-prime text-2xl mb-2"><i class="fas fa-certificate"></i></div>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-800">Busca de Certificados</h2>
+                    <p class="text-slate-600 text-sm sm:text-base leading-relaxed">
+                        Se você participou de algum evento conosco, digite seu CPF abaixo para baixar seu certificado.<br>
+                        <span class="text-xs font-semibold text-purple-600 uppercase tracking-wider">OBS: Apenas números, sem pontuação.</span>
+                    </p>
+                    <form id="cpf-form" class="mt-6 flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+                        <div class="relative flex-grow">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400"><i class="fas fa-id-card"></i></span>
+                            <input type="text" id="cpf-input" maxlength="11" placeholder="Digite apenas os 11 dígitos do seu CPF" class="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-saude-prime bg-white text-slate-700 font-medium tracking-wide">
+                        </div>
+                        <button type="submit" class="bg-saude-accent hover:bg-green-600 text-white px-6 py-3 rounded-xl font-semibold shadow-md transition duration-300 flex items-center justify-center space-x-2 whitespace-nowrap">
+                            <i class="fas fa-search"></i><span>Buscar Certificado</span>
+                        </button>
+                    </form>
+                    <div id="cpf-feedback" class="hidden text-sm font-medium mt-4 p-3 rounded-xl transition-all duration-300"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-slate-900 text-slate-300 pt-16 pb-8 border-t border-slate-800">
+        <div class="container mx-auto px-6 max-w-5xl">
+            
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
+                
+                <div class="space-y-4 md:col-span-1">
+                    <img src="imagens/logo-extenso.png" alt="Adolescer com Saúde" class="h-8 w-auto brightness-0 invert opacity-90 onerror-fallback">
+                    <p class="text-xs text-slate-400 leading-relaxed mt-3">
+                        Promovendo o Letramento em Saúde, autonomia e o protagonismo juvenil através da ciência e do afeto.
+                    </p>
+                </div>
+
+                <div class="space-y-4">
+                    <h4 class="text-white font-bold text-sm uppercase tracking-wider">Onde Estamos</h4>
+                    <ul class="space-y-2 text-xs text-slate-400 leading-relaxed">
+                        <li class="flex items-start space-x-2">
+                            <span class="text-saude-accent mt-0.5"><i class="fas fa-map-marker-alt"></i></span>
+                            <span>
+                                <strong>FENSG / UPE</strong><br>
+                                Faculdade de Enfermagem Nossa Senhora das Graças<br>
+                                R. Arnóbio Marquês, 310<br>
+                                Santo Amaro, Recife - PE<br>
+                                CEP: 50100-130
+                            </span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="space-y-4">
+                    <h4 class="text-white font-bold text-sm uppercase tracking-wider">Siga-nos</h4>
+                    <p class="text-xs text-slate-400 leading-relaxed">Acompanhe as nossas publicações semanais e campanhas de saúde digital.</p>
+                    <div class="flex space-x-3 pt-1">
+                        <a href="https://www.instagram.com/adolescercomsaude/" target="_blank" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-saude-prime text-white flex items-center justify-center transition duration-300 text-sm shadow-inner" title="Instagram @adolescercomsaude">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <h4 class="text-white font-bold text-sm uppercase tracking-wider">Dúvidas?</h4>
+                    <p class="text-xs text-slate-400 leading-relaxed">Entre em contacto com a nossa equipa de coordenação e extensionistas:</p>
+                    <a href="mailto:extensao.adolescercomsaude@upe.br" class="inline-flex items-center space-x-2 text-xs text-saude-accent hover:text-white transition duration-300 font-semibold bg-slate-800/50 hover:bg-slate-800 px-3 py-2 rounded-xl border border-slate-800">
+                        <i class="far fa-envelope text-sm"></i>
+                        <span>extensao.adolescercomsaude@upe.br</span>
+                    </a>
+                </div>
+
+            </div>
+
+            <div class="pt-8 border-t border-slate-800/80 text-center text-[10px] text-slate-500 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <p>&copy; 2026 Portal Adolescer com Saúde. Todos os direitos reservados.</p>
+                <div class="flex space-x-4">
+                    <span class="hover:text-slate-400">Faculdade de Enfermagem Nossa Senhora das Graças</span>
+                    <span>&bull;</span>
+                    <span class="hover:text-slate-400">Universidade de Pernambuco</span>
+                </div>
+            </div>
+
+        </div>
+    </footer>
+
+    <script>
+        const menuBtn = document.getElementById('menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        menuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+
+        // Lógica do Carrossel de Membros
+        const track = document.getElementById('carousel-track');
+        const nextBtn = document.getElementById('next-member');
+        const prevBtn = document.getElementById('prev-member');
+
+        if (track && nextBtn && prevBtn) {
+            nextBtn.addEventListener('click', () => {
+                const cardWidth = track.firstElementChild.getBoundingClientRect().width + 24;
+                track.scrollBy({ left: cardWidth, behavior: 'smooth' });
+            });
+
+            prevBtn.addEventListener('click', () => {
+                const cardWidth = track.firstElementChild.getBoundingClientRect().width + 24;
+                track.scrollBy({ left: -cardWidth, behavior: 'smooth' });
+            });
+        }
+
+        // Lógica de Expandir/Recolher Texto da Coordenadora
+        const anaShort = document.getElementById('ana-desc-short');
+        const anaFull = document.getElementById('ana-desc-full');
+        const anaBtn = document.getElementById('btn-ana-more');
+
+        if (anaShort && anaFull && anaBtn) {
+            anaBtn.addEventListener('click', () => {
+                if (anaFull.classList.contains('hidden')) {
+                    anaFull.classList.remove('hidden');
+                    anaShort.classList.add('hidden');
+                    anaBtn.textContent = 'Exibir menos';
+                } else {
+                    anaFull.classList.add('hidden');
+                    anaShort.classList.remove('hidden');
+                    anaBtn.textContent = 'Exibir mais';
+                }
+            });
+        }
+
+        // Lógica de Expandir/Recolher dos Eixos
+        function setupToggle(shortId, fullId, btnId) {
+            const shortEl = document.getElementById(shortId);
+            const fullEl = document.getElementById(fullId);
+            const btnEl = document.getElementById(btnId);
+            
+            if (shortEl && fullEl && btnEl) {
+                btnEl.addEventListener('click', () => {
+                    if (fullEl.classList.contains('hidden')) {
+                        fullEl.classList.remove('hidden');
+                        shortEl.classList.add('hidden');
+                        btnEl.textContent = 'Exibir menos';
+                    } else {
+                        fullEl.classList.add('hidden');
+                        shortEl.classList.remove('hidden');
+                        btnEl.textContent = 'Exibir mais';
+                    }
+                });
+            }
+        }
+        setupToggle('eixo-escolar-short', 'eixo-escolar-full', 'btn-escolar-more');
+        setupToggle('eixo-clinico-short', 'eixo-clinico-full', 'btn-clinico-more');
+        setupToggle('eixo-digital-short', 'eixo-digital-full', 'btn-digital-more');
+
+        // LÓGICA DO CARROSSEL DE NOTÍCIAS AUTOMÁTICO (10 SEGUNDOS)
+        const slides = document.querySelectorAll('.news-slide');
+        const dots = document.querySelectorAll('.news-dot');
+        const btnPrevSlide = document.getElementById('prev-slide');
+        const btnNextSlide = document.getElementById('next-slide');
+        let currentSlide = 0;
+        let slideInterval;
+
+        function showSlide(index) {
+            slides.forEach((slide, i) => {
+                if (i === index) {
+                    slide.classList.remove('opacity-0', 'z-0');
+                    slide.classList.add('opacity-100', 'z-10');
+                    dots[i].classList.remove('bg-purple-200');
+                    dots[i].classList.add('bg-saude-prime', 'w-4');
+                } else {
+                    slide.classList.remove('opacity-100', 'z-10');
+                    slide.classList.add('opacity-0', 'z-0');
+                    dots[i].classList.remove('bg-saude-prime', 'w-4');
+                    dots[i].classList.add('bg-purple-200');
+                }
+            });
+            currentSlide = index;
+        }
+
+        function nextSlide() {
+            let next = (currentSlide + 1) % slides.length;
+            showSlide(next);
+        }
+
+        function prevSlide() {
+            let prev = (currentSlide - 1 + slides.length) % slides.length;
+            showSlide(prev);
+        }
+
+        function startInterval() {
+            clearInterval(slideInterval);
+            slideInterval = setInterval(nextSlide, 10000);
+        }
+
+        if (slides.length > 0) {
+            btnNextSlide.addEventListener('click', () => { prevSlide(); startInterval(); });
+            btnPrevSlide.addEventListener('click', () => { nextSlide(); startInterval(); });
+            
+            dots.forEach((dot, index) => {
+                dot.addEventListener('click', () => { showSlide(index); startInterval(); });
+            });
+            
+            showSlide(0);
+            startInterval();
+        }
+
+        // Lógica do Carrossel de Cursos
+        const courseTrack = document.getElementById('course-carousel-track');
+        const courseNextBtn = document.getElementById('next-course');
+        const courseCourseBtn = document.getElementById('prev-course');
+
+        if (courseTrack && courseNextBtn && courseCourseBtn) {
+            courseNextBtn.addEventListener('click', () => {
+                const cardWidth = courseTrack.firstElementChild.getBoundingClientRect().width + 24;
+                courseTrack.scrollBy({ left: cardWidth, behavior: 'smooth' });
+            });
+
+            courseCourseBtn.addEventListener('click', () => {
+                const cardWidth = courseTrack.firstElementChild.getBoundingClientRect().width + 24;
+                track.scrollBy({ left: -cardWidth, behavior: 'smooth' });
+            });
+        }
+
+        // =======================================================
+        // INTEGRAÇÃO REAL COM GOOGLE DRIVE ATRAVÉS DO SEU APPS SCRIPT
+        // =======================================================
+        const cpfInput = document.getElementById('cpf-input');
+        const cpfForm = document.getElementById('cpf-form');
+        const cpfFeedback = document.getElementById('cpf-feedback');
+
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxKJhEGXzR2oPin4zmT5QNiG8KTLWQW3DcJO133sRjO-vUQ-h-LjjyndqDf_7a8IG1s/exec";
+
+        if (cpfInput && cpfForm && cpfFeedback) {
+            cpfInput.addEventListener('input', (e) => {
+                e.target.value = e.target.value.replace(/\D/g, ''); 
+            });
+
+            cpfForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const cpfDigitado = cpfInput.value;
+                
+                cpfFeedback.classList.remove('hidden', 'bg-red-50', 'text-red-600', 'bg-green-50', 'text-green-600', 'bg-yellow-50', 'text-yellow-600');
+
+                if (cpfDigitado.length < 11) {
+                    cpfFeedback.innerHTML = '❌ <strong>CPF Incompleto!</strong> Por favor, digite os 11 dígitos numéricos.';
+                    cpfFeedback.classList.add('bg-red-50', 'text-red-600');
+                    return;
+                }
+
+                cpfFeedback.innerHTML = '🔍 Procurando seus certificados em nossas subpastas...';
+                cpfFeedback.classList.add('bg-yellow-50', 'text-yellow-600');
+
+                fetch(`${SCRIPT_URL}?cpf=${cpfDigitado}`)
+                    .then(response => response.json())
+                    .then(result => {
+                        cpfFeedback.classList.remove('bg-yellow-50', 'text-yellow-600');
+
+                        if (result.status === "success" && result.dados && result.dados.length > 0) {
+                            let htmlBotoes = `
+                                <div class="space-y-4 text-center">
+                                    <p class="text-emerald-700 font-semibold">🎉 Certificado(s) Localizado(s)!</p>
+                                    <p class="text-xs text-slate-500 font-medium">Baixe os documentos encontrados para seu CPF:</p>
+                                    <div class="flex flex-col gap-2 max-w-sm mx-auto">
+                            `;
+
+                            result.dados.forEach(cert => {
+                                const nomeExibicao = cert.nome.replace('.pdf', '').replace(cpfDigitado, '').trim();
+                                
+                                htmlBotoes += `
+                                    <div class="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3 text-left">
+                                        <div class="flex-1">
+                                            <p class="text-xs font-bold text-slate-800 break-words">${nomeExibicao || cert.nome}</p>
+                                            <p class="text-[10px] text-slate-400">Projeto Adolescer com Saúde</p>
+                                        </div>
+                                        <a href="${cert.downloadUrl}" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg shadow transition flex items-center gap-1 whitespace-nowrap">
+                                            <i class="fas fa-download"></i> Baixar
+                                        </a>
+                                    </div>
+                                `;
+                            });
+
+                            htmlBotoes += `</div></div>`;
+                            cpfFeedback.innerHTML = htmlBotoes;
+                            cpfFeedback.classList.add('bg-green-50');
+                        } else {
+                            cpfFeedback.innerHTML = '❌ <strong>Nenhum registro encontrado!</strong> Não localizamos certificados para este CPF em nenhuma de nossas subpastas do Drive.';
+                            cpfFeedback.classList.add('bg-red-50', 'text-red-600');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erro de busca no script:', error);
+                        cpfFeedback.classList.remove('bg-yellow-50', 'text-yellow-600');
+                        cpfFeedback.innerHTML = '⚠️ <strong>Erro de Conexão!</strong> Não foi possível acessar a busca inteligente no Drive. Verifique si o seu Google Script está publicado como "Qualquer pessoa".';
+                        cpfFeedback.classList.add('bg-red-50', 'text-red-600');
+                    });
+            });
+        }
+
+        // Fallbacks de imagens
+        document.querySelectorAll('.onerror-fallback').forEach(img => {
+            img.onerror = function() {
+                if (this.src.includes('logo-extenso.png')) {
+                    this.parentElement.innerHTML = `<span class="font-bold text-xl text-saude-dark tracking-tight">Adolescer com Saúde</span>`;
+                }
+                else if (this.src.includes('logo-vetor.png')) { 
+                    this.parentElement.innerHTML = `<div class="w-72 h-72 rounded-3xl bg-gradient-to-br from-purple-600 to-emerald-500 flex items-center justify-center text-white text-6xl shadow-xl"><i class="fas fa-smile-beam"></i></div>`; 
+                }
+                else if (this.src.includes('imagens/equipe/')) {
+                    this.parentElement.innerHTML = `<div class="w-full h-full bg-slate-200 flex items-center justify-center text-slate-400 text-3xl"><i class="fas fa-user"></i></div>`;
+                }
+                else if (this.src.includes('imagens/eventos/')) {
+                    this.parentElement.innerHTML = `<div class="w-full h-full bg-gradient-to-br from-purple-100 to-indigo-100 flex items-center justify-center text-saude-prime text-4xl"><i class="far fa-image"></i></div>`;
+                }
+            };
+        });
+    </script>
+</body>
+</html>

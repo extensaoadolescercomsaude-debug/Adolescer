@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel da Coordenação - Adolescer com Saúde</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        saude: {
+                            light: '#f0fdf4', // Verde suave da Landing Page
+                            prime: '#0d9488', // Tom de verde-água/teal principal
+                            dark: '#115e59',  // Tom escuro para contraste
+                            accent: '#8b5cf6' // Roxo da LP usado como destaque secundário
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 font-sans antialiased text-slate-700 flex min-h-screen">
+
+    <aside class="w-64 bg-white border-r border-slate-200 flex flex-col fixed inset-y-0 left-0 z-20">
+        <div class="p-5 border-b border-slate-100 flex flex-col space-y-4 items-center">
+            <div class="w-full flex items-center justify-center">
+                <img src="imagens/logo-extenso.png" alt="Adolescer com Saúde" class="h-9 w-auto">
+            </div>
+            <div class="w-full flex items-center justify-center space-x-4 pt-3 border-t border-slate-100">
+                <img src="imagens/logo-fensg.png" alt="Logo FENSG" class="h-7 w-auto opacity-70">
+                <div class="w-px h-6 bg-slate-200"></div>
+                <img src="imagens/logo-upe.png" alt="Logo UPE" class="h-7 w-auto opacity-70">
+            </div>
+        </div>
+        
+        <nav class="flex-grow p-4 space-y-2 mt-2">
+            <button id="btn-tab-visao-geral" onclick="switchTab('visao-geral')" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 bg-teal-50 text-saude-prime">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+                <span>Visão Geral</span>
+            </button>
+            <button id="btn-tab-homologacoes" onclick="switchTab('homologacoes')" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 text-slate-500 hover:bg-slate-50 hover:text-slate-800">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 18 14 8"/><path d="m9 15 2 2 4-4"/></svg>
+                <span>Homologar Ações</span>
+            </button>
+            <button id="btn-tab-validar-horas" onclick="switchTab('validar-horas')" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 text-slate-500 hover:bg-slate-50 hover:text-slate-800">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <span>Validar Horas</span>
+            </button>
+            <button id="btn-tab-biblioteca" onclick="switchTab('biblioteca')" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 text-slate-500 hover:bg-slate-50 hover:text-slate-800">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M6 6h10"/><path d="M6 10h10"/></svg>
+                <span>Biblioteca de Atividades</span>
+            </button>
+            <button id="btn-tab-indicadores" onclick="switchTab('indicadores')" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 text-slate-500 hover:bg-slate-50 hover:text-slate-800">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>
+                <span>Indicadores</span>
+            </button>
+            <button id="btn-tab-membros" onclick="switchTab('membros')" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 text-slate-500 hover:bg-slate-50 hover:text-slate-800">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                <span>Gestão de Membros</span>
+            </button>
+        </nav>
+
+        <div class="p-4 border-t border-slate-100 text-center text-[10px] text-slate-400 font-semibold tracking-wide">
+            UPE FENSG • COORDENAÇÃO
+        </div>
+    </aside>
+
+    <div class="flex-grow pl-64 flex flex-col min-h-screen">
+        
+        <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 sticky top-0 z-10 shadow-sm">
+            <h1 id="page-title" class="font-bold text-sm uppercase tracking-wider text-slate-500">Visão Geral</h1>
+            
+            <div class="relative">
+                <button onclick="toggleUserMenu()" class="flex items-center space-x-3 focus:outline-none group cursor-pointer">
+                    <div class="text-right">
+                        <p class="text-xs font-bold text-slate-800 group-hover:text-saude-prime transition">Profª Dra. Ana Virgínia</p>
+                        <p class="text-[10px] text-purple-600 font-bold uppercase tracking-wider">Coordenadora Geral</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-purple-50 border-2 border-purple-200 flex items-center justify-center text-saude-accent font-bold text-xs shadow-sm">
+                        AV
+                    </div>
+                </button>
+
+                <div id="user-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-xl shadow-lg py-1 z-30">
+                    <button onclick="openModal('modal-perfil-coord')" class="w-full text-left px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-saude-prime flex items-center space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        <span>Editar Meu Perfil</span>
+                    </button>
+                    <hr class="border-slate-100">
+                    <a href="index.html" class="w-full text-left px-4 py-2.5 text-xs font-semibold text-red-600 hover:bg-red-50 flex items-center space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                        <span>Sair do Portal</span>
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <main class="p-8 flex-grow max-w-5xl w-full mx-auto space-y-8">
+            
+            <div id="tab-content-visao-geral" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-center">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Extensionistas Ativos</span>
+                        <h3 class="text-3xl font-black text-slate-800 mt-2">12 Alunos</h3>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-center">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Ações Pendentes</span>
+                        <h3 class="text-3xl font-black text-amber-600 mt-2">3 Atas</h3>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-center">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Horas na Fila</span>
+                        <h3 class="text-3xl font-black text-purple-600 mt-2">28 Horas</h3>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-white">
+                        <div>
+                            <h4 class="font-bold text-sm text-slate-800">Monitoramento de Acessos Recentes</h4>
+                            <p class="text-[11px] text-slate-400 mt-0.5">Histórico em tempo real de atividade dos extensionistas dentro do portal.</p>
+                        </div>
+                        <span class="text-[10px] font-bold text-saude-prime bg-teal-50 px-2 py-1 rounded border border-teal-100 uppercase tracking-wider">Conexões</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                                    <th class="py-3 px-6">Extensionista</th>
+                                    <th class="py-3 px-6">E-mail de Cadastro</th>
+                                    <th class="py-3 px-6 text-center">Último Acesso</th>
+                                    <th class="py-3 px-6 text-center">Tempo de Permanência</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-xs font-medium text-slate-600 divide-y divide-slate-100">
+                                <tr class="hover:bg-slate-50/40 transition-colors">
+                                    <td class="py-3.5 px-6 font-bold text-slate-800">Rivaldo de Pontes</td>
+                                    <td class="py-3.5 px-6 text-slate-500">rivaldo.pontes@upe.br</td>
+                                    <td class="py-3.5 px-6 text-center text-slate-500">Hoje às 15:42</td>
+                                    <td class="py-3.5 px-6 text-center"><span class="bg-teal-50 text-saude-prime font-bold px-2 py-1 rounded text-[11px]">45 min</span></td>
+                                </tr>
+                                <tr class="hover:bg-slate-50/40 transition-colors">
+                                    <td class="py-3.5 px-6 font-bold text-slate-800">Rayane Vitoria</td>
+                                    <td class="py-3.5 px-6 text-slate-500">rayane.vitoria@upe.br</td>
+                                    <td class="py-3.5 px-6 text-center text-slate-500">Ontem às 18:15</td>
+                                    <td class="py-3.5 px-6 text-center"><span class="bg-teal-50 text-saude-prime font-bold px-2 py-1 rounded text-[11px]">1h 12m</span></td>
+                                </tr>
+                                <tr class="hover:bg-slate-50/40 transition-colors">
+                                    <td class="py-3.5 px-6 font-bold text-slate-800">Gabriela Lins</td>
+                                    <td class="py-3.5 px-6 text-slate-500">gabriela.lins@upe.br</td>
+                                    <td class="py-3.5 px-6 text-center text-slate-400">Há 3 dias (14/07)</td>
+                                    <td class="py-3.5 px-6 text-center"><span class="bg-slate-100 text-slate-500 font-bold px-2 py-1 rounded text-[11px]">22 min</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-content-homologacoes" class="hidden space-y-6">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-800">Homologação de Ações e Atas</h2>
+                    <p class="text-xs text-slate-400 mt-0.5">Analise as relatorias técnicas das intervenções para validar as atividades do projeto.</p>
+                </div>
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                                <th class="py-3 px-6">Extensionista</th><th class="py-3 px-6">Local / Intervenção</th><th class="py-3 px-6">Documentos (Drive)</th><th class="py-3 px-6 text-center">Decisão</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-xs font-medium text-slate-600 divide-y divide-slate-100">
+                            <tr>
+                                <td class="py-4 px-6 font-bold text-slate-800">Rivaldo de Pontes</td>
+                                <td class="py-4 px-6">Oficina de Saúde Mental - Escola Estadual Central</td>
+                                <td class="py-4 px-6 space-y-1.5">
+                                    <a href="#" target="_blank" class="text-saude-prime block font-semibold hover:underline flex items-center gap-1.5">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg> Ver Ata Assinada
+                                    </a>
+                                    <a href="#" target="_blank" class="text-purple-600 block font-semibold hover:underline flex items-center gap-1.5">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg> Ver Relatoria Técnica
+                                    </a>
+                                </td>
+                                <td class="py-4 px-6">
+                                    <div class="flex justify-center space-x-2">
+                                        <button onclick="alert('Ação Homologada! Status atualizado no banco.')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Deferir</button>
+                                        <button onclick="alert('Abertura de modal para justificar indeferimento.')" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Indeferir</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="tab-content-validar-horas" class="hidden space-y-6">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-800">Validação de Lançamentos Departamentais</h2>
+                    <p class="text-xs text-slate-400 mt-0.5">Valide cargas horárias avulsas soltas (Reuniões, Pesquisas, Redes Sociais).</p>
+                </div>
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                                <th class="py-3 px-6">Membro</th><th class="py-3 px-6">Atividade Detalhada</th><th class="py-3 px-6 text-center">Horas</th><th class="py-3 px-6 text-center">Decisão</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-xs font-medium text-slate-600 divide-y divide-slate-100">
+                            <tr>
+                                <td class="py-4 px-6 font-bold text-slate-800">Rayane Vitoria</td>
+                                <td class="py-4 px-6 leading-relaxed"><strong>Preparação de Post:</strong> Pesquisa de artigos e design de carrossel no Canva sobre consequências do uso de Vapes na adolescência.</td>
+                                <td class="py-4 px-6 text-center font-black text-purple-600 text-sm">2h</td>
+                                <td class="py-4 px-6">
+                                    <div class="flex justify-center space-x-2">
+                                        <button onclick="alert('Horas Deferidas! Inserido no cômputo total da aluna.')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Deferir</button>
+                                        <button onclick="alert('Lançamento Indeferido.')" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Indeferir</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="tab-content-biblioteca" class="hidden space-y-8">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-800">Biblioteca de Atividades</h2>
+                    <p class="text-xs text-slate-400 mt-0.5">Faça a moderação dos novos envios e consulte o acervo de materiais já aprovados.</p>
+                </div>
+
+                <div>
+                    <h3 class="font-extrabold text-slate-800 text-sm uppercase tracking-wider mb-3">Aguardando Moderação</h3>
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-amber-50 border-b border-amber-100 text-[11px] font-bold text-amber-700 uppercase tracking-wider">
+                                    <th class="py-3 px-6">Material Didático / Dinâmica</th><th class="py-3 px-6">Autor</th><th class="py-3 px-6">Documento</th><th class="py-3 px-6 text-center">Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-xs font-medium text-slate-600 divide-y divide-slate-100">
+                                <tr>
+                                    <td class="py-4 px-6">
+                                        <p class="font-bold text-slate-800">Círculo de Cultura: Autoimagem</p>
+                                        <span class="inline-block bg-teal-50 text-saude-prime font-bold text-[9px] px-2 py-0.5 rounded mt-1">Público: 12 a 15 anos</span>
+                                    </td>
+                                    <td class="py-4 px-6">Júlia Vasconcelos</td>
+                                    <td class="py-4 px-6">
+                                        <a href="#" class="inline-flex items-center space-x-1 text-purple-600 hover:underline font-semibold bg-purple-50 px-3 py-1.5 rounded-lg">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                                            <span>Avaliar PDF</span>
+                                        </a>
+                                    </td>
+                                    <td class="py-4 px-6">
+                                        <div class="flex justify-center space-x-2">
+                                            <button onclick="alert('Material Aprovado! Adicionado ao acervo público.')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Aprovar</button>
+                                            <button onclick="alert('Material Indeferido e excluído da fila.')" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Recusar</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="font-extrabold text-slate-800 text-sm uppercase tracking-wider mb-3">Acervo Aprovado (Visível aos Alunos)</h3>
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                                    <th class="py-3 px-6">Material Didático / Dinâmica</th><th class="py-3 px-6">Autor</th><th class="py-3 px-6 text-center">Status</th><th class="py-3 px-6 text-center">Opções</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-xs font-medium text-slate-600 divide-y divide-slate-100">
+                                <tr>
+                                    <td class="py-4 px-6">
+                                        <p class="font-bold text-slate-800">Oficina Interativa de Saúde Mental</p>
+                                        <span class="inline-block bg-teal-50 text-saude-prime font-bold text-[9px] px-2 py-0.5 rounded mt-1">Público: 15 a 18 anos</span>
+                                    </td>
+                                    <td class="py-4 px-6">Rivaldo de Pontes</td>
+                                    <td class="py-4 px-6 text-center">
+                                        <span class="bg-emerald-50 text-emerald-600 border border-emerald-100 font-bold px-2.5 py-1 rounded text-[10px] uppercase">Público</span>
+                                    </td>
+                                    <td class="py-4 px-6">
+                                        <div class="flex justify-center space-x-3">
+                                            <button onclick="alert('Baixando material...')" class="text-saude-prime hover:text-saude-dark font-bold underline transition text-[11px]">Baixar</button>
+                                            <button onclick="confirm('Remover do acervo?') ? alert('Removido.') : null" class="text-red-600 hover:text-red-800 font-bold underline transition text-[11px]">Excluir</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-content-indicadores" class="hidden space-y-6">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-800">Indicadores do Projeto</h2>
+                    <p class="text-xs text-slate-400 mt-0.5">Métricas globais de engajamento, produtividade técnica e envolvimento discente extraídas em tempo real.</p>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm text-center">
+                        <h4 class="text-[10px] font-bold text-slate-400 uppercase">Extensionistas Ativos</h4>
+                        <p class="text-3xl font-black text-slate-800 mt-1">12</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm text-center">
+                        <h4 class="text-[10px] font-bold text-slate-400 uppercase">Ações Realizadas</h4>
+                        <p class="text-3xl font-black text-saude-prime mt-1">45</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm text-center">
+                        <h4 class="text-[10px] font-bold text-slate-400 uppercase">Materiais na Biblioteca</h4>
+                        <p class="text-3xl font-black text-saude-accent mt-1">18</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm text-center">
+                        <h4 class="text-[10px] font-bold text-slate-400 uppercase">Horas Validadas</h4>
+                        <p class="text-3xl font-black text-slate-800 mt-1">340</p>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-5 max-w-3xl">
+                    <h3 class="text-sm font-bold text-slate-800 border-b border-slate-100 pb-3">Gerar Relatório Analítico de Gestão</h3>
+                    
+                    <form id="reportForm" onsubmit="gerarPDFCustomizado(event)" class="space-y-3">
+                        <label class="flex items-start p-3 rounded-xl border border-slate-100 hover:border-teal-200 hover:bg-slate-50/50 cursor-pointer transition">
+                            <input type="checkbox" name="metricas" value="consolidado_horas" checked class="w-4 h-4 rounded border-slate-300 accent-teal-600 mt-0.5">
+                            <div class="ml-3">
+                                <span class="text-xs font-bold text-slate-800 block">Consolidado de Carga Horária e Assiduidade</span>
+                                <span class="text-[11px] text-slate-400">Total de horas validadas e quadro de acesso dos alunos no portal.</span>
+                            </div>
+                        </label>
+                        <label class="flex items-start p-3 rounded-xl border border-slate-100 hover:border-teal-200 hover:bg-slate-50/50 cursor-pointer transition">
+                            <input type="checkbox" name="metricas" value="mapa_instituicoes" checked class="w-4 h-4 rounded border-slate-300 accent-teal-600 mt-0.5">
+                            <div class="ml-3">
+                                <span class="text-xs font-bold text-slate-800 block">Mapa de Instituições Atendidas</span>
+                                <span class="text-[11px] text-slate-400">Relação de escolas/clínicas alcançadas pelas intervenções e links das Atas.</span>
+                            </div>
+                        </label>
+                        <label class="flex items-start p-3 rounded-xl border border-slate-100 hover:border-teal-200 hover:bg-slate-50/50 cursor-pointer transition">
+                            <input type="checkbox" name="metricas" value="produtividade_tecnica" checked class="w-4 h-4 rounded border-slate-300 accent-teal-600 mt-0.5">
+                            <div class="ml-3">
+                                <span class="text-xs font-bold text-slate-800 block">Produtividade de Materiais Pedagógicos</span>
+                                <span class="text-[11px] text-slate-400">Relação de dinâmicas aprovadas na Biblioteca e engajamento das redes sociais.</span>
+                            </div>
+                        </label>
+
+                        <button type="submit" id="btnExport" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 rounded-xl text-xs transition shadow-md flex items-center justify-center space-x-2 mt-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+                            <span id="btnExportText">Gerar Relatório de Indicadores (PDF)</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div id="tab-content-membros" class="hidden space-y-8">
+                
+                <div>
+                    <div class="flex items-center space-x-2 mb-3">
+                        <div class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></div>
+                        <h3 class="font-extrabold text-slate-800 text-sm uppercase tracking-wider">Solicitações de Cadastro (Aguardando Aprovação)</h3>
+                    </div>
+                    <div class="bg-amber-50/50 rounded-2xl border border-amber-100 shadow-sm overflow-hidden">
+                        <table class="w-full text-left">
+                            <tbody class="text-xs font-medium text-slate-700 divide-y divide-amber-100">
+                                <tr>
+                                    <td class="py-4 px-6">
+                                        <p class="font-bold text-slate-800">Bruno Silva</p>
+                                        <p class="text-[10px] text-slate-500">bruno.silva@upe.br</p>
+                                    </td>
+                                    <td class="py-4 px-6 text-right space-x-2">
+                                        <button onclick="alert('Cadastro Aprovado! Aluno liberado no Supabase.')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-lg transition shadow-sm">Aprovar Acesso</button>
+                                        <button onclick="alert('Cadastro Recusado e Excluído.')" class="bg-white hover:bg-rose-50 border border-slate-200 hover:border-rose-200 text-slate-600 hover:text-rose-600 font-bold px-4 py-2 rounded-lg transition">Recusar</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="font-extrabold text-slate-800 text-sm uppercase tracking-wider mb-3">Extensionistas Ativos no Sistema</h3>
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                                    <th class="py-3 px-6">Identificação</th>
+                                    <th class="py-3 px-6 text-center">Configurações de Credenciais</th>
+                                    <th class="py-3 px-6 text-center">Remover Projeto</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-xs font-medium text-slate-600 divide-y divide-slate-100">
+                                <tr>
+                                    <td class="py-4 px-6">
+                                        <p class="font-bold text-slate-800">Rivaldo de Pontes</p>
+                                        <p class="text-[10px] text-slate-500">rivaldo.pontes@upe.br</p>
+                                    </td>
+                                    <td class="py-4 px-6">
+                                        <div class="flex justify-center space-x-3">
+                                            <button onclick="alert('Link de redefinição enviado pelo Supabase!')" class="text-saude-prime hover:text-saude-dark font-bold underline decoration-saude-prime/30 underline-offset-4 transition">Resetar Senha</button>
+                                            <span class="text-slate-300">|</span>
+                                            <button onclick="alert('Abrir campo para atualizar o e-mail.')" class="text-purple-600 hover:text-purple-800 font-bold underline decoration-purple-600/30 underline-offset-4 transition">Mudar E-mail</button>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-6">
+                                        <div class="flex justify-center">
+                                            <button onclick="confirm('ATENÇÃO: Deseja banir e apagar permanentemente os dados deste aluno do banco?') ? alert('Aluno excluído.') : null" class="bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white border border-rose-100 p-2 rounded-xl transition cursor-pointer" title="Banir Membro">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+    <div id="modal-perfil-coord" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full shadow-xl border border-slate-100 p-6 space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="font-extrabold text-slate-800 text-base">Meu Perfil Administrativo</h3>
+                <button onclick="closeModal('modal-perfil-coord')" class="text-slate-400 hover:text-slate-600 text-sm font-bold cursor-pointer">Fechar</button>
+            </div>
+            <form onsubmit="event.preventDefault(); alert('Perfil salvo com sucesso!'); closeModal('modal-perfil-coord');" class="space-y-4">
+                <div class="flex flex-col items-center space-y-1">
+                    <div class="w-20 h-20 rounded-full bg-purple-50 border-2 border-purple-200 flex items-center justify-center text-saude-accent text-xl font-bold shadow shadow-purple-200 relative">AV</div>
+                    <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wide cursor-pointer hover:underline">Alterar Foto</span>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Nome Completo</label>
+                    <input type="text" required value="Profª Dra. Ana Virgínia Rodrigues" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:border-saude-prime">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Mini Biografia</label>
+                    <textarea rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium text-slate-700 focus:outline-none focus:border-saude-prime">Doutora em Saúde da Criança e do Adolescente (UFPE) e coordenadora geral do Adolescer com Saúde na FENSG/UPE.</textarea>
+                </div>
+                <div class="pt-2 flex gap-2">
+                    <button type="button" onclick="closeModal('modal-perfil-coord')" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold py-3 rounded-xl transition">Cancelar</button>
+                    <button type="submit" class="flex-1 bg-saude-prime hover:bg-saude-dark text-white text-xs font-bold py-3 rounded-xl transition shadow cursor-pointer">Salvar Perfil</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tabName) {
+            const tabs = ['visao-geral', 'homologacoes', 'validar-horas', 'biblioteca', 'indicadores', 'membros'];
+            const pageTitle = document.getElementById('page-title');
+
+            tabs.forEach(tab => {
+                document.getElementById(`tab-content-${tab}`).classList.add('hidden');
+                document.getElementById(`btn-tab-${tab}`).className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 text-slate-500 hover:bg-slate-50 hover:text-slate-800";
+            });
+
+            document.getElementById(`tab-content-${tabName}`).classList.remove('hidden');
+            document.getElementById(`btn-tab-${tabName}`).className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 bg-teal-50 text-saude-prime";
+
+            if (tabName === 'visao-geral') pageTitle.innerText = "Visão Geral";
+            else if (tabName === 'homologacoes') pageTitle.innerText = "Homologar Ações";
+            else if (tabName === 'validar-horas') pageTitle.innerText = "Validar Horas";
+            else if (tabName === 'biblioteca') pageTitle.innerText = "Biblioteca de Atividades";
+            else if (tabName === 'indicadores') pageTitle.innerText = "Indicadores do Projeto";
+            else if (tabName === 'membros') pageTitle.innerText = "Gestão de Membros";
+            
+            document.getElementById('user-dropdown').classList.add('hidden');
+        }
+
+        function toggleUserMenu() { document.getElementById('user-dropdown').classList.toggle('hidden'); }
+        function openModal(modalId) { document.getElementById(modalId).classList.remove('hidden'); }
+        function closeModal(modalId) { document.getElementById(modalId).classList.add('hidden'); }
+
+        window.addEventListener('click', function(e) {
+            const dropdown = document.getElementById('user-dropdown');
+            const btn = dropdown.previousElementSibling;
+            if (!dropdown.contains(e.target) && !btn.contains(e.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+
+        function gerarPDFCustomizado(e) {
+            e.preventDefault();
+            const btnExport = document.getElementById('btnExport');
+            const btnExportText = document.getElementById('btnExportText');
+            
+            btnExport.disabled = true;
+            btnExportText.innerText = "Extraindo Dados do Supabase...";
+
+            const checkboxes = document.querySelectorAll('input[name="metricas"]:checked');
+            if (checkboxes.length === 0) {
+                alert("Selecione pelo menos um módulo para o relatório.");
+                btnExport.disabled = false;
+                btnExportText.innerText = "Gerar Relatório de Indicadores (PDF)";
+                return;
+            }
+
+            setTimeout(() => {
+                alert("PDF Oficial gerado com sucesso! Os dados foram validados.");
+                btnExport.disabled = false;
+                btnExportText.innerText = "Gerar Relatório de Indicadores (PDF)";
+            }, 2500);
+        }
+    </script>
+</body>
+</html>

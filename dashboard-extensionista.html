@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Extensionista - Adolescer com Saúde</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        saude: {
+                            light: '#f0fdf4', // Verde suave da Landing Page
+                            prime: '#0d9488', // Tom de verde-água/teal principal
+                            dark: '#115e59',  // Tom escuro para contraste
+                            accent: '#8b5cf6' // Roxo da LP usado como destaque secundário
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 font-sans antialiased text-slate-700 flex min-h-screen">
+
+    <aside class="w-64 bg-white border-r border-slate-200 flex flex-col fixed inset-y-0 left-0 z-20">
+        <div class="p-5 border-b border-slate-100 flex flex-col space-y-4 items-center">
+            <div class="w-full flex items-center justify-center">
+                <img src="imagens/logo-extenso.png" alt="Adolescer com Saúde" class="h-9 w-auto onerror-fallback">
+            </div>
+            <div class="w-full flex items-center justify-center space-x-4 pt-3 border-t border-slate-100">
+                <img src="imagens/logo-fensg.png" alt="Logo FENSG" class="h-7 w-auto opacity-70 hover:opacity-100 transition duration-200">
+                <div class="w-px h-6 bg-slate-200"></div>
+                <img src="imagens/logo-upe.png" alt="Logo UPE" class="h-7 w-auto opacity-70 hover:opacity-100 transition duration-200">
+            </div>
+        </div>
+        
+        <nav class="flex-grow p-4 space-y-2 mt-2">
+            <button id="btn-tab-inicio" onclick="switchTab('inicio')" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 bg-teal-50 text-saude-prime">
+                <i class="fas fa-house text-base"></i>
+                <span>Página Inicial</span>
+            </button>
+            <button id="btn-tab-acoes" onclick="switchTab('acoes')" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 text-slate-500 hover:bg-slate-50 hover:text-slate-800">
+                <i class="fas fa-folder-open text-base"></i>
+                <span>Minhas Ações</span>
+            </button>
+            <button id="btn-tab-atividades" onclick="switchTab('atividades')" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 text-slate-500 hover:bg-slate-50 hover:text-slate-800">
+                <i class="fas fa-lightbulb text-base"></i>
+                <span>Biblioteca de Atividades</span>
+            </button>
+            <button id="btn-tab-documentos" onclick="switchTab('documentos')" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 text-slate-500 hover:bg-slate-50 hover:text-slate-800">
+                <i class="fas fa-file-pdf text-base"></i>
+                <span>Documentos Acadêmicos</span>
+            </button>
+        </nav>
+
+        <div class="p-4 border-t border-slate-100 text-center text-[10px] text-slate-400 font-semibold tracking-wide">
+            UPE FENSG • EXTENSÃO
+        </div>
+    </aside>
+
+    <div class="flex-grow pl-64 flex flex-col min-h-screen">
+        
+        <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 sticky top-0 z-10 shadow-sm">
+            <h1 id="page-title" class="font-bold text-sm uppercase tracking-wider text-slate-500">Página Inicial</h1>
+            
+            <div class="relative">
+                <button onclick="toggleUserMenu()" class="flex items-center space-x-3 focus:outline-none group">
+                    <div class="text-right hidden sm:block">
+                        <p class="text-xs font-bold text-slate-800 group-hover:text-saude-prime transition">Rivaldo de Pontes</p>
+                        <p class="text-[10px] text-slate-400 font-medium">Extensionista</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-teal-50 border-2 border-teal-100 flex items-center justify-center text-saude-prime font-bold text-xs shadow-sm">
+                        RP
+                    </div>
+                </button>
+
+                <div id="user-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-xl shadow-lg py-1 z-30">
+                    <button onclick="openModal('modal-perfil')" class="w-full text-left px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-saude-prime flex items-center space-x-2">
+                        <i class="fas fa-user text-slate-400"></i>
+                        <span>Ver Meu Perfil</span>
+                    </button>
+                    <hr class="border-slate-100">
+                    <a href="index.html" class="w-full text-left px-4 py-2.5 text-xs font-semibold text-red-600 hover:bg-red-50 flex items-center space-x-2">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Sair do Portal</span>
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <main class="p-8 flex-grow max-w-5xl w-full mx-auto space-y-8">
+            
+            <div id="tab-content-inicio" class="space-y-6">
+                
+                <div class="bg-gradient-to-r from-teal-600 to-emerald-600 p-6 rounded-2xl shadow-sm text-white relative overflow-hidden">
+                    <div class="absolute right-0 top-0 translate-x-4 -translate-y-4 w-32 h-32 bg-white/10 rounded-full filter blur-xl"></div>
+                    <div class="relative z-10 flex items-start space-x-4">
+                        <div class="bg-white/20 p-3 rounded-xl text-lg"><i class="fas fa-bullhorn"></i></div>
+                        <div>
+                            <h3 class="font-extrabold text-sm mb-1">Mural de Avisos da Coordenação</h3>
+                            <p class="text-xs text-teal-50 max-w-2xl leading-relaxed">
+                                Atenção extensionistas! Nossa próxima reunião geral ordinária acontecerá na sexta-feira às 14h via Google Meet para alinhar os preparativos da nova oficina do Eixo Escolar. Não faltem e lembrem-se de atualizar seus lançamentos de horas semanais.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+                    
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                        <div>
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-4">Horas Analisadas</span>
+                            
+                            <div class="grid grid-cols-2 gap-4 pb-2">
+                                <div>
+                                    <p class="text-2xl font-black text-amber-600">14h</p>
+                                    <p class="text-xs font-semibold text-slate-400">pendentes</p>
+                                </div>
+                                <div class="border-l border-slate-100 pl-4">
+                                    <p class="text-2xl font-black text-saude-prime">42h</p>
+                                    <p class="text-xs font-semibold text-slate-400">aprovadas</p>
+                                </div>
+                            </div>
+
+                            <div class="mt-4 mb-4">
+                                <div class="w-full bg-slate-100 rounded-full h-2">
+                                    <div class="bg-saude-prime h-2 rounded-full transition-all duration-500" style="width: 70%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-[11px] font-bold text-slate-500 bg-slate-50 p-2.5 rounded-xl flex items-center justify-between">
+                            <span><i class="fas fa-bullseye text-saude-prime mr-1"></i> Meta do Módulo:</span>
+                            <span class="text-slate-800">60 horas</span>
+                        </div>
+                    </div>
+
+                    <div class="md:col-span-2 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-center space-y-4">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Ações Principais</p>
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <button onclick="openModal('modal-horas')" class="flex-1 bg-saude-prime hover:bg-saude-dark text-white px-5 py-3.5 rounded-xl font-bold text-xs shadow-sm transition flex items-center justify-center space-x-2">
+                                <i class="fas fa-plus"></i> <span>Adicionar Carga Horária</span>
+                            </button>
+                            <button onclick="gerarRelatorioOficial()" class="flex-1 bg-white hover:bg-slate-50 text-saude-prime border border-slate-200 hover:border-saude-prime px-5 py-3.5 rounded-xl font-bold text-xs transition flex items-center justify-center space-x-2">
+                                <i class="fas fa-file-invoice"></i> <span id="text-relatorio">Gerar Relatório de Horas</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                        <h4 class="font-bold text-xs text-slate-400 uppercase tracking-wider">Histórico de Lançamentos</h4>
+                        <span class="text-[10px] font-bold text-teal-600 bg-teal-50 px-2 py-1 rounded-md">Lista Geral</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                                    <th class="py-3 px-6">Data</th>
+                                    <th class="py-3 px-6">Tipo de Atividade</th>
+                                    <th class="py-3 px-6 text-center">Horas</th>
+                                    <th class="py-3 px-6">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-xs font-medium text-slate-600 divide-y divide-slate-100">
+                                <tr>
+                                    <td class="py-4 px-6 font-semibold">12/07/2026</td>
+                                    <td class="py-4 px-6">Ação de Extensão Realizada (Eixo Escolar)</td>
+                                    <td class="py-4 px-6 text-center font-bold text-slate-800">4h</td>
+                                    <td class="py-4 px-6">
+                                        <span class="bg-emerald-50 text-emerald-700 border border-emerald-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Aprovado</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="py-4 px-6 font-semibold">14/07/2026</td>
+                                    <td class="py-4 px-6">Preparação de Post para Redes Sociais</td>
+                                    <td class="py-4 px-6 text-center font-bold text-slate-800">2h</td>
+                                    <td class="py-4 px-6">
+                                        <span class="bg-amber-50 text-amber-700 border border-amber-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Pendente</span>
+                                    </td>
+                                </tr>
+                                <tr class="bg-red-50/10">
+                                    <td class="py-4 px-6 font-semibold">08/07/2026</td>
+                                    <td class="py-4 px-6">Outros (Organização de Arquivos)</td>
+                                    <td class="py-4 px-6 text-center font-bold text-slate-800">8h</td>
+                                    <td class="py-4 px-6 space-y-1">
+                                        <div>
+                                            <span class="bg-red-50 text-red-700 border border-red-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Recusado</span>
+                                        </div>
+                                        <p class="text-[10px] text-red-600 italic bg-red-50/50 p-2 rounded-lg border border-red-100 mt-1 max-w-sm">
+                                            "Carga horária incompatível com a descrição fornecida. Por favor, detalhe as tarefas ou ajuste o valor." - Profª Ana Virgínia
+                                        </p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-content-acoes" class="hidden space-y-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <div>
+                        <h3 class="font-extrabold text-slate-800 text-base">Minhas Ações</h3>
+                        <p class="text-xs text-slate-400 mt-0.5">Gerencie e envie as atas e relatorias das atividades de extensão executadas.</p>
+                    </div>
+                    <button onclick="openModal('modal-nova-acao')" class="bg-saude-prime hover:bg-saude-dark text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm transition flex items-center space-x-1.5">
+                        <i class="fas fa-plus"></i> <span>Cadastrar uma ação</span>
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="p-6 border-b border-slate-100">
+                        <h4 class="font-bold text-xs text-slate-400 uppercase tracking-wider">Documentação Enviada</h4>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                                    <th class="py-3 px-6">Identificação da Ação / Local</th>
+                                    <th class="py-3 px-6">Ata de Extensão</th>
+                                    <th class="py-3 px-6">Relatoria Técnica</th>
+                                    <th class="py-3 px-6">Status Geral</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-xs font-medium text-slate-600 divide-y divide-slate-100">
+                                <tr class="hover:bg-slate-50/50 transition-all">
+                                    <td class="py-4 px-6">
+                                        <span class="font-bold text-slate-800 block">Oficina de Saúde Mental - E.E Arnóbio Marquês</span>
+                                        <span class="text-[10px] text-slate-400">Enviado em: 10/07/2026</span>
+                                    </td>
+                                    <td class="py-4 px-6 text-saude-prime font-semibold cursor-pointer hover:underline">
+                                        <i class="fas fa-paperclip mr-1"></i>ata_oficina_saude_mental.pdf
+                                    </td>
+                                    <td class="py-4 px-6 text-saude-prime font-semibold cursor-pointer hover:underline">
+                                        <i class="fas fa-file-invoice mr-1"></i>relatoria_intervencao_v1.pdf
+                                    </td>
+                                    <td class="py-4 px-6">
+                                        <span class="bg-emerald-50 text-emerald-700 border border-emerald-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Homologado</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-content-atividades" class="hidden space-y-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <div>
+                        <h3 class="font-extrabold text-slate-800 text-base">Biblioteca Colaborativa</h3>
+                        <p class="text-xs text-slate-400 mt-0.5">Compartilhe e baixe modelos de dinâmicas e oficinas validadas.</p>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <a href="https://docs.google.com/uc?export=download&id=1IZwXz2pz8FdvCjjYZAOh1LJv94KDXzUI" target="_blank" class="bg-teal-50 text-saude-prime hover:bg-saude-prime hover:text-white text-xs font-bold px-4 py-2.5 rounded-xl border border-teal-100 transition flex items-center space-x-1.5 shadow-sm">
+                            <i class="fas fa-download"></i> <span>Baixar Modelo Padrão</span>
+                        </a>
+                        <button onclick="openModal('modal-atividades')" class="bg-saude-accent hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm transition flex items-center space-x-1.5">
+                            <i class="fas fa-plus"></i> <span>Adicionar Nova Atividade</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm flex flex-col justify-between hover:shadow-md transition">
+                        <div class="space-y-3">
+                            <div class="text-saude-prime text-xl"><i class="fas fa-folder-open"></i></div>
+                            <h4 class="font-extrabold text-sm text-slate-800 leading-snug">Oficina Interativa de Saúde Mental e Escuta Ativa</h4>
+                            <p class="text-[11px] text-slate-400 font-medium"><strong>Autor:</strong> Rivaldo de Pontes</p>
+                            <span class="inline-block bg-teal-50 text-saude-prime font-bold text-[10px] px-2.5 py-0.5 rounded-md">Público: 15-18 anos</span>
+                        </div>
+                        <div class="pt-5 border-t border-slate-100 mt-4">
+                            <button onclick="alert('Fazendo download do arquivo do Drive...')" class="w-full bg-slate-50 hover:bg-teal-50 text-slate-700 hover:text-saude-prime border border-slate-200 hover:border-teal-200 text-xs font-bold py-2 rounded-xl transition flex items-center justify-center space-x-1">
+                                <i class="fas fa-download text-[10px]"></i> <span>Baixar Atividade</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm flex flex-col justify-between hover:shadow-md transition">
+                        <div class="space-y-3">
+                            <div class="text-saude-prime text-xl"><i class="fas fa-folder-open"></i></div>
+                            <h4 class="font-extrabold text-sm text-slate-800 leading-snug">Dinâmica Lúdica: Desmistificando Mitos Alimentares</h4>
+                            <p class="text-[11px] text-slate-400 font-medium"><strong>Autor:</strong> Rayane Vitoria</p>
+                            <span class="inline-block bg-indigo-50 text-saude-accent font-bold text-[10px] px-2.5 py-0.5 rounded-md">Público: 3º ao 5º ano</span>
+                        </div>
+                        <div class="pt-5 border-t border-slate-100 mt-4">
+                            <button onclick="alert('Fazendo download do arquivo do Drive...')" class="w-full bg-slate-50 hover:bg-teal-50 text-slate-700 hover:text-saude-prime border border-slate-200 hover:border-teal-200 text-xs font-bold py-2 rounded-xl transition flex items-center justify-center space-x-1">
+                                <i class="fas fa-download text-[10px]"></i> <span>Baixar Atividade</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-content-documentos" class="hidden space-y-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <div>
+                        <h3 class="font-extrabold text-slate-800 text-base">Documentos</h3>
+                        <p class="text-xs text-slate-400 mt-0.5">Documentos para utilização referente a atividades extensionistas.</p>
+                    </div>
+                    <div>
+                        <button onclick="fetchDriveFiles()" class="bg-teal-55 bg-teal-50 hover:bg-teal-100 text-saude-prime text-xs font-bold px-4 py-2.5 rounded-xl border border-teal-100 transition flex items-center space-x-1.5">
+                            <i class="fas fa-sync-alt" id="sync-icon"></i> <span id="sync-text">Sincronizar com Drive</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="loading-docs" class="hidden flex flex-col items-center justify-center py-12 space-y-3 bg-white rounded-2xl border border-slate-200">
+                    <div class="w-10 h-10 border-4 border-teal-200 border-t-saude-prime rounded-full animate-spin"></div>
+                    <p class="text-xs font-semibold text-slate-400">Consultando arquivos do Google Drive...</p>
+                </div>
+
+                <div id="error-docs" class="hidden p-6 bg-red-50 text-red-700 rounded-2xl border border-red-100 text-center space-y-2">
+                    <i class="fas fa-exclamation-triangle text-xl"></i>
+                    <p class="text-xs font-bold">Erro ao buscar arquivos do Drive.</p>
+                    <p class="text-[11px] text-red-500 max-w-md mx-auto">Verifique se você configurou a URL do Apps Script corretamente e se as permissões da pasta estão como "Qualquer pessoa com o link".</p>
+                </div>
+
+                <div id="empty-docs" class="hidden flex flex-col items-center justify-center py-16 bg-white rounded-2xl border border-slate-200 text-center px-4 space-y-3">
+                    <div class="text-slate-300 text-4xl"><i class="far fa-folder-open"></i></div>
+                    <p class="text-xs font-bold text-slate-500">Nenhum documento encontrado!</p>
+                    <p class="text-[11px] text-slate-400 max-w-xs leading-relaxed">Adicione arquivos na sua pasta compartilhada do Google Drive para que eles apareçam aqui.</p>
+                </div>
+
+                <div id="docs-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+            </div>
+
+        </main>
+    </div>
+
+    <div id="modal-horas" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full shadow-xl border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                <h3 class="font-extrabold text-slate-800 text-base">Lançar Carga Horária</h3>
+                <button onclick="closeModal('modal-horas')" class="text-slate-400 hover:text-slate-600 text-lg"><i class="fas fa-times"></i></button>
+            </div>
+            <form onsubmit="event.preventDefault(); alert('Lançamento enviado com sucesso!'); closeModal('modal-horas');" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Tipo de Atividade</label>
+                    <select id="tipo-atividade" onchange="toggleOutrosCampo()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium focus:outline-none focus:border-saude-prime text-slate-700">
+                        <option>Ação de Extensão Realizada</option>
+                        <option>Reunião Ordinária/Geral</option>
+                        <option>Preparação de Post para Redes Sociais</option>
+                        <option>Pesquisa para Ação ou Post</option>
+                        <option>Preparação de Material Didático/Oficina</option>
+                        <option value="Outros">Outros</option>
+                    </select>
+                </div>
+                <div id="wrapper-outros" class="hidden">
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Especifique a Atividade</label>
+                    <input type="text" placeholder="Qual foi a atividade realizada?" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium focus:outline-none focus:border-saude-prime">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Data da Atividade</label>
+                        <input type="date" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium focus:outline-none focus:border-saude-prime">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Horas Solicitadas</label>
+                        <input type="number" min="1" max="24" required placeholder="Ex: 2" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium focus:outline-none focus:border-saude-prime">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Descrição/Detalhes</label>
+                    <textarea rows="3" placeholder="Relate o que foi realizado ou anexe links técnicos..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium focus:outline-none focus:border-saude-prime"></textarea>
+                </div>
+                <div class="pt-2 flex gap-2">
+                    <button type="button" onclick="closeModal('modal-horas')" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold py-3 rounded-xl transition">Cancelar</button>
+                    <button type="submit" class="flex-1 bg-saude-prime hover:bg-saude-dark text-white text-xs font-bold py-3 rounded-xl transition shadow-sm">Enviar Registro</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-atividades" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full shadow-xl border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                <h3 class="font-extrabold text-slate-800 text-base">Adicionar Atividade Pronta</h3>
+                <button onclick="closeModal('modal-atividades')" class="text-slate-400 hover:text-slate-600 text-lg"><i class="fas fa-times"></i></button>
+            </div>
+            <form onsubmit="event.preventDefault(); alert('Atividade compartilhada!'); closeModal('modal-atividades');" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Título da Atividade</label>
+                    <input type="text" required placeholder="Ex: Oficina Temática sobre Nutrição" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium focus:outline-none focus:border-saude-prime">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Público-Alvo</label>
+                    <input type="text" required placeholder="Ex: Crianças do 3º ao 5º ano" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium focus:outline-none focus:border-saude-prime">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Objetivo Principal</label>
+                    <input type="text" required placeholder="Ex: Incentivar hábitos alimentares saudáveis" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium focus:outline-none focus:border-saude-prime">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Documento (PDF / Word)</label>
+                    <div class="border-2 border-dashed border-slate-200 bg-slate-50 p-4 rounded-xl text-center cursor-pointer hover:border-saude-prime transition">
+                        <input type="file" required class="hidden" id="file-atividade">
+                        <label for="file-atividade" class="cursor-pointer space-y-1 block">
+                            <i class="fas fa-cloud-upload-alt text-slate-400 text-xl block"></i>
+                            <span class="text-xs font-semibold text-slate-600 block">Clique para selecionar o arquivo</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="pt-2 flex gap-2">
+                    <button type="button" onclick="closeModal('modal-atividades')" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold py-3 rounded-xl transition">Cancelar</button>
+                    <button type="submit" class="flex-1 bg-saude-accent hover:bg-indigo-700 text-white text-xs font-bold py-3 rounded-xl transition shadow-sm">Compartilhar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-perfil" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full shadow-xl border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                <h3 class="font-extrabold text-slate-800 text-base">Meu Perfil Acadêmico</h3>
+                <button onclick="closeModal('modal-perfil')" class="text-slate-400 hover:text-slate-600 text-lg"><i class="fas fa-times"></i></button>
+            </div>
+            <form onsubmit="event.preventDefault(); alert('Perfil atualizado com sucesso!'); closeModal('modal-perfil');" class="p-6 space-y-4">
+                <div class="flex flex-col items-center space-y-2 mb-2">
+                    <div class="w-20 h-20 rounded-full bg-teal-50 border-2 border-teal-100 flex items-center justify-center text-saude-prime font-bold text-xl relative shadow-md">
+                        RP
+                        <label for="avatar-input" class="absolute bottom-0 right-0 bg-saude-prime text-white w-6 h-6 rounded-full flex items-center justify-center text-[10px] cursor-pointer hover:bg-saude-dark shadow">
+                            <i class="fas fa-camera"></i>
+                        </label>
+                        <input type="file" id="avatar-input" class="hidden">
+                    </div>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Alterar Foto</span>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Nome Completo</label>
+                    <input type="text" required value="Rivaldo de Pontes" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-semibold focus:outline-none focus:border-saude-prime text-slate-800">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">E-mail</label>
+                    <input type="email" required value="rivaldo.pontes@upe.br" class="w-full bg-slate-100 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium text-slate-400 cursor-not-allowed" readonly>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Mini Biografia</label>
+                    <textarea rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium focus:outline-none focus:border-saude-prime text-slate-700">Estudante de Enfermagem da FENSG/UPE. Extensionista ativo no projeto Adolescer com Saúde focado em intervenções escolares na rede pública.</textarea>
+                </div>
+                <div class="pt-2 flex gap-2">
+                    <button type="button" onclick="closeModal('modal-perfil')" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold py-3 rounded-xl transition">Fechar</button>
+                    <button type="submit" class="flex-1 bg-saude-prime hover:bg-saude-dark text-white text-xs font-bold py-3 rounded-xl transition shadow-sm">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-nova-acao" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full shadow-xl border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                <h3 class="font-extrabold text-slate-800 text-base">Cadastrar Nova Ação de Extensão</h3>
+                <button onclick="closeModal('modal-nova-acao')" class="text-slate-400 hover:text-slate-600 text-lg"><i class="fas fa-times"></i></button>
+            </div>
+            <form onsubmit="event.preventDefault(); alert('Documentação da ação enviada! Aguardando homologação da ata e relatoria.'); closeModal('modal-nova-acao');" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Identificação / Local da Ação</label>
+                    <input type="text" required placeholder="Ex: Oficina Temática na Escola X ou Roda de Conversa" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium focus:outline-none focus:border-saude-prime">
+                </div>
+                <div class="grid grid-cols-1 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Ata de Extensão (PDF / Digitalizada)</label>
+                        <div class="border-2 border-dashed border-slate-200 bg-slate-50 p-3 rounded-xl text-center cursor-pointer hover:border-saude-prime transition">
+                            <input type="file" required class="hidden" id="file-ata">
+                            <label for="file-ata" class="cursor-pointer text-xs font-semibold text-slate-500 block"><i class="fas fa-file-signature mr-1 text-slate-400"></i>Selecionar Ata da Ação</label>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Relatoria Técnica Descritiva (PDF)</label>
+                        <div class="border-2 border-dashed border-slate-200 bg-slate-50 p-3 rounded-xl text-center cursor-pointer hover:border-saude-prime transition">
+                            <input type="file" required class="hidden" id="file-relatoria">
+                            <label for="file-relatoria" class="cursor-pointer text-xs font-semibold text-slate-500 block"><i class="fas fa-file-invoice mr-1 text-slate-400"></i>Selecionar Relatoria</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="pt-2 flex gap-2">
+                    <button type="button" onclick="closeModal('modal-nova-acao')" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold py-3 rounded-xl transition">Cancelar</button>
+                    <button type="submit" class="flex-1 bg-saude-prime hover:bg-saude-dark text-white text-xs font-bold py-3 rounded-xl transition shadow-sm">Enviar Documentos</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // CONFIGURAÇÃO DA INTEGRAÇÃO REAL DO GOOGLE DRIVE (Aba Documentos)
+        const APPS_SCRIPT_DOCS_URL = 'https://script.google.com/macros/s/AKfycbyByjs75MeRhRmr1ZUl4b-KCRKTe6RJO12huK6xE2kfWJLBcwcNPn4_m5mNLou9toTE/exec'; 
+
+        // CONFIGURAÇÃO DA INTEGRAÇÃO DO GERADOR DE RELATÓRIO PDF (Exclusivo e Separado)
+        const APPS_SCRIPT_RELATORIO_URL = 'https://script.google.com/macros/s/AKfycbyYpBMPzPGGVM67o1iGGHcMmje1jUDfmHaIuvOZS30A7gCIWQ3fWnVxmE-aSvOW_9zUIQ/exec';
+
+        function switchTab(tabName) {
+            const tabInicio = document.getElementById('tab-content-inicio');
+            const tabAcoes = document.getElementById('tab-content-acoes');
+            const tabAtividades = document.getElementById('tab-content-atividades');
+            const tabDocumentos = document.getElementById('tab-content-documentos');
+            
+            const btnInicio = document.getElementById('btn-tab-inicio');
+            const btnAcoes = document.getElementById('btn-tab-acoes');
+            const btnAtividades = document.getElementById('btn-tab-atividades');
+            const btnDocumentos = document.getElementById('btn-tab-documentos');
+            const pageTitle = document.getElementById('page-title');
+
+            // Esconde todas as abas
+            tabInicio.classList.add('hidden');
+            tabAcoes.classList.add('hidden');
+            tabAtividades.classList.add('hidden');
+            tabDocumentos.classList.add('hidden');
+
+            // Reseta classes de seleção dos botões
+            const btnClassPadrao = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 text-slate-500 hover:bg-slate-50 hover:text-slate-800";
+            btnInicio.className = btnClassPadrao;
+            btnAcoes.className = btnClassPadrao;
+            btnAtividades.className = btnClassPadrao;
+            btnDocumentos.className = btnClassPadrao;
+
+            if (tabName === 'inicio') {
+                tabInicio.classList.remove('hidden');
+                btnInicio.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 bg-teal-50 text-saude-prime";
+                pageTitle.innerHTML = "Página Inicial";
+            } else if (tabName === 'acoes') {
+                tabAcoes.classList.remove('hidden');
+                btnAcoes.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 bg-teal-50 text-saude-prime";
+                pageTitle.innerHTML = "Minhas Ações";
+            } else if (tabName === 'atividades') {
+                tabAtividades.classList.remove('hidden');
+                btnAtividades.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 bg-teal-50 text-saude-prime";
+                pageTitle.innerHTML = "Biblioteca de Atividades";
+            } else if (tabName === 'documentos') {
+                tabDocumentos.classList.remove('hidden');
+                btnDocumentos.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 bg-teal-50 text-saude-prime";
+                pageTitle.innerHTML = "Documentos Acadêmicos";
+                
+                // Realiza a busca automática na nuvem ao entrar na aba pela primeira vez
+                if (document.getElementById('docs-grid').children.length === 0) {
+                    fetchDriveFiles();
+                }
+            }
+            document.getElementById('user-dropdown').classList.add('hidden');
+        }
+
+        // BUSCA DINÂMICA DE ARQUIVOS DO GOOGLE DRIVE (Aba Documentos)
+        async function fetchDriveFiles() {
+            const grid = document.getElementById('docs-grid');
+            const loading = document.getElementById('loading-docs');
+            const errorContainer = document.getElementById('error-docs');
+            const emptyContainer = document.getElementById('empty-docs');
+            const syncIcon = document.getElementById('sync-icon');
+            const syncText = document.getElementById('sync-text');
+
+            // Feedback visual inicial
+            grid.innerHTML = '';
+            loading.classList.remove('hidden');
+            errorContainer.classList.add('hidden');
+            emptyContainer.classList.add('hidden');
+            syncIcon.classList.add('animate-spin');
+            syncText.innerText = "Sincronizando...";
+
+            try {
+                const response = await fetch(APPS_SCRIPT_DOCS_URL);
+                const data = await response.json();
+
+                loading.classList.add('hidden');
+                syncIcon.classList.remove('animate-spin');
+                syncText.innerText = "Sincronizar com Drive";
+
+                if (data.success) {
+                    if (!data.files || data.files.length === 0) {
+                        emptyContainer.classList.remove('hidden');
+                        return;
+                    }
+
+                    // Mapeia e renderiza os arquivos reais retornados do Google Drive
+                    data.files.forEach(file => {
+                        let iconClass = 'fa-file-alt';
+                        let colorClass = 'text-slate-400';
+                        
+                        if (file.mimeType.includes('pdf')) {
+                            iconClass = 'fa-file-pdf';
+                            colorClass = 'text-red-500';
+                        } else if (file.mimeType.includes('word') || file.mimeType.includes('document')) {
+                            iconClass = 'fa-file-word';
+                            colorClass = 'text-blue-500';
+                        } else if (file.mimeType.includes('sheet') || file.mimeType.includes('excel')) {
+                            iconClass = 'fa-file-excel';
+                            colorClass = 'text-emerald-500';
+                        } else if (file.mimeType.includes('presentation') || file.mimeType.includes('powerpoint')) {
+                            iconClass = 'fa-file-powerpoint';
+                            colorClass = 'text-orange-500';
+                        } else if (file.mimeType.includes('image')) {
+                            iconClass = 'fa-file-image';
+                            colorClass = 'text-purple-500';
+                        }
+
+                        const cardHTML = `
+                            <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm flex flex-col justify-between hover:shadow-md transition">
+                                <div class="space-y-3">
+                                    <div class="${colorClass} text-2xl"><i class="fas ${iconClass}"></i></div>
+                                    <h4 class="font-extrabold text-sm text-slate-800 leading-snug">${file.name}</h4>
+                                    <div class="flex flex-wrap gap-2 text-[10px] text-slate-400 font-medium">
+                                        <span><i class="far fa-calendar-alt"></i> ${file.dateCreated}</span>
+                                        <span>•</span>
+                                        <span><i class="fas fa-weight-hanging"></i> ${file.size}</span>
+                                    </div>
+                                </div>
+                                <div class="pt-5 border-t border-slate-100 mt-4 flex gap-2">
+                                    <a href="${file.url}" target="_blank" class="flex-1 bg-slate-50 hover:bg-teal-50 text-slate-700 hover:text-saude-prime border border-slate-200 hover:border-teal-200 text-xs font-bold py-2 rounded-xl transition flex items-center justify-center space-x-1">
+                                        <i class="fas fa-external-link-alt text-[10px]"></i> <span>Abrir no Drive</span>
+                                    </a>
+                                </div>
+                            </div>
+                        `;
+                        grid.innerHTML += cardHTML;
+                    });
+                } else {
+                    errorContainer.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error("Erro na requisição:", error);
+                loading.classList.add('hidden');
+                errorContainer.classList.remove('hidden');
+                syncIcon.classList.remove('animate-spin');
+                syncText.innerText = "Sincronizar com Drive";
+            }
+        }
+
+        // COMUNICAÇÃO ASSÍNCRONA COM O SISTEMA DE RELATÓRIO DO DRIVE (Nova versão com download direto ativado)
+        async function gerarRelatorioOficial() {
+            const btnText = document.getElementById('text-relatorio');
+            const textoOriginal = btnText.innerText;
+            
+            // Ativa estado de carregamento do botão para feedback visual ao aluno
+            btnText.innerText = "Baixando PDF...";
+
+            // Coleta as horas reais e nomes que preencherão o Docs
+            const payload = {
+                nome: "Rivaldo de Pontes", // Integrado dinamicamente com o perfil
+                atividades: [
+                    {
+                        data: "12/07/2026",
+                        tipo: "Ação de Extensão Realizada (Eixo Escolar)",
+                        local: "Escola de Aplicação do Recife",
+                        horas: 4
+                    },
+                    {
+                        data: "14/07/2026",
+                        tipo: "Preparação de Post para Redes Sociais",
+                        local: "Eixo de Comunicação Digital",
+                        horas: 2
+                    }
+                ]
+            };
+
+            try {
+                // Realiza a chamada POST para o Apps Script exclusivo do relatório
+                const response = await fetch(APPS_SCRIPT_RELATORIO_URL, {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'text/plain;charset=utf-8'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                const resultado = await response.json();
+
+                if (resultado.success && resultado.pdfUrl) {
+                    // 🚀 ENGENHARIA DE URL: Transforma a URL web em link direto de descarregamento automático
+                    let urlDownloadDireto = resultado.pdfUrl;
+                    if (urlDownloadDireto.includes('/view')) {
+                        const arquivoId = urlDownloadDireto.split('/d/')[1].split('/view')[0];
+                        urlDownloadDireto = `https://docs.google.com/uc?export=download&id=${arquivoId}`;
+                    }
+
+                    // Cria a simulação do clique do conector físico na memória
+                    const linkTemporario = document.createElement('a');
+                    linkTemporario.href = urlDownloadDireto;
+                    linkTemporario.setAttribute('download', `Relatorio_Horas_Rivaldo.pdf`);
+                    document.body.appendChild(linkTemporario);
+                    linkTemporario.click();
+                    document.body.removeChild(linkTemporario);
+                } else {
+                    alert("Não foi possível gerar o relatório. Detalhes: " + (resultado.error || "Erro desconhecido."));
+                }
+            } catch (error) {
+                console.error("Erro de conexão do script:", error);
+                alert("Erro de conexão: Verifique sua internet ou a implantação do script do Google.");
+            } finally {
+                // Restaura o botão ao estado padrão
+                btnText.innerText = textoOriginal;
+            }
+        }
+
+        // CONTROLES DE INTERFACE COMUM
+        function toggleUserMenu() {
+            document.getElementById('user-dropdown').classList.toggle('hidden');
+        }
+
+        window.addEventListener('click', function(e) {
+            const dropdown = document.getElementById('user-dropdown');
+            const btn = dropdown.previousElementSibling;
+            if (!dropdown.contains(e.target) && !btn.contains(e.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+             switchTab('inicio');
+        });
+
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+            document.getElementById('user-dropdown').classList.add('hidden');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        document.getElementById('modal-horas').addEventListener('click', function(e) {
+            if (e.target === this) closeModal('modal-horas');
+        });
+        document.getElementById('modal-atividades').addEventListener('click', function(e) {
+            if (e.target === this) closeModal('modal-atividades');
+        });
+        document.getElementById('modal-nova-acao').addEventListener('click', function(e) {
+            if (e.target === this) closeModal('modal-nova-acao');
+        });
+
+        function toggleOutrosCampo() {
+            const select = document.getElementById('tipo-atividade');
+            const inputOutros = document.getElementById('wrapper-outros');
+            if (select.value === 'Outros') {
+                inputOutros.classList.remove('hidden');
+            } else {
+                inputOutros.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
