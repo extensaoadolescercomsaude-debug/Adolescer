@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cadastro - Portal Adolescer com Saúde</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="bg-slate-50 min-h-screen flex items-center justify-center p-4 selection:bg-teal-500 selection:text-white font-sans">
 
@@ -87,23 +88,26 @@
     </div>
 
     <script>
+        // 🟢 CONFIGURAÇÃO DO SUPABASE ADICIONADA AQUI (Substitua a URL pela sua)
+        const SUPABASE_URL = "https://hqckepxhcwvlwbhdlriy.supabase.co/rest/v1/"; 
+        const SUPABASE_ANON_KEY = "sb_publishable_Yc4xaOn65mSCBuj0rDPvtA_WfsrimeV";
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
         const passwordInput = document.getElementById('password');
         const confirmPasswordInput = document.getElementById('confirmPassword');
         const passwordError = document.getElementById('passwordError');
         const togglePasswordButton = document.getElementById('togglePassword');
         const eyeContainer = document.getElementById('eyeContainer');
 
-        // Ícones do Olho (Modo Blind)
         const svgOlhoAberto = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0z"/><circle cx="12" cy="12" r="3"/></svg>`;
         const svgOlhoFechado = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 10 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.52 13.52 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>`;
 
-        // Alternar visualização da senha
         togglePasswordButton.addEventListener('click', function () {
             const isPassword = passwordInput.getAttribute('type') === 'password';
             
             if (isPassword) {
                 passwordInput.setAttribute('type', 'text');
-                confirmPasswordInput.setAttribute('type', 'text'); // Mostra nos dois simultaneamente para facilitar
+                confirmPasswordInput.setAttribute('type', 'text');
                 eyeContainer.innerHTML = svgOlhoFechado;
             } else {
                 passwordInput.setAttribute('type', 'password');
@@ -112,23 +116,20 @@
             }
         });
 
-        // Validação no Envio do Formulário
         document.getElementById('registerForm').addEventListener('submit', function(e) {
-            // Verifica se as senhas batem
             if (passwordInput.value !== confirmPasswordInput.value) {
-                e.preventDefault(); // Impede o envio do form
-                passwordError.classList.remove('hidden'); // Exibe a mensagem de erro
-                confirmPasswordInput.classList.add('border-red-500', 'bg-red-50/30'); // Destaca o input com erro
+                e.preventDefault(); 
+                passwordError.classList.remove('hidden'); 
+                confirmPasswordInput.classList.add('border-red-500', 'bg-red-50/30'); 
                 confirmPasswordInput.focus();
             } else {
                 e.preventDefault();
                 passwordError.classList.add('hidden');
                 confirmPasswordInput.classList.remove('border-red-500', 'bg-red-50/30');
-                alert('Inscrição simulada com sucesso! Pronto para conectar a tabela de usuários (Auth) do Supabase.');
+                alert('Telas e chaves conectadas! O próximo passo será conectar a função real de envio de dados.');
             }
         });
 
-        // Limpa o aviso de erro enquanto o usuário corrige a senha de confirmação
         confirmPasswordInput.addEventListener('input', function() {
             if (!passwordError.classList.contains('hidden')) {
                 passwordError.classList.add('hidden');
