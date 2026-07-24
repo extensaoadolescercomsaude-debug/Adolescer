@@ -193,6 +193,7 @@
             submitButton.innerText = 'Entrar no Sistema';
 
             if (perfilError || !perfil) {
+                console.error('Erro ao buscar perfil:', perfilError);
                 alert('Não foi possível carregar seu perfil. Tente novamente ou contate a coordenação.');
                 return;
             }
