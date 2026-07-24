@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cadastro - Portal Adolescer com Saúde</title>
+    <link rel="icon" type="image/png" href="imagens/logo-vetor.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -112,8 +113,8 @@
         // IMPORTANTE: a URL deve ser a raiz do projeto, sem "/rest/v1/" no final —
         // o SDK monta os caminhos de auth/rest internamente.
         const SUPABASE_URL = "https://hqckepxhcwvlwbhdlriy.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhxY2tlcHhoY3d2bHdiaGRscml5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxMzcwMTQsImV4cCI6MjA5OTcxMzAxNH0.eycBrS1xDo3WX9MeRG2c9LYGR2nLTzK0zalxVj-TDWU";
-        
+        const SUPABASE_ANON_KEY = "sb_publishable_Yc4xaOn65mSCBuj0rDPvtA_WfsrimeV";
+
         // Renomeado para "supabaseClient" para não sobrescrever o objeto global
         // "supabase" que o script do CDN cria (evita o erro
         // "Cannot access 'supabase' before initialization").
@@ -174,7 +175,7 @@
                 return;
             }
 
-            alert('Cadastro realizado! Verifique seu e-mail para confirmar a conta.');
+            alert('Cadastro realizado! Verifique seu e-mail para confirmar a conta. Depois de confirmado, seu acesso ainda ficará pendente até a coordenação aprovar.');
         });
 
         confirmPasswordInput.addEventListener('input', function() {
