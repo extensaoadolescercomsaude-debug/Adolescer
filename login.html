@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Portal Adolescer com Saúde</title>
+    <link rel="icon" type="image/png" href="imagens/logo-vetor.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -35,6 +36,7 @@
             <p class="text-sm text-slate-500 mt-1 text-center">Área de Membros do Projeto de Extensão. Insira suas credenciais.</p>
         </div>
 
+        <div id="login-view">
         <form id="loginForm" class="space-y-5">
             
             <div>
@@ -90,6 +92,29 @@
                 Não tem uma conta? <a href="cadastro.html" class="text-saude-prime font-semibold hover:text-saude-dark hover:underline transition-colors">Cadastre-se</a>
             </p>
         </div>
+        </div>
+
+        <div id="pending-view" class="hidden text-center space-y-4 py-4">
+            <div class="w-16 h-16 mx-auto rounded-full bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-500 text-2xl">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <h2 class="text-lg font-bold text-slate-800">Cadastro em análise</h2>
+            <p class="text-sm text-slate-500 leading-relaxed max-w-xs mx-auto">
+                Sua conta foi criada com sucesso, mas ainda está aguardando aprovação da coordenação. Assim que for liberada, você poderá acessar o portal normalmente.
+            </p>
+            <button onclick="location.reload()" class="text-xs font-semibold text-saude-prime hover:text-saude-dark hover:underline">Voltar ao login</button>
+        </div>
+
+        <div id="rejected-view" class="hidden text-center space-y-4 py-4">
+            <div class="w-16 h-16 mx-auto rounded-full bg-red-50 border border-red-100 flex items-center justify-center text-red-500 text-2xl">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" x2="9" y1="9" y2="15"/><line x1="9" x2="15" y1="9" y2="15"/></svg>
+            </div>
+            <h2 class="text-lg font-bold text-slate-800">Acesso não autorizado</h2>
+            <p class="text-sm text-slate-500 leading-relaxed max-w-xs mx-auto">
+                Sua solicitação de cadastro não foi aprovada. Entre em contato com a coordenação para mais informações.
+            </p>
+            <a href="mailto:extensao.adolescercomsaude@upe.br" class="text-xs font-semibold text-saude-prime hover:text-saude-dark hover:underline">extensao.adolescercomsaude@upe.br</a>
+        </div>
 
     </div>
 
@@ -98,7 +123,7 @@
         // IMPORTANTE: a URL deve ser a raiz do projeto, sem "/rest/v1/" no final —
         // o SDK monta os caminhos de auth/rest internamente.
         const SUPABASE_URL = "https://hqckepxhcwvlwbhdlriy.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhxY2tlcHhoY3d2bHdiaGRscml5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxMzcwMTQsImV4cCI6MjA5OTcxMzAxNH0.eycBrS1xDo3WX9MeRG2c9LYGR2nLTzK0zalxVj-TDWU";
+        const SUPABASE_ANON_KEY = "sb_publishable_Yc4xaOn65mSCBuj0rDPvtA_WfsrimeV";
 
         // Renomeado para "supabaseClient" para não sobrescrever o objeto global
         // "supabase" que o script do CDN cria (evita o erro
@@ -126,6 +151,18 @@
             }
         });
 
+        const loginView = document.getElementById('login-view');
+        const pendingView = document.getElementById('pending-view');
+        const rejectedView = document.getElementById('rejected-view');
+        const submitButton = document.querySelector('#loginForm button[type="submit"] span');
+
+        function mostrarView(viewParaMostrar) {
+            loginView.classList.add('hidden');
+            pendingView.classList.add('hidden');
+            rejectedView.classList.add('hidden');
+            viewParaMostrar.classList.remove('hidden');
+        }
+
         // Evento estrutural de submit do formulário
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -133,18 +170,49 @@
             const email = document.getElementById('email').value;
             const password = passwordInput.value;
 
+            submitButton.innerText = 'Entrando...';
+
             const { data, error } = await supabaseClient.auth.signInWithPassword({
                 email: email,
                 password: password
             });
 
             if (error) {
+                submitButton.innerText = 'Entrar no Sistema';
                 alert('Erro ao entrar: ' + error.message);
                 return;
             }
 
-            // Login bem-sucedido — redirecione para a área correta aqui.
-            alert('Login realizado com sucesso!');
+            // Login OK no Auth — agora busca o perfil pra saber papel/status
+            const { data: perfil, error: perfilError } = await supabaseClient
+                .from('perfis')
+                .select('papel, status')
+                .eq('id', data.user.id)
+                .single();
+
+            submitButton.innerText = 'Entrar no Sistema';
+
+            if (perfilError || !perfil) {
+                alert('Não foi possível carregar seu perfil. Tente novamente ou contate a coordenação.');
+                return;
+            }
+
+            if (perfil.status === 'pendente') {
+                mostrarView(pendingView);
+                return;
+            }
+
+            if (perfil.status === 'rejeitado') {
+                mostrarView(rejectedView);
+                return;
+            }
+
+            // status === 'aprovado' — redireciona para o painel certo
+            if (perfil.papel === 'coordenacao') {
+                window.location.href = 'painel-coordenacao.html';
+            } else {
+                window.location.href = 'painel-extensionista.html';
+            }
         });
     </script>
 </body>
