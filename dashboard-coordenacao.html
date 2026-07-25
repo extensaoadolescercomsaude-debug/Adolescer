@@ -430,7 +430,7 @@
                 <h3 class="font-extrabold text-slate-800 text-base">Meu Perfil Administrativo</h3>
                 <button onclick="closeModal('modal-perfil-coord')" class="text-slate-400 hover:text-slate-600 text-sm font-bold cursor-pointer">Fechar</button>
             </div>
-            <form onsubmit="event.preventDefault(); alert('Perfil salvo com sucesso!'); closeModal('modal-perfil-coord');" class="space-y-4">
+            <form id="form-perfil-coord" onsubmit="salvarPerfil(event)" class="space-y-4">
                 <div class="flex flex-col items-center space-y-1">
                     <div class="w-20 h-20 rounded-full bg-purple-50 border-2 border-purple-200 flex items-center justify-center text-saude-accent text-xl font-bold shadow shadow-purple-200 relative"><span id="modal-avatar-initials">--</span></div>
                     <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wide cursor-pointer hover:underline">Alterar Foto</span>
@@ -441,11 +441,11 @@
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Mini Biografia</label>
-                    <textarea rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium text-slate-700 focus:outline-none focus:border-saude-prime">Doutora em Saúde da Criança e do Adolescente (UFPE) e coordenadora geral do Adolescer com Saúde na FENSG/UPE.</textarea>
+                    <textarea id="modal-user-bio" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium text-slate-700 focus:outline-none focus:border-saude-prime"></textarea>
                 </div>
                 <div class="pt-2 flex gap-2">
                     <button type="button" onclick="closeModal('modal-perfil-coord')" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold py-3 rounded-xl transition">Cancelar</button>
-                    <button type="submit" class="flex-1 bg-saude-prime hover:bg-saude-dark text-white text-xs font-bold py-3 rounded-xl transition shadow cursor-pointer">Salvar Perfil</button>
+                    <button type="submit" id="btn-salvar-perfil" class="flex-1 bg-saude-prime hover:bg-saude-dark text-white text-xs font-bold py-3 rounded-xl transition shadow cursor-pointer">Salvar Perfil</button>
                 </div>
             </form>
         </div>
@@ -474,7 +474,7 @@
 
             const { data: perfil, error } = await supabaseClient
                 .from('perfis')
-                .select('nome, email, papel, status')
+                .select('nome, email, papel, status, bio')
                 .eq('id', session.user.id)
                 .single();
 
@@ -489,6 +489,49 @@
         async function sairDoPortal() {
             await supabaseClient.auth.signOut();
             window.location.href = 'index.html';
+        }
+
+        // Salva nome e bio da coordenação de verdade no Supabase
+        async function salvarPerfil(e) {
+            e.preventDefault();
+
+            const btn = document.getElementById('btn-salvar-perfil');
+            const nome = document.getElementById('modal-user-name').value.trim();
+            const bio = document.getElementById('modal-user-bio').value.trim();
+
+            if (!nome) {
+                alert('O nome não pode ficar em branco.');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = 'Salvando...';
+
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const { error } = await supabaseClient
+                .from('perfis')
+                .update({ nome: nome, bio: bio })
+                .eq('id', session.user.id);
+
+            btn.disabled = false;
+            btn.innerText = 'Salvar Perfil';
+
+            if (error) {
+                alert('Erro ao salvar perfil: ' + error.message);
+                return;
+            }
+
+            // Atualiza a tela sem precisar recarregar a página
+            document.getElementById('header-user-name').innerText = nome;
+            document.getElementById('header-user-avatar').innerText = iniciais(nome);
+            document.getElementById('modal-avatar-initials').textContent = iniciais(nome);
+
+            closeModal('modal-perfil-coord');
         }
 
         function switchTab(tabName) {
@@ -537,6 +580,7 @@
             document.getElementById('header-user-avatar').innerText = iniciais(perfil.nome);
             document.getElementById('modal-avatar-initials').textContent = iniciais(perfil.nome);
             document.getElementById('modal-user-name').value = perfil.nome;
+            document.getElementById('modal-user-bio').value = perfil.bio || '';
         });
 
         function gerarPDFCustomizado(e) {
