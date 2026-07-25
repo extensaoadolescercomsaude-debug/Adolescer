@@ -688,7 +688,6 @@
             tbodyFila.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Carregando...</td></tr>';
             tbodyHist.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Carregando...</td></tr>';
 
-            // ATENÇÃO: Removi o .eq('status', 'pendente') para puxar TUDO e dividirmos depois
             const { data, error } = await supabaseClient
                 .from('acoes_extensao')
                 .select('id, local_intervencao, url_ata, url_relatoria, status, created_at, perfis(nome)');
@@ -701,10 +700,7 @@
             }
 
             // Divide entre fila (pendente) e histórico (já deferido ou indeferido)
-            // Pendentes: do mais antigo pro mais novo (quem pediu antes, é avaliado antes)
             const pendentes = data.filter(a => a.status === 'pendente').sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
-            
-            // Histórico: do mais recente para o mais antigo (últimas avaliações no topo)
             const historico = data.filter(a => a.status !== 'pendente').sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
 
             // ====== RENDERIZA A FILA DE PENDENTES ======
@@ -750,7 +746,12 @@
                                 ${acao.url_ata ? `<a href="${escapeHtml(acao.url_ata)}" target="_blank" class="text-slate-500 hover:text-saude-prime block font-semibold hover:underline flex items-center gap-1.5">Ata Assinada</a>` : ''}
                                 ${acao.url_relatoria ? `<a href="${escapeHtml(acao.url_relatoria)}" target="_blank" class="text-slate-500 hover:text-purple-600 block font-semibold hover:underline flex items-center gap-1.5">Relatoria</a>` : ''}
                             </td>
-                            <td class="py-4 px-6 text-center">${badge}</td>
+                            <td class="py-4 px-6 text-center">
+                                <div class="flex flex-col items-center space-y-1.5">
+                                    ${badge}
+                                    <button onclick="excluirAcao('${acao.id}')" class="text-[10px] font-bold text-slate-400 hover:text-red-600 underline transition cursor-pointer">Excluir do Sistema</button>
+                                </div>
+                            </td>
                         </tr>
                     `;
                 }).join('');
@@ -776,6 +777,25 @@
             carregarIndicadoresVisaoGeral();
         }
 
+        // Exclui permanentemente uma ação do Banco de Dados
+        async function excluirAcao(id) {
+            if (!confirm('ATENÇÃO COORDENAÇÃO: Tem certeza que deseja EXCLUIR PERMANENTEMENTE este registro do sistema? (O arquivo original continuará salvo no seu Google Drive como backup).')) return;
+
+            const { error } = await supabaseClient
+                .from('acoes_extensao')
+                .delete()
+                .eq('id', id);
+
+            if (error) {
+                alert('Erro ao excluir: ' + error.message);
+                return;
+            }
+
+            // Recarrega a tabela e os números da Visão Geral
+            carregarHomologacoes();
+            carregarIndicadoresVisaoGeral();
+        }
+
         // Busca lançamentos de horas avulsas pendentes E o histórico
         async function carregarHorasAvulsas() {
             const tbodyFila = document.getElementById('tbody-horas');
@@ -784,7 +804,6 @@
             tbodyFila.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Carregando...</td></tr>';
             tbodyHist.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Carregando...</td></tr>';
 
-            // Removido o .eq('status', 'pendente') para buscar também o histórico
             const { data, error } = await supabaseClient
                 .from('horas_avulsas')
                 .select('id, descricao, horas, status, created_at, perfis(nome)');
