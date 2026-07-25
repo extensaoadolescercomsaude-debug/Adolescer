@@ -161,41 +161,81 @@
                 </div>
             </div>
 
-            <div id="tab-content-homologacoes" class="hidden space-y-6">
+            <div id="tab-content-homologacoes" class="hidden space-y-8">
                 <div>
                     <h2 class="text-xl font-bold text-slate-800">Homologação de Ações e Atas</h2>
-                    <p class="text-xs text-slate-400 mt-0.5">Analise as relatorias técnicas das intervenções para validar as atividades do projeto.</p>
+                    <p class="text-xs text-slate-400 mt-0.5">Analise as relatorias técnicas das intervenções para validar as atividades do projeto e consulte o histórico.</p>
                 </div>
-                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                                <th class="py-3 px-6">Extensionista</th><th class="py-3 px-6">Local / Intervenção</th><th class="py-3 px-6">Documentos (Drive)</th><th class="py-3 px-6 text-center">Decisão</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tbody-homologacoes" class="text-xs font-medium text-slate-600 divide-y divide-slate-100">
-                            <tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Carregando...</td></tr>
-                        </tbody>
-                    </table>
+                
+                <div>
+                    <h3 class="font-extrabold text-slate-800 text-sm uppercase tracking-wider mb-3 text-amber-600">Fila: Aguardando Avaliação</h3>
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                                    <th class="py-3 px-6">Extensionista</th><th class="py-3 px-6">Local / Intervenção</th><th class="py-3 px-6">Documentos (Drive)</th><th class="py-3 px-6 text-center">Decisão</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-homologacoes" class="text-xs font-medium text-slate-600 divide-y divide-slate-100">
+                                <tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Carregando...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="font-extrabold text-slate-800 text-sm uppercase tracking-wider mb-3 mt-6 text-slate-500">Histórico de Ações</h3>
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                                    <th class="py-3 px-6">Extensionista</th><th class="py-3 px-6">Local / Intervenção</th><th class="py-3 px-6">Documentos</th><th class="py-3 px-6 text-center">Status Final</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-historico-acoes" class="text-xs font-medium text-slate-600 divide-y divide-slate-100">
+                                <tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Carregando...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
-            <div id="tab-content-validar-horas" class="hidden space-y-6">
+            <div id="tab-content-validar-horas" class="hidden space-y-8">
                 <div>
                     <h2 class="text-xl font-bold text-slate-800">Validação de Lançamentos Departamentais</h2>
-                    <p class="text-xs text-slate-400 mt-0.5">Valide cargas horárias avulsas soltas (Reuniões, Pesquisas, Redes Sociais).</p>
+                    <p class="text-xs text-slate-400 mt-0.5">Valide cargas horárias avulsas soltas (Reuniões, Pesquisas, Redes Sociais) e consulte o histórico.</p>
                 </div>
-                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                                <th class="py-3 px-6">Membro</th><th class="py-3 px-6">Atividade Detalhada</th><th class="py-3 px-6 text-center">Horas</th><th class="py-3 px-6 text-center">Decisão</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tbody-horas" class="text-xs font-medium text-slate-600 divide-y divide-slate-100">
-                            <tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Carregando...</td></tr>
-                        </tbody>
-                    </table>
+                
+                <div>
+                    <h3 class="font-extrabold text-slate-800 text-sm uppercase tracking-wider mb-3 text-amber-600">Fila: Horas Pendentes</h3>
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                                    <th class="py-3 px-6">Membro</th><th class="py-3 px-6">Atividade Detalhada</th><th class="py-3 px-6 text-center">Horas</th><th class="py-3 px-6 text-center">Decisão</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-horas" class="text-xs font-medium text-slate-600 divide-y divide-slate-100">
+                                <tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Carregando...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="font-extrabold text-slate-800 text-sm uppercase tracking-wider mb-3 mt-6 text-slate-500">Histórico de Horas Validadas</h3>
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                                    <th class="py-3 px-6">Membro</th><th class="py-3 px-6">Atividade Detalhada</th><th class="py-3 px-6 text-center">Horas</th><th class="py-3 px-6 text-center">Status Final</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-historico-horas" class="text-xs font-medium text-slate-600 divide-y divide-slate-100">
+                                <tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Carregando...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -640,47 +680,81 @@
             if (elHoras) elHoras.innerText = `${totalHoras} Horas`;
         }
 
-        // Busca ações/atas pendentes de homologação
+        // Busca ações/atas pendentes de homologação E o histórico
         async function carregarHomologacoes() {
-            const tbody = document.getElementById('tbody-homologacoes');
-            tbody.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Carregando...</td></tr>';
+            const tbodyFila = document.getElementById('tbody-homologacoes');
+            const tbodyHist = document.getElementById('tbody-historico-acoes');
 
+            tbodyFila.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Carregando...</td></tr>';
+            tbodyHist.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Carregando...</td></tr>';
+
+            // ATENÇÃO: Removi o .eq('status', 'pendente') para puxar TUDO e dividirmos depois
             const { data, error } = await supabaseClient
                 .from('acoes_extensao')
-                .select('id, local_intervencao, url_ata, url_relatoria, status, perfis(nome)')
-                .eq('status', 'pendente')
-                .order('created_at', { ascending: true });
+                .select('id, local_intervencao, url_ata, url_relatoria, status, created_at, perfis(nome)');
 
             if (error) {
-                tbody.innerHTML = `<tr><td class="py-6 px-6 text-center text-rose-500" colspan="4">Erro ao carregar: ${escapeHtml(error.message)}</td></tr>`;
+                const erroMsg = `<tr><td class="py-6 px-6 text-center text-rose-500" colspan="4">Erro ao carregar: ${escapeHtml(error.message)}</td></tr>`;
+                tbodyFila.innerHTML = erroMsg;
+                tbodyHist.innerHTML = erroMsg;
                 return;
             }
 
-            if (data.length === 0) {
-                tbody.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Nenhuma ação aguardando homologação.</td></tr>';
-                return;
+            // Divide entre fila (pendente) e histórico (já deferido ou indeferido)
+            // Pendentes: do mais antigo pro mais novo (quem pediu antes, é avaliado antes)
+            const pendentes = data.filter(a => a.status === 'pendente').sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
+            
+            // Histórico: do mais recente para o mais antigo (últimas avaliações no topo)
+            const historico = data.filter(a => a.status !== 'pendente').sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+
+            // ====== RENDERIZA A FILA DE PENDENTES ======
+            if (pendentes.length === 0) {
+                tbodyFila.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Nenhuma ação aguardando homologação.</td></tr>';
+            } else {
+                tbodyFila.innerHTML = pendentes.map(acao => `
+                    <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="py-4 px-6 font-bold text-slate-800">${escapeHtml(acao.perfis?.nome || '—')}</td>
+                        <td class="py-4 px-6">${escapeHtml(acao.local_intervencao)}</td>
+                        <td class="py-4 px-6 space-y-1.5">
+                            ${acao.url_ata ? `<a href="${escapeHtml(acao.url_ata)}" target="_blank" class="text-saude-prime block font-semibold hover:underline flex items-center gap-1.5">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg> Ver Ata Assinada
+                            </a>` : '<span class="text-slate-300 text-[11px]">Sem ata anexada</span>'}
+                            ${acao.url_relatoria ? `<a href="${escapeHtml(acao.url_relatoria)}" target="_blank" class="text-purple-600 block font-semibold hover:underline flex items-center gap-1.5">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg> Ver Relatoria Técnica
+                            </a>` : ''}
+                        </td>
+                        <td class="py-4 px-6">
+                            <div class="flex justify-center space-x-2">
+                                <button onclick="decidirAcao('${acao.id}', 'deferido')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Deferir</button>
+                                <button onclick="decidirAcao('${acao.id}', 'indeferido')" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Indeferir</button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
             }
 
-            tbody.innerHTML = data.map(acao => `
-                <tr>
-                    <td class="py-4 px-6 font-bold text-slate-800">${escapeHtml(acao.perfis?.nome || '—')}</td>
-                    <td class="py-4 px-6">${escapeHtml(acao.local_intervencao)}</td>
-                    <td class="py-4 px-6 space-y-1.5">
-                        ${acao.url_ata ? `<a href="${escapeHtml(acao.url_ata)}" target="_blank" class="text-saude-prime block font-semibold hover:underline flex items-center gap-1.5">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg> Ver Ata Assinada
-                        </a>` : '<span class="text-slate-300 text-[11px]">Sem ata anexada</span>'}
-                        ${acao.url_relatoria ? `<a href="${escapeHtml(acao.url_relatoria)}" target="_blank" class="text-purple-600 block font-semibold hover:underline flex items-center gap-1.5">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg> Ver Relatoria Técnica
-                        </a>` : ''}
-                    </td>
-                    <td class="py-4 px-6">
-                        <div class="flex justify-center space-x-2">
-                            <button onclick="decidirAcao('${acao.id}', 'deferido')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Deferir</button>
-                            <button onclick="decidirAcao('${acao.id}', 'indeferido')" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Indeferir</button>
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
+            // ====== RENDERIZA O HISTÓRICO ======
+            if (historico.length === 0) {
+                tbodyHist.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Nenhum histórico registrado.</td></tr>';
+            } else {
+                tbodyHist.innerHTML = historico.map(acao => {
+                    const badge = acao.status === 'deferido' 
+                        ? '<span class="bg-emerald-50 text-emerald-700 border border-emerald-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Deferido</span>'
+                        : '<span class="bg-rose-50 text-rose-700 border border-rose-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Indeferido</span>';
+                    
+                    return `
+                        <tr class="hover:bg-slate-50/50 transition-colors">
+                            <td class="py-4 px-6 font-bold text-slate-800">${escapeHtml(acao.perfis?.nome || '—')}</td>
+                            <td class="py-4 px-6">${escapeHtml(acao.local_intervencao)}</td>
+                            <td class="py-4 px-6 space-y-1.5">
+                                ${acao.url_ata ? `<a href="${escapeHtml(acao.url_ata)}" target="_blank" class="text-slate-500 hover:text-saude-prime block font-semibold hover:underline flex items-center gap-1.5">Ata Assinada</a>` : ''}
+                                ${acao.url_relatoria ? `<a href="${escapeHtml(acao.url_relatoria)}" target="_blank" class="text-slate-500 hover:text-purple-600 block font-semibold hover:underline flex items-center gap-1.5">Relatoria</a>` : ''}
+                            </td>
+                            <td class="py-4 px-6 text-center">${badge}</td>
+                        </tr>
+                    `;
+                }).join('');
+            }
         }
 
         // Defere ou indefere uma ação/ata
@@ -702,40 +776,67 @@
             carregarIndicadoresVisaoGeral();
         }
 
-        // Busca lançamentos de horas avulsas pendentes
+        // Busca lançamentos de horas avulsas pendentes E o histórico
         async function carregarHorasAvulsas() {
-            const tbody = document.getElementById('tbody-horas');
-            tbody.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Carregando...</td></tr>';
+            const tbodyFila = document.getElementById('tbody-horas');
+            const tbodyHist = document.getElementById('tbody-historico-horas');
 
+            tbodyFila.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Carregando...</td></tr>';
+            tbodyHist.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Carregando...</td></tr>';
+
+            // Removido o .eq('status', 'pendente') para buscar também o histórico
             const { data, error } = await supabaseClient
                 .from('horas_avulsas')
-                .select('id, descricao, horas, status, perfis(nome)')
-                .eq('status', 'pendente')
-                .order('created_at', { ascending: true });
+                .select('id, descricao, horas, status, created_at, perfis(nome)');
 
             if (error) {
-                tbody.innerHTML = `<tr><td class="py-6 px-6 text-center text-rose-500" colspan="4">Erro ao carregar: ${escapeHtml(error.message)}</td></tr>`;
+                const erroMsg = `<tr><td class="py-6 px-6 text-center text-rose-500" colspan="4">Erro ao carregar: ${escapeHtml(error.message)}</td></tr>`;
+                tbodyFila.innerHTML = erroMsg;
+                tbodyHist.innerHTML = erroMsg;
                 return;
             }
 
-            if (data.length === 0) {
-                tbody.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Nenhum lançamento de horas pendente.</td></tr>';
-                return;
+            const pendentes = data.filter(h => h.status === 'pendente').sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
+            const historico = data.filter(h => h.status !== 'pendente').sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+
+            // ====== RENDERIZA A FILA DE PENDENTES ======
+            if (pendentes.length === 0) {
+                tbodyFila.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Nenhum lançamento de horas pendente.</td></tr>';
+            } else {
+                tbodyFila.innerHTML = pendentes.map(h => `
+                    <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="py-4 px-6 font-bold text-slate-800">${escapeHtml(h.perfis?.nome || '—')}</td>
+                        <td class="py-4 px-6 leading-relaxed">${escapeHtml(h.descricao)}</td>
+                        <td class="py-4 px-6 text-center font-black text-purple-600 text-sm">${h.horas}h</td>
+                        <td class="py-4 px-6">
+                            <div class="flex justify-center space-x-2">
+                                <button onclick="decidirHora('${h.id}', 'deferido')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Deferir</button>
+                                <button onclick="decidirHora('${h.id}', 'indeferido')" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Indeferir</button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
             }
 
-            tbody.innerHTML = data.map(h => `
-                <tr>
-                    <td class="py-4 px-6 font-bold text-slate-800">${escapeHtml(h.perfis?.nome || '—')}</td>
-                    <td class="py-4 px-6 leading-relaxed">${escapeHtml(h.descricao)}</td>
-                    <td class="py-4 px-6 text-center font-black text-purple-600 text-sm">${h.horas}h</td>
-                    <td class="py-4 px-6">
-                        <div class="flex justify-center space-x-2">
-                            <button onclick="decidirHora('${h.id}', 'deferido')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Deferir</button>
-                            <button onclick="decidirHora('${h.id}', 'indeferido')" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Indeferir</button>
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
+            // ====== RENDERIZA O HISTÓRICO ======
+            if (historico.length === 0) {
+                tbodyHist.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Nenhum histórico registrado.</td></tr>';
+            } else {
+                tbodyHist.innerHTML = historico.map(h => {
+                    const badge = h.status === 'deferido' 
+                        ? '<span class="bg-emerald-50 text-emerald-700 border border-emerald-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Deferido</span>'
+                        : '<span class="bg-rose-50 text-rose-700 border border-rose-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Indeferido</span>';
+                    
+                    return `
+                        <tr class="hover:bg-slate-50/50 transition-colors">
+                            <td class="py-4 px-6 font-bold text-slate-800">${escapeHtml(h.perfis?.nome || '—')}</td>
+                            <td class="py-4 px-6 leading-relaxed text-slate-500">${escapeHtml(h.descricao)}</td>
+                            <td class="py-4 px-6 text-center font-black text-slate-600 text-sm">${h.horas}h</td>
+                            <td class="py-4 px-6 text-center">${badge}</td>
+                        </tr>
+                    `;
+                }).join('');
+            }
         }
 
         // Defere ou indefere um lançamento de horas
