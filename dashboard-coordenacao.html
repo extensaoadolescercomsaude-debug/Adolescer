@@ -466,7 +466,8 @@
         </div>
     </div>
 
-    <!-- NOVO MODAL: LER CONTESTAÇÃO DO ALUNO -->
+    <!-- O Modal de Ler Contestação foi mantido no HTML a seu pedido, 
+         embora não seja mais necessário, pois as informações aparecem agora direto na tabela! -->
     <div id="modal-ler-contestacao" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-3xl max-w-md w-full shadow-xl border border-slate-100 p-6 space-y-4">
             <div class="flex justify-between items-center border-b border-slate-100 pb-3">
@@ -476,19 +477,16 @@
                 </h3>
                 <button onclick="closeModal('modal-ler-contestacao')" class="text-slate-400 hover:text-slate-600 text-sm font-bold cursor-pointer">Fechar</button>
             </div>
-            
             <div class="space-y-4">
                 <div class="bg-rose-50 border border-rose-100 p-3 rounded-xl">
                     <span class="block text-[10px] font-bold text-rose-700 uppercase mb-1">Seu motivo de recusa original:</span>
                     <p id="view-motivo-coord" class="text-xs text-rose-800 italic leading-relaxed"></p>
                 </div>
-
                 <div class="bg-amber-50 border border-amber-100 p-3 rounded-xl">
                     <span class="block text-[10px] font-bold text-amber-700 uppercase mb-1">Defesa/Justificativa do Aluno:</span>
                     <p id="view-texto-aluno" class="text-xs text-amber-900 font-medium leading-relaxed"></p>
                 </div>
             </div>
-
             <div class="pt-2">
                 <button type="button" onclick="closeModal('modal-ler-contestacao')" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold py-3 rounded-xl transition">Entendido, vou avaliar</button>
             </div>
@@ -623,12 +621,6 @@
             if (tabela === 'acoes_extensao') carregarHomologacoes();
             if (tabela === 'horas_avulsas') carregarHorasAvulsas();
             carregarIndicadoresVisaoGeral();
-        }
-
-        function lerContestacao(motivoCoord, defesaAluno) {
-            document.getElementById('view-motivo-coord').innerText = motivoCoord || 'Sem motivo registrado.';
-            document.getElementById('view-texto-aluno').innerText = defesaAluno || 'Sem texto de defesa.';
-            openModal('modal-ler-contestacao');
         }
 
         // Atualiza o card "Extensionistas Ativos" na Visão Geral
@@ -816,45 +808,49 @@
                 }, {});
             }
 
-            const pendentesGrp = agrupar(pendentes);
-            if (Object.keys(pendentesGrp).length === 0) {
+            // ====== RENDERIZA A FILA DE PENDENTES (LISTA CORRIDA) ======
+            if (pendentes.length === 0) {
                 tbodyFila.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Nenhuma ação aguardando homologação.</td></tr>';
             } else {
-                let out = '';
-                for (let nome in pendentesGrp) {
-                    out += `<tr class="bg-slate-100/70 border-y border-slate-200"><td colspan="4" class="py-2.5 px-6 font-extrabold text-slate-700 text-[11px] uppercase tracking-wider"><svg xmlns="http://www.w3.org/2000/svg" class="inline-block w-4 h-4 mr-1.5 text-saude-prime" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg> Pasta do Extensionista: ${escapeHtml(nome)}</td></tr>`;
+                tbodyFila.innerHTML = pendentes.map(acao => {
+                    const isContestado = acao.status === 'contestado';
+                    const trClass = isContestado ? 'bg-amber-50/40 hover:bg-amber-100/50' : 'hover:bg-slate-50/50';
+                    const badgeContestado = isContestado ? `<span class="block bg-amber-100 text-amber-700 text-[9px] font-bold px-2 py-0.5 rounded mt-1 uppercase w-max">Em Contestação</span>` : '';
                     
-                    pendentesGrp[nome].forEach(acao => {
-                        const isContestado = acao.status === 'contestado';
-                        const trClass = isContestado ? 'bg-amber-50/40 hover:bg-amber-100/50' : 'hover:bg-white';
-                        const badgeContestado = isContestado ? `<span class="block bg-amber-100 text-amber-700 text-[9px] font-bold px-2 py-0.5 rounded mt-1 uppercase w-max">Em Contestação</span>` : '';
-                        const btnLerContestacao = isContestado ? `<button type="button" onclick="lerContestacao('${escapeHtml(acao.motivo_recusa)}', '${escapeHtml(acao.texto_contestacao)}')" class="text-[10px] text-amber-600 font-bold underline mb-2 cursor-pointer w-full text-center hover:text-amber-800">Ler Resposta do Aluno</button>` : '';
+                    let detalhesLocal = escapeHtml(acao.local_intervencao);
+                    if (isContestado) {
+                        detalhesLocal += `
+                        <div class="mt-2 text-[10px] bg-white p-2 rounded border border-amber-200 leading-relaxed text-left shadow-sm">
+                            <span class="block font-bold text-rose-700 mb-0.5">Motivo da Recusa Original:</span>
+                            <span class="block text-rose-600 mb-1.5 italic">${escapeHtml(acao.motivo_recusa)}</span>
+                            <span class="block font-bold text-amber-700 mb-0.5">Defesa/Justificativa do Aluno:</span>
+                            <span class="block text-slate-700 font-medium">${escapeHtml(acao.texto_contestacao)}</span>
+                        </div>`;
+                    }
 
-                        out += `
-                        <tr class="${trClass} transition-colors border-b border-slate-100">
-                            <td class="py-4 px-6 font-bold text-slate-800">
-                                <span class="text-[10px] text-slate-400 font-semibold block mb-0.5">${new Date(acao.created_at).toLocaleDateString('pt-BR')}</span>
-                                ${escapeHtml(acao.perfis?.nome || '—')}
-                                ${badgeContestado}
-                            </td>
-                            <td class="py-4 px-6">${escapeHtml(acao.local_intervencao)}</td>
-                            <td class="py-4 px-6 space-y-1.5">
-                                ${acao.url_ata ? `<a href="${escapeHtml(acao.url_ata)}" target="_blank" class="text-saude-prime block font-semibold hover:underline flex items-center gap-1.5"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg> Ver Ata</a>` : '<span class="text-slate-300 text-[11px]">Sem ata</span>'}
-                                ${acao.url_relatoria ? `<a href="${escapeHtml(acao.url_relatoria)}" target="_blank" class="text-purple-600 block font-semibold hover:underline flex items-center gap-1.5"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg> Ver Relatoria</a>` : ''}
-                            </td>
-                            <td class="py-4 px-6">
-                                ${btnLerContestacao}
-                                <div class="flex justify-center space-x-2">
-                                    <button type="button" onclick="decidirAcao('${acao.id}', 'deferido')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Deferir</button>
-                                    <button type="button" onclick="abrirModalRecusa('${acao.id}', 'acoes_extensao')" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Indeferir</button>
-                                </div>
-                            </td>
-                        </tr>`;
-                    });
-                }
-                tbodyFila.innerHTML = out;
+                    return `
+                    <tr class="${trClass} transition-colors border-b border-slate-100">
+                        <td class="py-4 px-6 font-bold text-slate-800">
+                            <span class="text-[10px] text-slate-400 font-semibold block mb-0.5">${new Date(acao.created_at).toLocaleDateString('pt-BR')}</span>
+                            ${escapeHtml(acao.perfis?.nome || '—')}
+                            ${badgeContestado}
+                        </td>
+                        <td class="py-4 px-6">${detalhesLocal}</td>
+                        <td class="py-4 px-6 space-y-1.5">
+                            ${acao.url_ata ? `<a href="${escapeHtml(acao.url_ata)}" target="_blank" class="text-saude-prime block font-semibold hover:underline flex items-center gap-1.5"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg> Ver Ata</a>` : '<span class="text-slate-300 text-[11px]">Sem ata</span>'}
+                            ${acao.url_relatoria ? `<a href="${escapeHtml(acao.url_relatoria)}" target="_blank" class="text-purple-600 block font-semibold hover:underline flex items-center gap-1.5"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg> Ver Relatoria</a>` : ''}
+                        </td>
+                        <td class="py-4 px-6">
+                            <div class="flex justify-center space-x-2">
+                                <button type="button" onclick="decidirAcao('${acao.id}', 'deferido')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Deferir</button>
+                                <button type="button" onclick="abrirModalRecusa('${acao.id}', 'acoes_extensao')" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Indeferir</button>
+                            </div>
+                        </td>
+                    </tr>`;
+                }).join('');
             }
 
+            // ====== RENDERIZA O HISTORICO (COM SUBPASTAS) ======
             const histGrp = agrupar(historico);
             if (Object.keys(histGrp).length === 0) {
                 tbodyHist.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Nenhum histórico registrado.</td></tr>';
@@ -959,45 +955,46 @@
                 }, {});
             }
 
-            // ====== RENDERIZA A FILA DE PENDENTES ======
-            const pendentesGrp = agrupar(pendentes);
-            if (Object.keys(pendentesGrp).length === 0) {
+            // ====== RENDERIZA A FILA DE PENDENTES (LISTA CORRIDA) ======
+            if (pendentes.length === 0) {
                 tbodyFila.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Nenhum lançamento de horas pendente.</td></tr>';
             } else {
-                let out = '';
-                for (let nome in pendentesGrp) {
-                    out += `<tr class="bg-slate-100/70 border-y border-slate-200"><td colspan="4" class="py-2.5 px-6 font-extrabold text-slate-700 text-[11px] uppercase tracking-wider"><svg xmlns="http://www.w3.org/2000/svg" class="inline-block w-4 h-4 mr-1.5 text-saude-prime" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg> Pasta do Extensionista: ${escapeHtml(nome)}</td></tr>`;
+                tbodyFila.innerHTML = pendentes.map(h => {
+                    const isContestado = h.status === 'contestado';
+                    const trClass = isContestado ? 'bg-amber-50/40 hover:bg-amber-100/50' : 'hover:bg-slate-50/50';
+                    const badgeContestado = isContestado ? `<span class="block bg-amber-100 text-amber-700 text-[9px] font-bold px-2 py-0.5 rounded mt-1 uppercase w-max">Em Contestação</span>` : '';
                     
-                    pendentesGrp[nome].forEach(h => {
-                        const isContestado = h.status === 'contestado';
-                        const trClass = isContestado ? 'bg-amber-50/40 hover:bg-amber-100/50' : 'hover:bg-white';
-                        const badgeContestado = isContestado ? `<span class="block bg-amber-100 text-amber-700 text-[9px] font-bold px-2 py-0.5 rounded mt-1 uppercase w-max">Em Contestação</span>` : '';
-                        
-                        const btnLerContestacao = isContestado ? `<button type="button" onclick="lerContestacao('${escapeHtml(h.motivo_recusa)}', '${escapeHtml(h.texto_contestacao)}')" class="text-[10px] text-amber-600 font-bold underline mb-2 cursor-pointer w-full text-center hover:text-amber-800">Ler Resposta do Aluno</button>` : '';
+                    let detalhesHora = escapeHtml(h.descricao);
+                    if (isContestado) {
+                        detalhesHora += `
+                        <div class="mt-2 text-[10px] bg-white p-2 rounded border border-amber-200 leading-relaxed text-left shadow-sm">
+                            <span class="block font-bold text-rose-700 mb-0.5">Motivo da Recusa Original:</span>
+                            <span class="block text-rose-600 mb-1.5 italic">${escapeHtml(h.motivo_recusa)}</span>
+                            <span class="block font-bold text-amber-700 mb-0.5">Defesa/Justificativa do Aluno:</span>
+                            <span class="block text-slate-700 font-medium">${escapeHtml(h.texto_contestacao)}</span>
+                        </div>`;
+                    }
 
-                        out += `
-                        <tr class="${trClass} transition-colors border-b border-slate-100">
-                            <td class="py-4 px-6 font-bold text-slate-800">
-                                <span class="text-[10px] text-slate-400 font-semibold block mb-0.5">${new Date(h.created_at).toLocaleDateString('pt-BR')}</span>
-                                ${escapeHtml(h.perfis?.nome || '—')}
-                                ${badgeContestado}
-                            </td>
-                            <td class="py-4 px-6 leading-relaxed">${escapeHtml(h.descricao)}</td>
-                            <td class="py-4 px-6 text-center font-black text-purple-600 text-sm">${h.horas}h</td>
-                            <td class="py-4 px-6">
-                                ${btnLerContestacao}
-                                <div class="flex justify-center space-x-2">
-                                    <button type="button" onclick="decidirHora('${h.id}', 'deferido')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Deferir</button>
-                                    <button type="button" onclick="abrirModalRecusa('${h.id}', 'horas_avulsas')" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Indeferir</button>
-                                </div>
-                            </td>
-                        </tr>`;
-                    });
-                }
-                tbodyFila.innerHTML = out;
+                    return `
+                    <tr class="${trClass} transition-colors border-b border-slate-100">
+                        <td class="py-4 px-6 font-bold text-slate-800">
+                            <span class="text-[10px] text-slate-400 font-semibold block mb-0.5">${new Date(h.created_at).toLocaleDateString('pt-BR')}</span>
+                            ${escapeHtml(h.perfis?.nome || '—')}
+                            ${badgeContestado}
+                        </td>
+                        <td class="py-4 px-6 leading-relaxed text-slate-600">${detalhesHora}</td>
+                        <td class="py-4 px-6 text-center font-black text-purple-600 text-sm">${h.horas}h</td>
+                        <td class="py-4 px-6">
+                            <div class="flex justify-center space-x-2">
+                                <button type="button" onclick="decidirHora('${h.id}', 'deferido')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Deferir</button>
+                                <button type="button" onclick="abrirModalRecusa('${h.id}', 'horas_avulsas')" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Indeferir</button>
+                            </div>
+                        </td>
+                    </tr>`;
+                }).join('');
             }
 
-            // ====== RENDERIZA O HISTÓRICO ======
+            // ====== RENDERIZA O HISTORICO (COM SUBPASTAS) ======
             const histGrp = agrupar(historico);
             if (Object.keys(histGrp).length === 0) {
                 tbodyHist.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Nenhum histórico registrado.</td></tr>';
