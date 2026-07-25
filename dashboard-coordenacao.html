@@ -106,7 +106,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-center">
                         <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Extensionistas Ativos</span>
-                        <h3 class="text-3xl font-black text-slate-800 mt-2">12 Alunos</h3>
+                        <h3 id="stat-extensionistas-ativos" class="text-3xl font-black text-slate-800 mt-2">Carregando...</h3>
                     </div>
                     <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-center">
                         <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Ações Pendentes</span>
@@ -366,17 +366,8 @@
                     </div>
                     <div class="bg-amber-50/50 rounded-2xl border border-amber-100 shadow-sm overflow-hidden">
                         <table class="w-full text-left">
-                            <tbody class="text-xs font-medium text-slate-700 divide-y divide-amber-100">
-                                <tr>
-                                    <td class="py-4 px-6">
-                                        <p class="font-bold text-slate-800">Bruno Silva</p>
-                                        <p class="text-[10px] text-slate-500">bruno.silva@upe.br</p>
-                                    </td>
-                                    <td class="py-4 px-6 text-right space-x-2">
-                                        <button onclick="alert('Cadastro Aprovado! Aluno liberado no Supabase.')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-lg transition shadow-sm">Aprovar Acesso</button>
-                                        <button onclick="alert('Cadastro Recusado e Excluído.')" class="bg-white hover:bg-rose-50 border border-slate-200 hover:border-rose-200 text-slate-600 hover:text-rose-600 font-bold px-4 py-2 rounded-lg transition">Recusar</button>
-                                    </td>
-                                </tr>
+                            <tbody id="tbody-pendentes" class="text-xs font-medium text-slate-700 divide-y divide-amber-100">
+                                <tr><td class="py-6 px-6 text-center text-slate-400" colspan="2">Carregando...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -389,31 +380,12 @@
                             <thead>
                                 <tr class="bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
                                     <th class="py-3 px-6">Identificação</th>
-                                    <th class="py-3 px-6 text-center">Configurações de Credenciais</th>
-                                    <th class="py-3 px-6 text-center">Remover Projeto</th>
+                                    <th class="py-3 px-6 text-center">Credenciais</th>
+                                    <th class="py-3 px-6 text-center">Revogar Acesso</th>
                                 </tr>
                             </thead>
-                            <tbody class="text-xs font-medium text-slate-600 divide-y divide-slate-100">
-                                <tr>
-                                    <td class="py-4 px-6">
-                                        <p class="font-bold text-slate-800">Rivaldo de Pontes</p>
-                                        <p class="text-[10px] text-slate-500">rivaldo.pontes@upe.br</p>
-                                    </td>
-                                    <td class="py-4 px-6">
-                                        <div class="flex justify-center space-x-3">
-                                            <button onclick="alert('Link de redefinição enviado pelo Supabase!')" class="text-saude-prime hover:text-saude-dark font-bold underline decoration-saude-prime/30 underline-offset-4 transition">Resetar Senha</button>
-                                            <span class="text-slate-300">|</span>
-                                            <button onclick="alert('Abrir campo para atualizar o e-mail.')" class="text-purple-600 hover:text-purple-800 font-bold underline decoration-purple-600/30 underline-offset-4 transition">Mudar E-mail</button>
-                                        </div>
-                                    </td>
-                                    <td class="py-4 px-6">
-                                        <div class="flex justify-center">
-                                            <button onclick="confirm('ATENÇÃO: Deseja banir e apagar permanentemente os dados deste aluno do banco?') ? alert('Aluno excluído.') : null" class="bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white border border-rose-100 p-2 rounded-xl transition cursor-pointer" title="Banir Membro">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
+                            <tbody id="tbody-ativos" class="text-xs font-medium text-slate-600 divide-y divide-slate-100">
+                                <tr><td class="py-6 px-6 text-center text-slate-400" colspan="3">Carregando...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -534,9 +506,157 @@
             closeModal('modal-perfil-coord');
         }
 
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str ?? '';
+            return div.innerHTML;
+        }
+
+        // Atualiza o card "Extensionistas Ativos" na Visão Geral
+        async function carregarContadorExtensionistas() {
+            const { count, error } = await supabaseClient
+                .from('perfis')
+                .select('*', { count: 'exact', head: true })
+                .eq('papel', 'extensionista')
+                .eq('status', 'aprovado');
+
+            const el = document.getElementById('stat-extensionistas-ativos');
+            if (!el) return;
+
+            if (error) {
+                el.innerText = '--';
+                return;
+            }
+            el.innerText = `${count} Aluno${count === 1 ? '' : 's'}`;
+        }
+
+        // Busca todos os extensionistas e separa em pendentes / ativos
+        async function carregarMembros() {
+            const tbodyPendentes = document.getElementById('tbody-pendentes');
+            const tbodyAtivos = document.getElementById('tbody-ativos');
+
+            tbodyPendentes.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="2">Carregando...</td></tr>';
+            tbodyAtivos.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="3">Carregando...</td></tr>';
+
+            const { data: perfis, error } = await supabaseClient
+                .from('perfis')
+                .select('id, nome, email, papel, status')
+                .eq('papel', 'extensionista')
+                .order('nome', { ascending: true });
+
+            if (error) {
+                tbodyPendentes.innerHTML = `<tr><td class="py-6 px-6 text-center text-rose-500" colspan="2">Erro ao carregar: ${escapeHtml(error.message)}</td></tr>`;
+                tbodyAtivos.innerHTML = '';
+                return;
+            }
+
+            const pendentes = perfis.filter(p => p.status === 'pendente');
+            const ativos = perfis.filter(p => p.status === 'aprovado');
+
+            if (pendentes.length === 0) {
+                tbodyPendentes.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="2">Nenhuma solicitação pendente no momento.</td></tr>';
+            } else {
+                tbodyPendentes.innerHTML = pendentes.map(p => `
+                    <tr>
+                        <td class="py-4 px-6">
+                            <p class="font-bold text-slate-800">${escapeHtml(p.nome)}</p>
+                            <p class="text-[10px] text-slate-500">${escapeHtml(p.email)}</p>
+                        </td>
+                        <td class="py-4 px-6 text-right space-x-2">
+                            <button onclick="decidirCadastro('${p.id}', 'aprovado')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-lg transition shadow-sm">Aprovar Acesso</button>
+                            <button onclick="decidirCadastro('${p.id}', 'rejeitado')" class="bg-white hover:bg-rose-50 border border-slate-200 hover:border-rose-200 text-slate-600 hover:text-rose-600 font-bold px-4 py-2 rounded-lg transition">Recusar</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            if (ativos.length === 0) {
+                tbodyAtivos.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="3">Nenhum extensionista ativo ainda.</td></tr>';
+            } else {
+                tbodyAtivos.innerHTML = ativos.map(p => `
+                    <tr>
+                        <td class="py-4 px-6">
+                            <p class="font-bold text-slate-800">${escapeHtml(p.nome)}</p>
+                            <p class="text-[10px] text-slate-500">${escapeHtml(p.email)}</p>
+                        </td>
+                        <td class="py-4 px-6">
+                            <div class="flex justify-center">
+                                <button onclick="resetarSenha('${escapeHtml(p.email)}')" class="text-saude-prime hover:text-saude-dark font-bold underline decoration-saude-prime/30 underline-offset-4 transition">Resetar Senha</button>
+                            </div>
+                        </td>
+                        <td class="py-4 px-6">
+                            <div class="flex justify-center">
+                                <button onclick="revogarAcesso('${p.id}')" class="bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white border border-rose-100 p-2 rounded-xl transition cursor-pointer" title="Revogar Acesso">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            carregarContadorExtensionistas();
+        }
+
+        // Aprova ou recusa uma solicitação de cadastro
+        async function decidirCadastro(id, novoStatus) {
+            const acao = novoStatus === 'aprovado' ? 'aprovar' : 'recusar';
+            if (!confirm(`Tem certeza que deseja ${acao} este cadastro?`)) return;
+
+            const { error } = await supabaseClient
+                .from('perfis')
+                .update({ status: novoStatus })
+                .eq('id', id);
+
+            if (error) {
+                alert('Erro: ' + error.message);
+                return;
+            }
+
+            carregarMembros();
+        }
+
+        // Envia e-mail de redefinição de senha via Supabase Auth
+        async function resetarSenha(email) {
+            if (!confirm(`Enviar e-mail de redefinição de senha para ${email}?`)) return;
+
+            const { error } = await supabaseClient.auth.resetPasswordForEmail(email);
+
+            if (error) {
+                alert('Erro ao enviar e-mail: ' + error.message);
+                return;
+            }
+
+            alert('E-mail de redefinição enviado para ' + email + '.');
+        }
+
+        // Revoga o acesso de um extensionista (marca como rejeitado, não apaga do banco)
+        async function revogarAcesso(id) {
+            if (!confirm('ATENÇÃO: isso vai revogar o acesso deste extensionista ao portal. Deseja continuar?')) return;
+
+            const { error } = await supabaseClient
+                .from('perfis')
+                .update({ status: 'rejeitado' })
+                .eq('id', id);
+
+            if (error) {
+                alert('Erro: ' + error.message);
+                return;
+            }
+
+            carregarMembros();
+        }
+
+        let membrosCarregado = false;
+
         function switchTab(tabName) {
             const tabs = ['visao-geral', 'homologacoes', 'validar-horas', 'biblioteca', 'indicadores', 'membros'];
             const pageTitle = document.getElementById('page-title');
+
+            if (tabName === 'membros' && !membrosCarregado) {
+                membrosCarregado = true;
+                carregarMembros();
+            }
 
             tabs.forEach(tab => {
                 document.getElementById(`tab-content-${tab}`).classList.add('hidden');
@@ -581,6 +701,8 @@
             document.getElementById('modal-avatar-initials').textContent = iniciais(perfil.nome);
             document.getElementById('modal-user-name').value = perfil.nome;
             document.getElementById('modal-user-bio').value = perfil.bio || '';
+
+            carregarContadorExtensionistas();
         });
 
         function gerarPDFCustomizado(e) {
