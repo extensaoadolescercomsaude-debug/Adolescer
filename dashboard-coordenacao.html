@@ -110,11 +110,11 @@
                     </div>
                     <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-center">
                         <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Ações Pendentes</span>
-                        <h3 class="text-3xl font-black text-amber-600 mt-2">3 Atas</h3>
+                        <h3 id="stat-acoes-pendentes" class="text-3xl font-black text-amber-600 mt-2">Carregando...</h3>
                     </div>
                     <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-center">
                         <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Horas na Fila</span>
-                        <h3 class="text-3xl font-black text-purple-600 mt-2">28 Horas</h3>
+                        <h3 id="stat-horas-fila" class="text-3xl font-black text-purple-600 mt-2">Carregando...</h3>
                     </div>
                 </div>
 
@@ -173,25 +173,8 @@
                                 <th class="py-3 px-6">Extensionista</th><th class="py-3 px-6">Local / Intervenção</th><th class="py-3 px-6">Documentos (Drive)</th><th class="py-3 px-6 text-center">Decisão</th>
                             </tr>
                         </thead>
-                        <tbody class="text-xs font-medium text-slate-600 divide-y divide-slate-100">
-                            <tr>
-                                <td class="py-4 px-6 font-bold text-slate-800">Rivaldo de Pontes</td>
-                                <td class="py-4 px-6">Oficina de Saúde Mental - Escola Estadual Central</td>
-                                <td class="py-4 px-6 space-y-1.5">
-                                    <a href="#" target="_blank" class="text-saude-prime block font-semibold hover:underline flex items-center gap-1.5">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg> Ver Ata Assinada
-                                    </a>
-                                    <a href="#" target="_blank" class="text-purple-600 block font-semibold hover:underline flex items-center gap-1.5">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg> Ver Relatoria Técnica
-                                    </a>
-                                </td>
-                                <td class="py-4 px-6">
-                                    <div class="flex justify-center space-x-2">
-                                        <button onclick="alert('Ação Homologada! Status atualizado no banco.')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Deferir</button>
-                                        <button onclick="alert('Abertura de modal para justificar indeferimento.')" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Indeferir</button>
-                                    </div>
-                                </td>
-                            </tr>
+                        <tbody id="tbody-homologacoes" class="text-xs font-medium text-slate-600 divide-y divide-slate-100">
+                            <tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Carregando...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -209,18 +192,8 @@
                                 <th class="py-3 px-6">Membro</th><th class="py-3 px-6">Atividade Detalhada</th><th class="py-3 px-6 text-center">Horas</th><th class="py-3 px-6 text-center">Decisão</th>
                             </tr>
                         </thead>
-                        <tbody class="text-xs font-medium text-slate-600 divide-y divide-slate-100">
-                            <tr>
-                                <td class="py-4 px-6 font-bold text-slate-800">Rayane Vitoria</td>
-                                <td class="py-4 px-6 leading-relaxed"><strong>Preparação de Post:</strong> Pesquisa de artigos e design de carrossel no Canva sobre consequências do uso de Vapes na adolescência.</td>
-                                <td class="py-4 px-6 text-center font-black text-purple-600 text-sm">2h</td>
-                                <td class="py-4 px-6">
-                                    <div class="flex justify-center space-x-2">
-                                        <button onclick="alert('Horas Deferidas! Inserido no cômputo total da aluna.')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Deferir</button>
-                                        <button onclick="alert('Lançamento Indeferido.')" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Indeferir</button>
-                                    </div>
-                                </td>
-                            </tr>
+                        <tbody id="tbody-horas" class="text-xs font-medium text-slate-600 divide-y divide-slate-100">
+                            <tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Carregando...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -647,7 +620,146 @@
             carregarMembros();
         }
 
+        // Atualiza os cards "Ações Pendentes" e "Horas na Fila" da Visão Geral
+        async function carregarIndicadoresVisaoGeral() {
+            const { count: countAcoes } = await supabaseClient
+                .from('acoes_extensao')
+                .select('*', { count: 'exact', head: true })
+                .eq('status', 'pendente');
+
+            const elAcoes = document.getElementById('stat-acoes-pendentes');
+            if (elAcoes) elAcoes.innerText = `${countAcoes ?? 0} Ata${countAcoes === 1 ? '' : 's'}`;
+
+            const { data: horasPendentes } = await supabaseClient
+                .from('horas_avulsas')
+                .select('horas')
+                .eq('status', 'pendente');
+
+            const totalHoras = (horasPendentes || []).reduce((soma, h) => soma + Number(h.horas), 0);
+            const elHoras = document.getElementById('stat-horas-fila');
+            if (elHoras) elHoras.innerText = `${totalHoras} Horas`;
+        }
+
+        // Busca ações/atas pendentes de homologação
+        async function carregarHomologacoes() {
+            const tbody = document.getElementById('tbody-homologacoes');
+            tbody.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Carregando...</td></tr>';
+
+            const { data, error } = await supabaseClient
+                .from('acoes_extensao')
+                .select('id, local_intervencao, url_ata, url_relatoria, status, perfis(nome)')
+                .eq('status', 'pendente')
+                .order('created_at', { ascending: true });
+
+            if (error) {
+                tbody.innerHTML = `<tr><td class="py-6 px-6 text-center text-rose-500" colspan="4">Erro ao carregar: ${escapeHtml(error.message)}</td></tr>`;
+                return;
+            }
+
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Nenhuma ação aguardando homologação.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.map(acao => `
+                <tr>
+                    <td class="py-4 px-6 font-bold text-slate-800">${escapeHtml(acao.perfis?.nome || '—')}</td>
+                    <td class="py-4 px-6">${escapeHtml(acao.local_intervencao)}</td>
+                    <td class="py-4 px-6 space-y-1.5">
+                        ${acao.url_ata ? `<a href="${escapeHtml(acao.url_ata)}" target="_blank" class="text-saude-prime block font-semibold hover:underline flex items-center gap-1.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg> Ver Ata Assinada
+                        </a>` : '<span class="text-slate-300 text-[11px]">Sem ata anexada</span>'}
+                        ${acao.url_relatoria ? `<a href="${escapeHtml(acao.url_relatoria)}" target="_blank" class="text-purple-600 block font-semibold hover:underline flex items-center gap-1.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg> Ver Relatoria Técnica
+                        </a>` : ''}
+                    </td>
+                    <td class="py-4 px-6">
+                        <div class="flex justify-center space-x-2">
+                            <button onclick="decidirAcao('${acao.id}', 'deferido')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Deferir</button>
+                            <button onclick="decidirAcao('${acao.id}', 'indeferido')" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Indeferir</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Defere ou indefere uma ação/ata
+        async function decidirAcao(id, novoStatus) {
+            const acaoTexto = novoStatus === 'deferido' ? 'deferir (homologar)' : 'indeferir';
+            if (!confirm(`Tem certeza que deseja ${acaoTexto} esta ação?`)) return;
+
+            const { error } = await supabaseClient
+                .from('acoes_extensao')
+                .update({ status: novoStatus })
+                .eq('id', id);
+
+            if (error) {
+                alert('Erro: ' + error.message);
+                return;
+            }
+
+            carregarHomologacoes();
+            carregarIndicadoresVisaoGeral();
+        }
+
+        // Busca lançamentos de horas avulsas pendentes
+        async function carregarHorasAvulsas() {
+            const tbody = document.getElementById('tbody-horas');
+            tbody.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Carregando...</td></tr>';
+
+            const { data, error } = await supabaseClient
+                .from('horas_avulsas')
+                .select('id, descricao, horas, status, perfis(nome)')
+                .eq('status', 'pendente')
+                .order('created_at', { ascending: true });
+
+            if (error) {
+                tbody.innerHTML = `<tr><td class="py-6 px-6 text-center text-rose-500" colspan="4">Erro ao carregar: ${escapeHtml(error.message)}</td></tr>`;
+                return;
+            }
+
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Nenhum lançamento de horas pendente.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.map(h => `
+                <tr>
+                    <td class="py-4 px-6 font-bold text-slate-800">${escapeHtml(h.perfis?.nome || '—')}</td>
+                    <td class="py-4 px-6 leading-relaxed">${escapeHtml(h.descricao)}</td>
+                    <td class="py-4 px-6 text-center font-black text-purple-600 text-sm">${h.horas}h</td>
+                    <td class="py-4 px-6">
+                        <div class="flex justify-center space-x-2">
+                            <button onclick="decidirHora('${h.id}', 'deferido')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Deferir</button>
+                            <button onclick="decidirHora('${h.id}', 'indeferido')" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Indeferir</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Defere ou indefere um lançamento de horas
+        async function decidirHora(id, novoStatus) {
+            const acaoTexto = novoStatus === 'deferido' ? 'deferir' : 'indeferir';
+            if (!confirm(`Tem certeza que deseja ${acaoTexto} este lançamento de horas?`)) return;
+
+            const { error } = await supabaseClient
+                .from('horas_avulsas')
+                .update({ status: novoStatus })
+                .eq('id', id);
+
+            if (error) {
+                alert('Erro: ' + error.message);
+                return;
+            }
+
+            carregarHorasAvulsas();
+            carregarIndicadoresVisaoGeral();
+        }
+
         let membrosCarregado = false;
+        let homologacoesCarregado = false;
+        let horasCarregado = false;
 
         function switchTab(tabName) {
             const tabs = ['visao-geral', 'homologacoes', 'validar-horas', 'biblioteca', 'indicadores', 'membros'];
@@ -656,6 +768,14 @@
             if (tabName === 'membros' && !membrosCarregado) {
                 membrosCarregado = true;
                 carregarMembros();
+            }
+            if (tabName === 'homologacoes' && !homologacoesCarregado) {
+                homologacoesCarregado = true;
+                carregarHomologacoes();
+            }
+            if (tabName === 'validar-horas' && !horasCarregado) {
+                horasCarregado = true;
+                carregarHorasAvulsas();
             }
 
             tabs.forEach(tab => {
@@ -703,6 +823,7 @@
             document.getElementById('modal-user-bio').value = perfil.bio || '';
 
             carregarContadorExtensionistas();
+            carregarIndicadoresVisaoGeral();
         });
 
         function gerarPDFCustomizado(e) {
