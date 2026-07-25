@@ -982,7 +982,12 @@
                             <td class="py-4 px-6 font-bold text-slate-800">${escapeHtml(h.perfis?.nome || '—')}</td>
                             <td class="py-4 px-6 leading-relaxed text-slate-500">${escapeHtml(h.descricao)}</td>
                             <td class="py-4 px-6 text-center font-black text-slate-600 text-sm">${h.horas}h</td>
-                            <td class="py-4 px-6 text-center">${badge}</td>
+                            <td class="py-4 px-6 text-center">
+                                <div class="flex flex-col items-center space-y-1.5">
+                                    ${badge}
+                                    <button onclick="excluirHora('${h.id}')" class="text-[10px] font-bold text-slate-400 hover:text-red-600 underline transition cursor-pointer">Excluir do Sistema</button>
+                                </div>
+                            </td>
                         </tr>
                     `;
                 }).join('');
@@ -1001,6 +1006,24 @@
 
             if (error) {
                 alert('Erro: ' + error.message);
+                return;
+            }
+
+            carregarHorasAvulsas();
+            carregarIndicadoresVisaoGeral();
+        }
+
+        // Exclui permanentemente uma HORA do Banco de Dados
+        async function excluirHora(id) {
+            if (!confirm('ATENÇÃO COORDENAÇÃO: Tem certeza que deseja EXCLUIR PERMANENTEMENTE este registro do sistema?')) return;
+
+            const { error } = await supabaseClient
+                .from('horas_avulsas')
+                .delete()
+                .eq('id', id);
+
+            if (error) {
+                alert('Erro ao excluir: ' + error.message);
                 return;
             }
 
