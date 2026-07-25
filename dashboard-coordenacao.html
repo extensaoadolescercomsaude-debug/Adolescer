@@ -786,7 +786,7 @@
             if (elHoras) elHoras.innerText = `${totalHoras} Horas`;
         }
 
-        // Busca ações/atas pendentes de homologação E o histórico
+        // Busca ações/atas pendentes de homologação E o histórico (com "SUBPASTAS" por aluno)
         async function carregarHomologacoes() {
             const tbodyFila = document.getElementById('tbody-homologacoes');
             const tbodyHist = document.getElementById('tbody-historico-acoes');
@@ -800,66 +800,80 @@
 
             if (error) {
                 const erroMsg = `<tr><td class="py-6 px-6 text-center text-rose-500" colspan="4">Erro ao carregar: ${escapeHtml(error.message)}</td></tr>`;
-                tbodyFila.innerHTML = erroMsg;
-                tbodyHist.innerHTML = erroMsg;
+                tbodyFila.innerHTML = erroMsg; tbodyHist.innerHTML = erroMsg;
                 return;
             }
 
-            // Divide entre fila (pendente e contestado) e histórico (já deferido ou indeferido)
             const pendentes = data.filter(a => a.status === 'pendente' || a.status === 'contestado').sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
             const historico = data.filter(a => a.status === 'deferido' || a.status === 'indeferido').sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
 
-            // ====== RENDERIZA A FILA DE PENDENTES ======
-            if (pendentes.length === 0) {
-                tbodyFila.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Nenhuma ação aguardando homologação.</td></tr>';
-            } else {
-                tbodyFila.innerHTML = pendentes.map(acao => {
-                    const isContestado = acao.status === 'contestado';
-                    const trClass = isContestado ? 'bg-amber-50/40 hover:bg-amber-100/50' : 'hover:bg-slate-50/50';
-                    const badgeContestado = isContestado ? `<span class="block bg-amber-100 text-amber-700 text-[9px] font-bold px-2 py-0.5 rounded mt-1 uppercase w-max">Em Contestação</span>` : '';
-                    
-                    const btnLerContestacao = isContestado ? `
-                        <button onclick="lerContestacao('${escapeHtml(acao.motivo_recusa)}', '${escapeHtml(acao.texto_contestacao)}')" class="text-[10px] text-amber-600 font-bold underline mb-2 cursor-pointer w-full text-center hover:text-amber-800">Ler Resposta do Aluno</button>
-                    ` : '';
-
-                    return `
-                    <tr class="${trClass} transition-colors border-b border-slate-100">
-                        <td class="py-4 px-6 font-bold text-slate-800">
-                            ${escapeHtml(acao.perfis?.nome || '—')}
-                            ${badgeContestado}
-                        </td>
-                        <td class="py-4 px-6">${escapeHtml(acao.local_intervencao)}</td>
-                        <td class="py-4 px-6 space-y-1.5">
-                            ${acao.url_ata ? `<a href="${escapeHtml(acao.url_ata)}" target="_blank" class="text-saude-prime block font-semibold hover:underline flex items-center gap-1.5">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg> Ver Ata Assinada
-                            </a>` : '<span class="text-slate-300 text-[11px]">Sem ata anexada</span>'}
-                            ${acao.url_relatoria ? `<a href="${escapeHtml(acao.url_relatoria)}" target="_blank" class="text-purple-600 block font-semibold hover:underline flex items-center gap-1.5">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg> Ver Relatoria Técnica
-                            </a>` : ''}
-                        </td>
-                        <td class="py-4 px-6">
-                            ${btnLerContestacao}
-                            <div class="flex justify-center space-x-2">
-                                <button onclick="decidirAcao('${acao.id}', 'deferido')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Deferir</button>
-                                <button onclick="abrirModalRecusa('${acao.id}', 'acoes_extensao')" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Indeferir</button>
-                            </div>
-                        </td>
-                    </tr>
-                `}).join('');
+            function agrupar(lista) {
+                return lista.reduce((acc, obj) => {
+                    const n = obj.perfis?.nome || 'Desconhecido';
+                    if(!acc[n]) acc[n] = [];
+                    acc[n].push(obj);
+                    return acc;
+                }, {});
             }
 
-            // ====== RENDERIZA O HISTÓRICO ======
-            if (historico.length === 0) {
+            const pendentesGrp = agrupar(pendentes);
+            if (Object.keys(pendentesGrp).length === 0) {
+                tbodyFila.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Nenhuma ação aguardando homologação.</td></tr>';
+            } else {
+                let out = '';
+                for (let nome in pendentesGrp) {
+                    out += `<tr class="bg-slate-100/70 border-y border-slate-200"><td colspan="4" class="py-2.5 px-6 font-extrabold text-slate-700 text-[11px] uppercase tracking-wider"><svg xmlns="http://www.w3.org/2000/svg" class="inline-block w-4 h-4 mr-1.5 text-saude-prime" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg> Pasta do Extensionista: ${escapeHtml(nome)}</td></tr>`;
+                    
+                    pendentesGrp[nome].forEach(acao => {
+                        const isContestado = acao.status === 'contestado';
+                        const trClass = isContestado ? 'bg-amber-50/40 hover:bg-amber-100/50' : 'hover:bg-white';
+                        const badgeContestado = isContestado ? `<span class="block bg-amber-100 text-amber-700 text-[9px] font-bold px-2 py-0.5 rounded mt-1 uppercase w-max">Em Contestação</span>` : '';
+                        const btnLerContestacao = isContestado ? `<button type="button" onclick="lerContestacao('${escapeHtml(acao.motivo_recusa)}', '${escapeHtml(acao.texto_contestacao)}')" class="text-[10px] text-amber-600 font-bold underline mb-2 cursor-pointer w-full text-center hover:text-amber-800">Ler Resposta do Aluno</button>` : '';
+
+                        out += `
+                        <tr class="${trClass} transition-colors border-b border-slate-100">
+                            <td class="py-4 px-6 font-bold text-slate-800">
+                                <span class="text-[10px] text-slate-400 font-semibold block mb-0.5">${new Date(acao.created_at).toLocaleDateString('pt-BR')}</span>
+                                ${escapeHtml(acao.perfis?.nome || '—')}
+                                ${badgeContestado}
+                            </td>
+                            <td class="py-4 px-6">${escapeHtml(acao.local_intervencao)}</td>
+                            <td class="py-4 px-6 space-y-1.5">
+                                ${acao.url_ata ? `<a href="${escapeHtml(acao.url_ata)}" target="_blank" class="text-saude-prime block font-semibold hover:underline flex items-center gap-1.5"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg> Ver Ata</a>` : '<span class="text-slate-300 text-[11px]">Sem ata</span>'}
+                                ${acao.url_relatoria ? `<a href="${escapeHtml(acao.url_relatoria)}" target="_blank" class="text-purple-600 block font-semibold hover:underline flex items-center gap-1.5"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg> Ver Relatoria</a>` : ''}
+                            </td>
+                            <td class="py-4 px-6">
+                                ${btnLerContestacao}
+                                <div class="flex justify-center space-x-2">
+                                    <button type="button" onclick="decidirAcao('${acao.id}', 'deferido')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Deferir</button>
+                                    <button type="button" onclick="abrirModalRecusa('${acao.id}', 'acoes_extensao')" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Indeferir</button>
+                                </div>
+                            </td>
+                        </tr>`;
+                    });
+                }
+                tbodyFila.innerHTML = out;
+            }
+
+            const histGrp = agrupar(historico);
+            if (Object.keys(histGrp).length === 0) {
                 tbodyHist.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Nenhum histórico registrado.</td></tr>';
             } else {
-                tbodyHist.innerHTML = historico.map(acao => {
-                    const badge = acao.status === 'deferido' 
-                        ? '<span class="bg-emerald-50 text-emerald-700 border border-emerald-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Deferido</span>'
-                        : '<span class="bg-rose-50 text-rose-700 border border-rose-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Indeferido</span>';
+                let out = '';
+                for (let nome in histGrp) {
+                    out += `<tr class="bg-slate-100/70 border-y border-slate-200"><td colspan="4" class="py-2.5 px-6 font-extrabold text-slate-700 text-[11px] uppercase tracking-wider"><svg xmlns="http://www.w3.org/2000/svg" class="inline-block w-4 h-4 mr-1.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg> Histórico do Extensionista: ${escapeHtml(nome)}</td></tr>`;
                     
-                    return `
+                    histGrp[nome].forEach(acao => {
+                        const badge = acao.status === 'deferido' 
+                            ? '<span class="bg-emerald-50 text-emerald-700 border border-emerald-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Deferido</span>'
+                            : '<span class="bg-rose-50 text-rose-700 border border-rose-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Indeferido</span>';
+                        
+                        out += `
                         <tr class="hover:bg-slate-50/50 transition-colors">
-                            <td class="py-4 px-6 font-bold text-slate-800">${escapeHtml(acao.perfis?.nome || '—')}</td>
+                            <td class="py-4 px-6 font-bold text-slate-800">
+                                <span class="text-[10px] text-slate-400 font-semibold block mb-0.5">${new Date(acao.created_at).toLocaleDateString('pt-BR')}</span>
+                                ${escapeHtml(acao.perfis?.nome || '—')}
+                            </td>
                             <td class="py-4 px-6">${escapeHtml(acao.local_intervencao)}</td>
                             <td class="py-4 px-6 space-y-1.5">
                                 ${acao.url_ata ? `<a href="${escapeHtml(acao.url_ata)}" target="_blank" class="text-slate-500 hover:text-saude-prime block font-semibold hover:underline flex items-center gap-1.5">Ata Assinada</a>` : ''}
@@ -868,12 +882,13 @@
                             <td class="py-4 px-6 text-center">
                                 <div class="flex flex-col items-center space-y-1.5">
                                     ${badge}
-                                    <button onclick="excluirAcao('${acao.id}')" class="text-[10px] font-bold text-slate-400 hover:text-red-600 underline transition cursor-pointer">Excluir do Sistema</button>
+                                    <button type="button" onclick="excluirAcao('${acao.id}')" class="text-[10px] font-bold text-slate-400 hover:text-red-600 underline transition cursor-pointer">Excluir do Sistema</button>
                                 </div>
                             </td>
-                        </tr>
-                    `;
-                }).join('');
+                        </tr>`;
+                    });
+                }
+                tbodyHist.innerHTML = out;
             }
         }
 
@@ -914,7 +929,7 @@
             carregarIndicadoresVisaoGeral();
         }
 
-        // Busca lançamentos de horas avulsas pendentes E o histórico
+        // Busca lançamentos de horas avulsas pendentes E o histórico (com "SUBPASTAS" por aluno)
         async function carregarHorasAvulsas() {
             const tbodyFila = document.getElementById('tbody-horas');
             const tbodyHist = document.getElementById('tbody-historico-horas');
@@ -928,69 +943,92 @@
 
             if (error) {
                 const erroMsg = `<tr><td class="py-6 px-6 text-center text-rose-500" colspan="4">Erro ao carregar: ${escapeHtml(error.message)}</td></tr>`;
-                tbodyFila.innerHTML = erroMsg;
-                tbodyHist.innerHTML = erroMsg;
+                tbodyFila.innerHTML = erroMsg; tbodyHist.innerHTML = erroMsg;
                 return;
             }
 
             const pendentes = data.filter(h => h.status === 'pendente' || h.status === 'contestado').sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
             const historico = data.filter(h => h.status === 'deferido' || h.status === 'indeferido').sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
 
+            function agrupar(lista) {
+                return lista.reduce((acc, obj) => {
+                    const n = obj.perfis?.nome || 'Desconhecido';
+                    if(!acc[n]) acc[n] = [];
+                    acc[n].push(obj);
+                    return acc;
+                }, {});
+            }
+
             // ====== RENDERIZA A FILA DE PENDENTES ======
-            if (pendentes.length === 0) {
+            const pendentesGrp = agrupar(pendentes);
+            if (Object.keys(pendentesGrp).length === 0) {
                 tbodyFila.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Nenhum lançamento de horas pendente.</td></tr>';
             } else {
-                tbodyFila.innerHTML = pendentes.map(h => {
-                    const isContestado = h.status === 'contestado';
-                    const trClass = isContestado ? 'bg-amber-50/40 hover:bg-amber-100/50' : 'hover:bg-slate-50/50';
-                    const badgeContestado = isContestado ? `<span class="block bg-amber-100 text-amber-700 text-[9px] font-bold px-2 py-0.5 rounded mt-1 uppercase w-max">Em Contestação</span>` : '';
+                let out = '';
+                for (let nome in pendentesGrp) {
+                    out += `<tr class="bg-slate-100/70 border-y border-slate-200"><td colspan="4" class="py-2.5 px-6 font-extrabold text-slate-700 text-[11px] uppercase tracking-wider"><svg xmlns="http://www.w3.org/2000/svg" class="inline-block w-4 h-4 mr-1.5 text-saude-prime" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg> Pasta do Extensionista: ${escapeHtml(nome)}</td></tr>`;
                     
-                    const btnLerContestacao = isContestado ? `
-                        <button onclick="lerContestacao('${escapeHtml(h.motivo_recusa)}', '${escapeHtml(h.texto_contestacao)}')" class="text-[10px] text-amber-600 font-bold underline mb-2 cursor-pointer w-full text-center hover:text-amber-800">Ler Resposta do Aluno</button>
-                    ` : '';
+                    pendentesGrp[nome].forEach(h => {
+                        const isContestado = h.status === 'contestado';
+                        const trClass = isContestado ? 'bg-amber-50/40 hover:bg-amber-100/50' : 'hover:bg-white';
+                        const badgeContestado = isContestado ? `<span class="block bg-amber-100 text-amber-700 text-[9px] font-bold px-2 py-0.5 rounded mt-1 uppercase w-max">Em Contestação</span>` : '';
+                        
+                        const btnLerContestacao = isContestado ? `<button type="button" onclick="lerContestacao('${escapeHtml(h.motivo_recusa)}', '${escapeHtml(h.texto_contestacao)}')" class="text-[10px] text-amber-600 font-bold underline mb-2 cursor-pointer w-full text-center hover:text-amber-800">Ler Resposta do Aluno</button>` : '';
 
-                    return `
-                    <tr class="${trClass} transition-colors border-b border-slate-100">
-                        <td class="py-4 px-6 font-bold text-slate-800">
-                            ${escapeHtml(h.perfis?.nome || '—')}
-                            ${badgeContestado}
-                        </td>
-                        <td class="py-4 px-6 leading-relaxed">${escapeHtml(h.descricao)}</td>
-                        <td class="py-4 px-6 text-center font-black text-purple-600 text-sm">${h.horas}h</td>
-                        <td class="py-4 px-6">
-                            ${btnLerContestacao}
-                            <div class="flex justify-center space-x-2">
-                                <button onclick="decidirHora('${h.id}', 'deferido')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Deferir</button>
-                                <button onclick="abrirModalRecusa('${h.id}', 'horas_avulsas')" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Indeferir</button>
-                            </div>
-                        </td>
-                    </tr>
-                `}).join('');
+                        out += `
+                        <tr class="${trClass} transition-colors border-b border-slate-100">
+                            <td class="py-4 px-6 font-bold text-slate-800">
+                                <span class="text-[10px] text-slate-400 font-semibold block mb-0.5">${new Date(h.created_at).toLocaleDateString('pt-BR')}</span>
+                                ${escapeHtml(h.perfis?.nome || '—')}
+                                ${badgeContestado}
+                            </td>
+                            <td class="py-4 px-6 leading-relaxed">${escapeHtml(h.descricao)}</td>
+                            <td class="py-4 px-6 text-center font-black text-purple-600 text-sm">${h.horas}h</td>
+                            <td class="py-4 px-6">
+                                ${btnLerContestacao}
+                                <div class="flex justify-center space-x-2">
+                                    <button type="button" onclick="decidirHora('${h.id}', 'deferido')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Deferir</button>
+                                    <button type="button" onclick="abrirModalRecusa('${h.id}', 'horas_avulsas')" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Indeferir</button>
+                                </div>
+                            </td>
+                        </tr>`;
+                    });
+                }
+                tbodyFila.innerHTML = out;
             }
 
             // ====== RENDERIZA O HISTÓRICO ======
-            if (historico.length === 0) {
+            const histGrp = agrupar(historico);
+            if (Object.keys(histGrp).length === 0) {
                 tbodyHist.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Nenhum histórico registrado.</td></tr>';
             } else {
-                tbodyHist.innerHTML = historico.map(h => {
-                    const badge = h.status === 'deferido' 
-                        ? '<span class="bg-emerald-50 text-emerald-700 border border-emerald-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Deferido</span>'
-                        : '<span class="bg-rose-50 text-rose-700 border border-rose-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Indeferido</span>';
+                let out = '';
+                for (let nome in histGrp) {
+                    out += `<tr class="bg-slate-100/70 border-y border-slate-200"><td colspan="4" class="py-2.5 px-6 font-extrabold text-slate-700 text-[11px] uppercase tracking-wider"><svg xmlns="http://www.w3.org/2000/svg" class="inline-block w-4 h-4 mr-1.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg> Histórico do Extensionista: ${escapeHtml(nome)}</td></tr>`;
                     
-                    return `
+                    histGrp[nome].forEach(h => {
+                        const badge = h.status === 'deferido' 
+                            ? '<span class="bg-emerald-50 text-emerald-700 border border-emerald-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Deferido</span>'
+                            : '<span class="bg-rose-50 text-rose-700 border border-rose-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Indeferido</span>';
+                        
+                        out += `
                         <tr class="hover:bg-slate-50/50 transition-colors">
-                            <td class="py-4 px-6 font-bold text-slate-800">${escapeHtml(h.perfis?.nome || '—')}</td>
+                            <td class="py-4 px-6 font-bold text-slate-800">
+                                <span class="text-[10px] text-slate-400 font-semibold block mb-0.5">${new Date(h.created_at).toLocaleDateString('pt-BR')}</span>
+                                ${escapeHtml(h.perfis?.nome || '—')}
+                            </td>
                             <td class="py-4 px-6 leading-relaxed text-slate-500">${escapeHtml(h.descricao)}</td>
                             <td class="py-4 px-6 text-center font-black text-slate-600 text-sm">${h.horas}h</td>
                             <td class="py-4 px-6 text-center">
                                 <div class="flex flex-col items-center space-y-1.5">
                                     ${badge}
-                                    <button onclick="excluirHora('${h.id}')" class="text-[10px] font-bold text-slate-400 hover:text-red-600 underline transition cursor-pointer">Excluir do Sistema</button>
+                                    <button type="button" onclick="excluirHora('${h.id}')" class="text-[10px] font-bold text-slate-400 hover:text-red-600 underline transition cursor-pointer">Excluir do Sistema</button>
                                 </div>
                             </td>
-                        </tr>
-                    `;
-                }).join('');
+                        </tr>`;
+                    });
+                }
+                tbodyHist.innerHTML = out;
             }
         }
 
