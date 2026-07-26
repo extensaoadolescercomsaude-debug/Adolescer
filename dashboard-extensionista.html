@@ -521,7 +521,7 @@
 
             const { data: perfil, error } = await supabaseClient
                 .from('perfis')
-                .select('nome, email, papel, status, bio')
+                .select('id, nome, email, papel, status, bio') // <-- ID FOI INSERIDO AQUI
                 .eq('id', session.user.id)
                 .single();
 
@@ -532,6 +532,43 @@
 
             return perfil;
         }
+
+        // --- SISTEMA DE RASTREIO DE SESSÃO ---
+        let sessaoAtualId = null;
+
+        async function iniciarRastreioAcesso(perfilId) {
+            const { data, error } = await supabaseClient
+                .from('sessoes_acesso')
+                .insert({ perfil_id: perfilId })
+                .select('id')
+                .single();
+
+            if (error || !data) return;
+            sessaoAtualId = data.id;
+
+            setInterval(atualizarPing, 60000); // heartbeat a cada 1 min
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'hidden') atualizarPing();
+            });
+            window.addEventListener('beforeunload', atualizarPingSync);
+        }
+
+        async function atualizarPing() {
+            if (!sessaoAtualId) return;
+            await supabaseClient
+                .from('sessoes_acesso')
+                .update({ last_ping_at: new Date().toISOString() })
+                .eq('id', sessaoAtualId);
+        }
+
+        function atualizarPingSync() {
+            if (!sessaoAtualId) return;
+            navigator.sendBeacon(
+                `${SUPABASE_URL}/rest/v1/sessoes_acesso?id=eq.${sessaoAtualId}`,
+                new Blob([JSON.stringify({ last_ping_at: new Date().toISOString() })], { type: 'application/json' })
+            );
+        }
+        // -------------------------------------
 
         async function salvarPerfil(e) {
             e.preventDefault();
@@ -1301,9 +1338,13 @@
             }
         }
 
+        // INICIALIZAÇÃO DA PÁGINA (AQUI É ONDE O RASTREIO É LIGADO!)
         document.addEventListener('DOMContentLoaded', async () => {
              const perfil = await protegerPagina();
              if (!perfil) return;
+
+             // CHAMA O RASTREIO AQUI!
+             iniciarRastreioAcesso(perfil.id);
 
              document.getElementById('header-user-name').innerText = perfil.nome;
              document.getElementById('header-user-avatar').innerText = iniciais(perfil.nome);
