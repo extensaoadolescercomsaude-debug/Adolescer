@@ -23,6 +23,8 @@
         }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <style>
         @keyframes fadeSlideIn {
             from { opacity: 0; transform: translateY(4px); }
@@ -168,25 +170,8 @@
                                     <th class="py-3 px-6 text-center">Tempo de Permanência</th>
                                 </tr>
                             </thead>
-                            <tbody class="text-xs font-medium text-slate-600 divide-y divide-slate-100">
-                                <tr class="hover:bg-slate-50/40 transition-colors">
-                                    <td class="py-3.5 px-6 font-bold text-slate-800">Rivaldo de Pontes</td>
-                                    <td class="py-3.5 px-6 text-slate-500">rivaldo.pontes@upe.br</td>
-                                    <td class="py-3.5 px-6 text-center text-slate-500">Hoje às 15:42</td>
-                                    <td class="py-3.5 px-6 text-center"><span class="bg-teal-50 text-saude-prime font-bold px-2 py-1 rounded text-[11px]">45 min</span></td>
-                                </tr>
-                                <tr class="hover:bg-slate-50/40 transition-colors">
-                                    <td class="py-3.5 px-6 font-bold text-slate-800">Rayane Vitoria</td>
-                                    <td class="py-3.5 px-6 text-slate-500">rayane.vitoria@upe.br</td>
-                                    <td class="py-3.5 px-6 text-center text-slate-500">Ontem às 18:15</td>
-                                    <td class="py-3.5 px-6 text-center"><span class="bg-teal-50 text-saude-prime font-bold px-2 py-1 rounded text-[11px]">1h 12m</span></td>
-                                </tr>
-                                <tr class="hover:bg-slate-50/40 transition-colors">
-                                    <td class="py-3.5 px-6 font-bold text-slate-800">Gabriela Lins</td>
-                                    <td class="py-3.5 px-6 text-slate-500">gabriela.lins@upe.br</td>
-                                    <td class="py-3.5 px-6 text-center text-slate-400">Há 3 dias (14/07)</td>
-                                    <td class="py-3.5 px-6 text-center"><span class="bg-slate-100 text-slate-500 font-bold px-2 py-1 rounded text-[11px]">22 min</span></td>
-                                </tr>
+                            <tbody id="tbody-acessos-recentes" class="text-xs font-medium text-slate-600 divide-y divide-slate-100">
+                                <tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Carregando...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -319,19 +304,19 @@
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm text-center">
                         <h4 class="text-[10px] font-bold text-slate-400 uppercase">Extensionistas Ativos</h4>
-                        <p class="text-3xl font-black text-slate-800 mt-1">12</p>
+                        <p id="ind-extensionistas-ativos" class="text-3xl font-black text-slate-800 mt-1">--</p>
                     </div>
                     <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm text-center">
                         <h4 class="text-[10px] font-bold text-slate-400 uppercase">Ações Realizadas</h4>
-                        <p class="text-3xl font-black text-saude-prime mt-1">45</p>
+                        <p id="ind-acoes-realizadas" class="text-3xl font-black text-saude-prime mt-1">--</p>
                     </div>
                     <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm text-center">
                         <h4 class="text-[10px] font-bold text-slate-400 uppercase">Materiais na Biblioteca</h4>
-                        <p class="text-3xl font-black text-saude-accent mt-1">18</p>
+                        <p id="ind-materiais-biblioteca" class="text-3xl font-black text-saude-accent mt-1">--</p>
                     </div>
                     <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm text-center">
                         <h4 class="text-[10px] font-bold text-slate-400 uppercase">Horas Validadas</h4>
-                        <p class="text-3xl font-black text-slate-800 mt-1">340</p>
+                        <p id="ind-horas-validadas" class="text-3xl font-black text-slate-800 mt-1">--</p>
                     </div>
                 </div>
 
@@ -357,7 +342,7 @@
                             <input type="checkbox" name="metricas" value="produtividade_tecnica" checked class="w-4 h-4 rounded border-slate-300 accent-teal-600 mt-0.5">
                             <div class="ml-3">
                                 <span class="text-xs font-bold text-slate-800 block">Produtividade de Materiais Pedagógicos</span>
-                                <span class="text-[11px] text-slate-400">Relação de dinâmicas aprovadas na Biblioteca e engajamento das redes sociais.</span>
+                                <span class="text-[11px] text-slate-400">Relação de dinâmicas aprovadas na Biblioteca.</span>
                             </div>
                         </label>
 
@@ -755,6 +740,68 @@
             if (elHoras) elHoras.innerText = `${totalHoras} Horas`;
         }
 
+        // ========================== MONITORAMENTO DE ACESSOS (VISÃO GERAL) ==========================
+        function formatarPermanencia(inicio, fim) {
+            const ms = new Date(fim) - new Date(inicio);
+            if (isNaN(ms) || ms < 0) return '--';
+            const minutosTotais = Math.round(ms / 60000);
+            if (minutosTotais < 1) return '< 1 min';
+            const horas = Math.floor(minutosTotais / 60);
+            const minutos = minutosTotais % 60;
+            return horas > 0 ? `${horas}h ${minutos}m` : `${minutos} min`;
+        }
+
+        function formatarDataAcesso(dataIso) {
+            const data = new Date(dataIso);
+            const hoje = new Date();
+            const ontem = new Date();
+            ontem.setDate(hoje.getDate() - 1);
+
+            const mesmodia = data.toDateString() === hoje.toDateString();
+            const foiOntem = data.toDateString() === ontem.toDateString();
+            const hora = data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+            if (mesmodia) return `Hoje às ${hora}`;
+            if (foiOntem) return `Ontem às ${hora}`;
+            return `${data.toLocaleDateString('pt-BR')} às ${hora}`;
+        }
+
+        async function carregarAcessosRecentes() {
+            const tbody = document.getElementById('tbody-acessos-recentes');
+            if (!tbody) return;
+
+            const { data, error } = await supabaseClient
+                .from('sessoes_acesso')
+                .select('login_at, last_ping_at, perfis(nome, email)')
+                .order('login_at', { ascending: false })
+                .limit(20);
+
+            if (error) {
+                tbody.innerHTML = `<tr><td class="py-6 px-6 text-center text-rose-500" colspan="4">Erro ao carregar acessos: ${escapeHtml(error.message)}</td></tr>`;
+                return;
+            }
+
+            if (!data || data.length === 0) {
+                tbody.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Nenhum acesso registrado ainda.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.map(sessao => {
+                const nome = sessao.perfis?.nome || 'Desconhecido';
+                const email = sessao.perfis?.email || '—';
+                const ultimoAcesso = formatarDataAcesso(sessao.login_at);
+                const permanencia = formatarPermanencia(sessao.login_at, sessao.last_ping_at);
+
+                return `
+                <tr class="hover:bg-slate-50/40 transition-colors">
+                    <td class="py-3.5 px-6 font-bold text-slate-800">${escapeHtml(nome)}</td>
+                    <td class="py-3.5 px-6 text-slate-500">${escapeHtml(email)}</td>
+                    <td class="py-3.5 px-6 text-center text-slate-500">${ultimoAcesso}</td>
+                    <td class="py-3.5 px-6 text-center"><span class="bg-teal-50 text-saude-prime font-bold px-2 py-1 rounded text-[11px]">${permanencia}</span></td>
+                </tr>`;
+            }).join('');
+        }
+
         function agruparPorNome(lista) {
             return lista.reduce((acc, obj) => {
                 const n = obj.perfis?.nome || 'Desconhecido';
@@ -1132,6 +1179,10 @@
                 bibliotecaCarregada = true;
                 carregarBibliotecaCoord();
             }
+            if (tabName === 'indicadores' && !indicadoresCarregados) {
+                indicadoresCarregados = true;
+                carregarIndicadoresCompletos();
+            }
 
             tabs.forEach(tab => {
                 document.getElementById(`tab-content-${tab}`).classList.add('hidden');
@@ -1179,29 +1230,203 @@
 
             carregarContadorExtensionistas();
             carregarIndicadoresVisaoGeral();
+            carregarAcessosRecentes();
         });
 
-        function gerarPDFCustomizado(e) {
+        // ========================== INDICADORES (DADOS REAIS) ==========================
+        let indicadoresCarregados = false;
+
+        async function carregarIndicadoresCompletos() {
+            const elExt = document.getElementById('ind-extensionistas-ativos');
+            const elAcoes = document.getElementById('ind-acoes-realizadas');
+            const elMateriais = document.getElementById('ind-materiais-biblioteca');
+            const elHoras = document.getElementById('ind-horas-validadas');
+
+            const [
+                { count: countExt },
+                { count: countAcoes },
+                { count: countMateriais },
+                { data: horasDeferidas }
+            ] = await Promise.all([
+                supabaseClient.from('perfis').select('*', { count: 'exact', head: true }).eq('papel', 'extensionista').eq('status', 'aprovado'),
+                supabaseClient.from('acoes_extensao').select('*', { count: 'exact', head: true }).eq('status', 'deferido'),
+                supabaseClient.from('biblioteca_atividades').select('*', { count: 'exact', head: true }).eq('status', 'aprovado'),
+                supabaseClient.from('horas_avulsas').select('horas').eq('status', 'deferido')
+            ]);
+
+            const totalHoras = (horasDeferidas || []).reduce((soma, h) => soma + Number(h.horas), 0);
+
+            if (elExt) elExt.innerText = countExt ?? 0;
+            if (elAcoes) elAcoes.innerText = countAcoes ?? 0;
+            if (elMateriais) elMateriais.innerText = countMateriais ?? 0;
+            if (elHoras) elHoras.innerText = totalHoras;
+        }
+
+        // ---- Seções do relatório PDF ----
+
+        function verificarQuebraDePagina(doc, y, margem = 270) {
+            if (y > margem) {
+                doc.addPage();
+                return 20;
+            }
+            return y;
+        }
+
+        async function adicionarSecaoConsolidadoHoras(doc, y) {
+            const [{ data: horas }, { data: sessoes }] = await Promise.all([
+                supabaseClient.from('horas_avulsas').select('horas, status, perfis(nome)').eq('status', 'deferido'),
+                supabaseClient.from('sessoes_acesso').select('login_at, perfis(nome)').order('login_at', { ascending: false })
+            ]);
+
+            const totaisPorAluno = {};
+            (horas || []).forEach(h => {
+                const nome = h.perfis?.nome || 'Desconhecido';
+                totaisPorAluno[nome] = (totaisPorAluno[nome] || 0) + Number(h.horas);
+            });
+
+            const ultimoAcessoPorAluno = {};
+            (sessoes || []).forEach(s => {
+                const nome = s.perfis?.nome || 'Desconhecido';
+                if (!ultimoAcessoPorAluno[nome]) ultimoAcessoPorAluno[nome] = s.login_at;
+            });
+
+            const nomes = Array.from(new Set([...Object.keys(totaisPorAluno), ...Object.keys(ultimoAcessoPorAluno)])).sort();
+            const linhas = nomes.map(nome => [
+                nome,
+                `${totaisPorAluno[nome] || 0}h`,
+                ultimoAcessoPorAluno[nome] ? new Date(ultimoAcessoPorAluno[nome]).toLocaleString('pt-BR') : 'Sem registro'
+            ]);
+
+            y = verificarQuebraDePagina(doc, y);
+            doc.setFontSize(12);
+            doc.setTextColor(20);
+            doc.text('1. Consolidado de Carga Horária e Assiduidade', 14, y);
+            y += 5;
+
+            doc.autoTable({
+                startY: y,
+                head: [['Extensionista', 'Horas Validadas', 'Último Acesso ao Portal']],
+                body: linhas.length ? linhas : [['Nenhum dado disponível', '-', '-']],
+                theme: 'striped',
+                headStyles: { fillColor: [13, 148, 136] },
+                styles: { fontSize: 8, cellPadding: 2.5 },
+                margin: { left: 14, right: 14 }
+            });
+
+            return doc.lastAutoTable.finalY + 12;
+        }
+
+        async function adicionarSecaoMapaInstituicoes(doc, y) {
+            const { data } = await supabaseClient
+                .from('acoes_extensao')
+                .select('local_intervencao, created_at, perfis(nome)')
+                .eq('status', 'deferido')
+                .order('created_at', { ascending: false });
+
+            const linhas = (data || []).map(a => [
+                a.local_intervencao || '—',
+                a.perfis?.nome || 'Desconhecido',
+                new Date(a.created_at).toLocaleDateString('pt-BR')
+            ]);
+
+            y = verificarQuebraDePagina(doc, y);
+            doc.setFontSize(12);
+            doc.setTextColor(20);
+            doc.text('2. Mapa de Instituições Atendidas (Ações Homologadas)', 14, y);
+            y += 5;
+
+            doc.autoTable({
+                startY: y,
+                head: [['Local / Instituição', 'Extensionista Responsável', 'Data']],
+                body: linhas.length ? linhas : [['Nenhuma ação homologada até o momento', '-', '-']],
+                theme: 'striped',
+                headStyles: { fillColor: [139, 92, 246] },
+                styles: { fontSize: 8, cellPadding: 2.5 },
+                margin: { left: 14, right: 14 }
+            });
+
+            return doc.lastAutoTable.finalY + 12;
+        }
+
+        async function adicionarSecaoProdutividade(doc, y) {
+            const { data } = await supabaseClient
+                .from('biblioteca_atividades')
+                .select('titulo, publico_alvo, created_at, perfis(nome)')
+                .eq('status', 'aprovado')
+                .order('created_at', { ascending: false });
+
+            const linhas = (data || []).map(m => [
+                m.titulo || '—',
+                m.publico_alvo || '—',
+                m.perfis?.nome || 'Desconhecido',
+                new Date(m.created_at).toLocaleDateString('pt-BR')
+            ]);
+
+            y = verificarQuebraDePagina(doc, y);
+            doc.setFontSize(12);
+            doc.setTextColor(20);
+            doc.text('3. Produtividade de Materiais Pedagógicos (Biblioteca Aprovada)', 14, y);
+            y += 5;
+
+            doc.autoTable({
+                startY: y,
+                head: [['Material / Dinâmica', 'Público-Alvo', 'Autor', 'Data de Aprovação']],
+                body: linhas.length ? linhas : [['Nenhum material aprovado até o momento', '-', '-', '-']],
+                theme: 'striped',
+                headStyles: { fillColor: [17, 94, 89] },
+                styles: { fontSize: 8, cellPadding: 2.5 },
+                margin: { left: 14, right: 14 }
+            });
+
+            return doc.lastAutoTable.finalY + 12;
+        }
+
+        async function gerarPDFCustomizado(e) {
             e.preventDefault();
             const btnExport = document.getElementById('btnExport');
             const btnExportText = document.getElementById('btnExportText');
-            
-            btnExport.disabled = true;
-            btnExportText.innerText = "Extraindo Dados do Supabase...";
 
-            const checkboxes = document.querySelectorAll('input[name="metricas"]:checked');
-            if (checkboxes.length === 0) {
+            const modulos = Array.from(document.querySelectorAll('input[name="metricas"]:checked')).map(cb => cb.value);
+            if (modulos.length === 0) {
                 alert("Selecione pelo menos um módulo para o relatório.");
-                btnExport.disabled = false;
-                btnExportText.innerText = "Gerar Relatório de Indicadores (PDF)";
                 return;
             }
 
-            setTimeout(() => {
-                alert("PDF Oficial gerado com sucesso! Os dados foram validados.");
+            btnExport.disabled = true;
+            btnExportText.innerText = "Extraindo dados do Supabase...";
+
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+
+                doc.setFontSize(16);
+                doc.setTextColor(17, 94, 89);
+                doc.text('Relatório de Indicadores — Adolescer com Saúde', 14, 18);
+
+                doc.setFontSize(9);
+                doc.setTextColor(120);
+                doc.text(`Gerado em ${new Date().toLocaleString('pt-BR')} pela Coordenação (UPE/FENSG)`, 14, 24);
+                doc.setTextColor(20);
+
+                let y = 34;
+
+                if (modulos.includes('consolidado_horas')) {
+                    y = await adicionarSecaoConsolidadoHoras(doc, y);
+                }
+                if (modulos.includes('mapa_instituicoes')) {
+                    y = await adicionarSecaoMapaInstituicoes(doc, y);
+                }
+                if (modulos.includes('produtividade_tecnica')) {
+                    y = await adicionarSecaoProdutividade(doc, y);
+                }
+
+                doc.save(`relatorio-indicadores-adolescer-${new Date().toISOString().slice(0,10)}.pdf`);
+            } catch (err) {
+                alert('Erro ao gerar o relatório: ' + err.message);
+            } finally {
                 btnExport.disabled = false;
                 btnExportText.innerText = "Gerar Relatório de Indicadores (PDF)";
-            }, 2500);
+            }
         }
     </script>
 </body>
