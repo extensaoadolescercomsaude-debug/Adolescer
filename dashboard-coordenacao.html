@@ -23,6 +23,32 @@
         }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn {
+            animation: fadeSlideIn 0.25s ease-out;
+        }
+        #tab-content-visao-geral,
+        #tab-content-homologacoes,
+        #tab-content-validar-horas,
+        #tab-content-biblioteca,
+        #tab-content-indicadores,
+        #tab-content-membros {
+            animation: fadeSlideIn 0.3s ease-out;
+        }
+        tbody tr {
+            transition: background-color 0.15s ease;
+        }
+        .modal-panel {
+            animation: fadeSlideIn 0.2s ease-out;
+        }
+        button, a {
+            transition: all 0.15s ease;
+        }
+    </style>
 </head>
 <body class="bg-slate-50 font-sans antialiased text-slate-700 flex min-h-screen">
 
@@ -411,7 +437,7 @@
 
     <!-- MODAL DE PERFIL DA COORDENAÇÃO -->
     <div id="modal-perfil-coord" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-3xl max-w-md w-full shadow-xl border border-slate-100 p-6 space-y-4">
+        <div class="modal-panel bg-white rounded-3xl max-w-md w-full shadow-xl border border-slate-100 p-6 space-y-4">
             <div class="flex justify-between items-center border-b border-slate-100 pb-3">
                 <h3 class="font-extrabold text-slate-800 text-base">Meu Perfil Administrativo</h3>
                 <button onclick="closeModal('modal-perfil-coord')" class="text-slate-400 hover:text-slate-600 text-sm font-bold cursor-pointer">Fechar</button>
@@ -439,7 +465,7 @@
 
     <!-- NOVO MODAL: MOTIVO DO INDEFERIMENTO -->
     <div id="modal-motivo-recusa" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-3xl max-w-md w-full shadow-xl border border-slate-100 p-6 space-y-4">
+        <div class="modal-panel bg-white rounded-3xl max-w-md w-full shadow-xl border border-slate-100 p-6 space-y-4">
             <div class="flex justify-between items-center border-b border-slate-100 pb-3">
                 <h3 class="font-extrabold text-rose-600 text-base flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
@@ -469,7 +495,7 @@
     <!-- O Modal de Ler Contestação foi mantido no HTML a seu pedido, 
          embora não seja mais necessário, pois as informações aparecem agora direto na tabela! -->
     <div id="modal-ler-contestacao" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-3xl max-w-md w-full shadow-xl border border-slate-100 p-6 space-y-4">
+        <div class="modal-panel bg-white rounded-3xl max-w-md w-full shadow-xl border border-slate-100 p-6 space-y-4">
             <div class="flex justify-between items-center border-b border-slate-100 pb-3">
                 <h3 class="font-extrabold text-amber-600 text-base flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4c0-1.1.9-2 2-2h8a2 2 0 0 1 2 2v5Z"/><path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1"/></svg>
@@ -505,7 +531,6 @@
             return primeiras.join('') || '??';
         }
 
-        // GUARDA DE SESSÃO: só deixa passar quem está logado, aprovado, e é coordenação.
         async function protegerPagina() {
             const { data: { session } } = await supabaseClient.auth.getSession();
 
@@ -533,7 +558,6 @@
             window.location.href = 'index.html';
         }
 
-        // Salva nome e bio da coordenação de verdade no Supabase
         async function salvarPerfil(e) {
             e.preventDefault();
 
@@ -568,7 +592,6 @@
                 return;
             }
 
-            // Atualiza a tela sem precisar recarregar a página
             document.getElementById('header-user-name').innerText = nome;
             document.getElementById('header-user-avatar').innerText = iniciais(nome);
             document.getElementById('modal-avatar-initials').textContent = iniciais(nome);
@@ -582,14 +605,10 @@
             return div.innerHTML;
         }
 
-        // ==========================================
-        // LÓGICA DE ABRIR MODAL DE RECUSA / CONTESTAÇÃO
-        // ==========================================
-        
         function abrirModalRecusa(id, tabela) {
             document.getElementById('recusa-id-alvo').value = id;
             document.getElementById('recusa-tabela-alvo').value = tabela;
-            document.getElementById('texto-motivo-recusa').value = ''; // limpa texto antigo
+            document.getElementById('texto-motivo-recusa').value = '';
             openModal('modal-motivo-recusa');
         }
 
@@ -623,7 +642,6 @@
             carregarIndicadoresVisaoGeral();
         }
 
-        // Atualiza o card "Extensionistas Ativos" na Visão Geral
         async function carregarContadorExtensionistas() {
             const { count, error } = await supabaseClient
                 .from('perfis')
@@ -641,7 +659,6 @@
             el.innerText = `${count} Aluno${count === 1 ? '' : 's'}`;
         }
 
-        // Busca todos os extensionistas e separa em pendentes / ativos
         async function carregarMembros() {
             const tbodyPendentes = document.getElementById('tbody-pendentes');
             const tbodyAtivos = document.getElementById('tbody-ativos');
@@ -668,7 +685,7 @@
                 tbodyPendentes.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="2">Nenhuma solicitação pendente no momento.</td></tr>';
             } else {
                 tbodyPendentes.innerHTML = pendentes.map(p => `
-                    <tr>
+                    <tr class="animate-fadeIn">
                         <td class="py-4 px-6">
                             <p class="font-bold text-slate-800">${escapeHtml(p.nome)}</p>
                             <p class="text-[10px] text-slate-500">${escapeHtml(p.email)}</p>
@@ -685,7 +702,7 @@
                 tbodyAtivos.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="3">Nenhum extensionista ativo ainda.</td></tr>';
             } else {
                 tbodyAtivos.innerHTML = ativos.map(p => `
-                    <tr>
+                    <tr class="animate-fadeIn">
                         <td class="py-4 px-6">
                             <p class="font-bold text-slate-800">${escapeHtml(p.nome)}</p>
                             <p class="text-[10px] text-slate-500">${escapeHtml(p.email)}</p>
@@ -709,7 +726,6 @@
             carregarContadorExtensionistas();
         }
 
-        // Aprova ou recusa uma solicitação de cadastro
         async function decidirCadastro(id, novoStatus) {
             const acao = novoStatus === 'aprovado' ? 'aprovar' : 'recusar';
             if (!confirm(`Tem certeza que deseja ${acao} este cadastro?`)) return;
@@ -727,7 +743,6 @@
             carregarMembros();
         }
 
-        // Envia e-mail de redefinição de senha via Supabase Auth
         async function resetarSenha(email) {
             if (!confirm(`Enviar e-mail de redefinição de senha para ${email}?`)) return;
 
@@ -741,7 +756,6 @@
             alert('E-mail de redefinição enviado para ' + email + '.');
         }
 
-        // Revoga o acesso de um extensionista (marca como rejeitado, não apaga do banco)
         async function revogarAcesso(id) {
             if (!confirm('ATENÇÃO: isso vai revogar o acesso deste extensionista ao portal. Deseja continuar?')) return;
 
@@ -758,7 +772,6 @@
             carregarMembros();
         }
 
-        // Atualiza os cards "Ações Pendentes" e "Horas na Fila" da Visão Geral
         async function carregarIndicadoresVisaoGeral() {
             const { count: countAcoes } = await supabaseClient
                 .from('acoes_extensao')
@@ -778,7 +791,6 @@
             if (elHoras) elHoras.innerText = `${totalHoras} Horas`;
         }
 
-        // Busca ações/atas pendentes de homologação E o histórico (com "SUBPASTAS" por aluno)
         async function carregarHomologacoes() {
             const tbodyFila = document.getElementById('tbody-homologacoes');
             const tbodyHist = document.getElementById('tbody-historico-acoes');
@@ -808,7 +820,6 @@
                 }, {});
             }
 
-            // ====== RENDERIZA A FILA DE PENDENTES (LISTA CORRIDA) ======
             if (pendentes.length === 0) {
                 tbodyFila.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Nenhuma ação aguardando homologação.</td></tr>';
             } else {
@@ -820,7 +831,7 @@
                     let detalhesLocal = escapeHtml(acao.local_intervencao);
                     if (isContestado) {
                         detalhesLocal += `
-                        <div class="mt-2 text-[10px] bg-white p-2 rounded border border-amber-200 leading-relaxed text-left shadow-sm">
+                        <div class="mt-2 text-[10px] bg-white p-2 rounded border border-amber-200 leading-relaxed text-left shadow-sm animate-fadeIn">
                             <span class="block font-bold text-rose-700 mb-0.5">Motivo da Recusa Original:</span>
                             <span class="block text-rose-600 mb-1.5 italic">${escapeHtml(acao.motivo_recusa)}</span>
                             <span class="block font-bold text-amber-700 mb-0.5">Defesa/Justificativa do Aluno:</span>
@@ -829,7 +840,7 @@
                     }
 
                     return `
-                    <tr class="${trClass} transition-colors border-b border-slate-100">
+                    <tr class="${trClass} transition-colors border-b border-slate-100 animate-fadeIn">
                         <td class="py-4 px-6 font-bold text-slate-800">
                             <span class="text-[10px] text-slate-400 font-semibold block mb-0.5">${new Date(acao.created_at).toLocaleDateString('pt-BR')}</span>
                             ${escapeHtml(acao.perfis?.nome || '—')}
@@ -850,7 +861,6 @@
                 }).join('');
             }
 
-            // ====== RENDERIZA O HISTORICO (COM SUBPASTAS) ======
             const histGrp = agrupar(historico);
             if (Object.keys(histGrp).length === 0) {
                 tbodyHist.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Nenhum histórico registrado.</td></tr>';
@@ -865,7 +875,7 @@
                             : '<span class="bg-rose-50 text-rose-700 border border-rose-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Indeferido</span>';
                         
                         out += `
-                        <tr class="hover:bg-slate-50/50 transition-colors">
+                        <tr class="hover:bg-slate-50/50 transition-colors animate-fadeIn">
                             <td class="py-4 px-6 font-bold text-slate-800">
                                 <span class="text-[10px] text-slate-400 font-semibold block mb-0.5">${new Date(acao.created_at).toLocaleDateString('pt-BR')}</span>
                                 ${escapeHtml(acao.perfis?.nome || '—')}
@@ -888,7 +898,6 @@
             }
         }
 
-        // Defere uma ação/ata
         async function decidirAcao(id, novoStatus) {
             const acaoTexto = novoStatus === 'deferido' ? 'deferir (homologar)' : 'indeferir';
             if (!confirm(`Tem certeza que deseja ${acaoTexto} esta ação?`)) return;
@@ -907,7 +916,6 @@
             carregarIndicadoresVisaoGeral();
         }
 
-        // Exclui permanentemente uma ação do Banco de Dados
         async function excluirAcao(id) {
             if (!confirm('ATENÇÃO COORDENAÇÃO: Tem certeza que deseja EXCLUIR PERMANENTEMENTE este registro do sistema? (O arquivo original continuará salvo no seu Google Drive como backup).')) return;
 
@@ -925,7 +933,6 @@
             carregarIndicadoresVisaoGeral();
         }
 
-        // Busca lançamentos de horas avulsas pendentes E o histórico (com "SUBPASTAS" por aluno)
         async function carregarHorasAvulsas() {
             const tbodyFila = document.getElementById('tbody-horas');
             const tbodyHist = document.getElementById('tbody-historico-horas');
@@ -955,7 +962,6 @@
                 }, {});
             }
 
-            // ====== RENDERIZA A FILA DE PENDENTES (LISTA CORRIDA) ======
             if (pendentes.length === 0) {
                 tbodyFila.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Nenhum lançamento de horas pendente.</td></tr>';
             } else {
@@ -967,7 +973,7 @@
                     let detalhesHora = escapeHtml(h.descricao);
                     if (isContestado) {
                         detalhesHora += `
-                        <div class="mt-2 text-[10px] bg-white p-2 rounded border border-amber-200 leading-relaxed text-left shadow-sm">
+                        <div class="mt-2 text-[10px] bg-white p-2 rounded border border-amber-200 leading-relaxed text-left shadow-sm animate-fadeIn">
                             <span class="block font-bold text-rose-700 mb-0.5">Motivo da Recusa Original:</span>
                             <span class="block text-rose-600 mb-1.5 italic">${escapeHtml(h.motivo_recusa)}</span>
                             <span class="block font-bold text-amber-700 mb-0.5">Defesa/Justificativa do Aluno:</span>
@@ -976,7 +982,7 @@
                     }
 
                     return `
-                    <tr class="${trClass} transition-colors border-b border-slate-100">
+                    <tr class="${trClass} transition-colors border-b border-slate-100 animate-fadeIn">
                         <td class="py-4 px-6 font-bold text-slate-800">
                             <span class="text-[10px] text-slate-400 font-semibold block mb-0.5">${new Date(h.created_at).toLocaleDateString('pt-BR')}</span>
                             ${escapeHtml(h.perfis?.nome || '—')}
@@ -994,7 +1000,6 @@
                 }).join('');
             }
 
-            // ====== RENDERIZA O HISTORICO (COM SUBPASTAS) ======
             const histGrp = agrupar(historico);
             if (Object.keys(histGrp).length === 0) {
                 tbodyHist.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Nenhum histórico registrado.</td></tr>';
@@ -1009,7 +1014,7 @@
                             : '<span class="bg-rose-50 text-rose-700 border border-rose-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Indeferido</span>';
                         
                         out += `
-                        <tr class="hover:bg-slate-50/50 transition-colors">
+                        <tr class="hover:bg-slate-50/50 transition-colors animate-fadeIn">
                             <td class="py-4 px-6 font-bold text-slate-800">
                                 <span class="text-[10px] text-slate-400 font-semibold block mb-0.5">${new Date(h.created_at).toLocaleDateString('pt-BR')}</span>
                                 ${escapeHtml(h.perfis?.nome || '—')}
@@ -1029,7 +1034,6 @@
             }
         }
 
-        // Defere um lançamento de horas
         async function decidirHora(id, novoStatus) {
             const acaoTexto = novoStatus === 'deferido' ? 'deferir' : 'indeferir';
             if (!confirm(`Tem certeza que deseja ${acaoTexto} este lançamento de horas?`)) return;
@@ -1048,7 +1052,6 @@
             carregarIndicadoresVisaoGeral();
         }
 
-        // Exclui permanentemente uma HORA do Banco de Dados
         async function excluirHora(id) {
             if (!confirm('ATENÇÃO COORDENAÇÃO: Tem certeza que deseja EXCLUIR PERMANENTEMENTE este registro do sistema?')) return;
 
@@ -1123,7 +1126,7 @@
 
         document.addEventListener('DOMContentLoaded', async () => {
             const perfil = await protegerPagina();
-            if (!perfil) return; // já foi redirecionado para login.html
+            if (!perfil) return;
 
             document.getElementById('header-user-name').innerText = perfil.nome;
             document.getElementById('header-user-avatar').innerText = iniciais(perfil.nome);
