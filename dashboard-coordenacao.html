@@ -286,26 +286,8 @@
                                     <th class="py-3 px-6">Material Didático / Dinâmica</th><th class="py-3 px-6">Autor</th><th class="py-3 px-6">Documento</th><th class="py-3 px-6 text-center">Ação</th>
                                 </tr>
                             </thead>
-                            <tbody class="text-xs font-medium text-slate-600 divide-y divide-slate-100">
-                                <tr>
-                                    <td class="py-4 px-6">
-                                        <p class="font-bold text-slate-800">Círculo de Cultura: Autoimagem</p>
-                                        <span class="inline-block bg-teal-50 text-saude-prime font-bold text-[9px] px-2 py-0.5 rounded mt-1">Público: 12 a 15 anos</span>
-                                    </td>
-                                    <td class="py-4 px-6">Júlia Vasconcelos</td>
-                                    <td class="py-4 px-6">
-                                        <a href="#" class="inline-flex items-center space-x-1 text-purple-600 hover:underline font-semibold bg-purple-50 px-3 py-1.5 rounded-lg">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-                                            <span>Avaliar PDF</span>
-                                        </a>
-                                    </td>
-                                    <td class="py-4 px-6">
-                                        <div class="flex justify-center space-x-2">
-                                            <button onclick="alert('Material Aprovado! Adicionado ao acervo público.')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Aprovar</button>
-                                            <button onclick="alert('Material Indeferido e excluído da fila.')" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Recusar</button>
-                                        </div>
-                                    </td>
-                                </tr>
+                            <tbody id="tbody-biblioteca-pendentes" class="text-xs font-medium text-slate-600 divide-y divide-slate-100">
+                                <tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Carregando...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -320,23 +302,8 @@
                                     <th class="py-3 px-6">Material Didático / Dinâmica</th><th class="py-3 px-6">Autor</th><th class="py-3 px-6 text-center">Status</th><th class="py-3 px-6 text-center">Opções</th>
                                 </tr>
                             </thead>
-                            <tbody class="text-xs font-medium text-slate-600 divide-y divide-slate-100">
-                                <tr>
-                                    <td class="py-4 px-6">
-                                        <p class="font-bold text-slate-800">Oficina Interativa de Saúde Mental</p>
-                                        <span class="inline-block bg-teal-50 text-saude-prime font-bold text-[9px] px-2 py-0.5 rounded mt-1">Público: 15 a 18 anos</span>
-                                    </td>
-                                    <td class="py-4 px-6">Rivaldo de Pontes</td>
-                                    <td class="py-4 px-6 text-center">
-                                        <span class="bg-emerald-50 text-emerald-600 border border-emerald-100 font-bold px-2.5 py-1 rounded text-[10px] uppercase">Público</span>
-                                    </td>
-                                    <td class="py-4 px-6">
-                                        <div class="flex justify-center space-x-3">
-                                            <button onclick="alert('Baixando material...')" class="text-saude-prime hover:text-saude-dark font-bold underline transition text-[11px]">Baixar</button>
-                                            <button onclick="confirm('Remover do acervo?') ? alert('Removido.') : null" class="text-red-600 hover:text-red-800 font-bold underline transition text-[11px]">Excluir</button>
-                                        </div>
-                                    </td>
-                                </tr>
+                            <tbody id="tbody-biblioteca-aprovados" class="text-xs font-medium text-slate-600 divide-y divide-slate-100">
+                                <tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Carregando...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -635,6 +602,7 @@
             
             if (tabela === 'acoes_extensao') carregarHomologacoes();
             if (tabela === 'horas_avulsas') carregarHorasAvulsas();
+            if (tabela === 'biblioteca_atividades') carregarBibliotecaCoord();
             carregarIndicadoresVisaoGeral();
         }
 
@@ -1046,9 +1014,103 @@
             carregarIndicadoresVisaoGeral();
         }
 
+        // ========================== BIBLIOTECA (COORDENAÇÃO) ==========================
+        async function carregarBibliotecaCoord() {
+            const tbodyPendentes = document.getElementById('tbody-biblioteca-pendentes');
+            const tbodyAprovados = document.getElementById('tbody-biblioteca-aprovados');
+
+            tbodyPendentes.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Carregando...</td></tr>';
+            tbodyAprovados.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Carregando...</td></tr>';
+
+            const { data, error } = await supabaseClient
+                .from('biblioteca_atividades')
+                .select('id, titulo, publico_alvo, objetivo, url_arquivo, status, created_at, perfis(nome)')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                const erroMsg = `<tr><td class="py-6 px-6 text-center text-rose-500" colspan="4">Erro ao carregar: ${escapeHtml(error.message)}</td></tr>`;
+                tbodyPendentes.innerHTML = erroMsg;
+                tbodyAprovados.innerHTML = erroMsg;
+                return;
+            }
+
+            const pendentes = data.filter(a => a.status === 'pendente');
+            const aprovados = data.filter(a => a.status === 'aprovado');
+
+            if (pendentes.length === 0) {
+                tbodyPendentes.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Nenhuma atividade aguardando moderação.</td></tr>';
+            } else {
+                tbodyPendentes.innerHTML = pendentes.map(atv => `
+                    <tr class="animate-fadeIn hover:bg-slate-50 transition-colors">
+                        <td class="py-4 px-6">
+                            <p class="font-bold text-slate-800">${escapeHtml(atv.titulo)}</p>
+                            <span class="inline-block bg-teal-50 text-saude-prime font-bold text-[9px] px-2 py-0.5 rounded mt-1">Público: ${escapeHtml(atv.publico_alvo)}</span>
+                        </td>
+                        <td class="py-4 px-6">${escapeHtml(atv.perfis?.nome || 'Desconhecido')}</td>
+                        <td class="py-4 px-6">
+                            <a href="${escapeHtml(atv.url_arquivo)}" target="_blank" class="inline-flex items-center space-x-1 text-purple-600 hover:underline font-semibold bg-purple-50 px-3 py-1.5 rounded-lg">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                                <span>Avaliar Arquivo</span>
+                            </a>
+                        </td>
+                        <td class="py-4 px-6">
+                            <div class="flex justify-center space-x-2">
+                                <button onclick="decidirAtividade('${atv.id}', 'aprovado')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Aprovar</button>
+                                <button onclick="abrirModalRecusa('${atv.id}', 'biblioteca_atividades')" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Recusar</button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            if (aprovados.length === 0) {
+                tbodyAprovados.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Nenhuma atividade no acervo aprovado.</td></tr>';
+            } else {
+                tbodyAprovados.innerHTML = aprovados.map(atv => {
+                    const fileId = atv.url_arquivo.includes('/d/') ? atv.url_arquivo.split('/d/')[1].split('/view')[0] : '';
+                    const downloadUrl = fileId ? `https://docs.google.com/uc?export=download&id=${fileId}` : atv.url_arquivo;
+                    return `
+                    <tr class="animate-fadeIn hover:bg-slate-50 transition-colors">
+                        <td class="py-4 px-6">
+                            <p class="font-bold text-slate-800">${escapeHtml(atv.titulo)}</p>
+                            <span class="inline-block bg-teal-50 text-saude-prime font-bold text-[9px] px-2 py-0.5 rounded mt-1">Público: ${escapeHtml(atv.publico_alvo)}</span>
+                        </td>
+                        <td class="py-4 px-6">${escapeHtml(atv.perfis?.nome || 'Desconhecido')}</td>
+                        <td class="py-4 px-6 text-center">
+                            <span class="bg-emerald-50 text-emerald-600 border border-emerald-100 font-bold px-2.5 py-1 rounded text-[10px] uppercase">Público</span>
+                        </td>
+                        <td class="py-4 px-6">
+                            <div class="flex justify-center items-center space-x-3">
+                                <a href="${escapeHtml(atv.url_arquivo)}" target="_blank" class="text-slate-500 hover:text-saude-prime font-bold transition text-[11px] flex items-center gap-1" title="Visualizar">
+                                    <i class="fas fa-eye text-sm"></i>
+                                </a>
+                                <a href="${downloadUrl}" class="text-saude-prime hover:text-saude-dark font-bold underline transition text-[11px]">Baixar</a>
+                                <button onclick="excluirAtividade('${atv.id}')" class="text-red-600 hover:text-red-800 font-bold underline transition text-[11px]">Excluir</button>
+                            </div>
+                        </td>
+                    </tr>
+                `}).join('');
+            }
+        }
+
+        async function decidirAtividade(id, novoStatus) {
+            if (!confirm('Tem certeza que deseja aprovar esta atividade para o acervo público?')) return;
+            const { error } = await supabaseClient.from('biblioteca_atividades').update({ status: novoStatus }).eq('id', id);
+            if (error) { alert('Erro: ' + error.message); return; }
+            carregarBibliotecaCoord();
+        }
+
+        async function excluirAtividade(id) {
+            if (!confirm('Tem certeza que deseja remover esta atividade do acervo público?')) return;
+            const { error } = await supabaseClient.from('biblioteca_atividades').delete().eq('id', id);
+            if (error) { alert('Erro ao excluir: ' + error.message); return; }
+            carregarBibliotecaCoord();
+        }
+
         let membrosCarregado = false;
         let homologacoesCarregado = false;
         let horasCarregado = false;
+        let bibliotecaCarregada = false;
 
         function switchTab(tabName) {
             const tabs = ['visao-geral', 'homologacoes', 'validar-horas', 'biblioteca', 'indicadores', 'membros'];
@@ -1065,6 +1127,10 @@
             if (tabName === 'validar-horas' && !horasCarregado) {
                 horasCarregado = true;
                 carregarHorasAvulsas();
+            }
+            if (tabName === 'biblioteca' && !bibliotecaCarregada) {
+                bibliotecaCarregada = true;
+                carregarBibliotecaCoord();
             }
 
             tabs.forEach(tab => {
