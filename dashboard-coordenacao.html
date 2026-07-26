@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel da Coordenação - Adolescer com Saúde</title>
+    <title>Painel do Extensionista - Adolescer com Saúde</title>
     <link rel="icon" type="image/png" href="imagens/logo-vetor.png">
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
         tailwind.config = {
             theme: {
@@ -31,19 +32,14 @@
         .animate-fadeIn {
             animation: fadeSlideIn 0.25s ease-out;
         }
-        #tab-content-visao-geral,
-        #tab-content-homologacoes,
-        #tab-content-validar-horas,
-        #tab-content-biblioteca,
-        #tab-content-indicadores,
-        #tab-content-membros {
+        #tab-content-inicio,
+        #tab-content-acoes,
+        #tab-content-atividades,
+        #tab-content-documentos {
             animation: fadeSlideIn 0.3s ease-out;
         }
         tbody tr {
             transition: background-color 0.15s ease;
-        }
-        .modal-panel {
-            animation: fadeSlideIn 0.2s ease-out;
         }
         button, a {
             transition: all 0.15s ease;
@@ -55,71 +51,63 @@
     <aside class="w-64 bg-white border-r border-slate-200 flex flex-col fixed inset-y-0 left-0 z-20">
         <div class="p-5 border-b border-slate-100 flex flex-col space-y-4 items-center">
             <div class="w-full flex items-center justify-center">
-                <img src="imagens/logo-extenso.png" alt="Adolescer com Saúde" class="h-9 w-auto">
+                <img src="imagens/logo-extenso.png" alt="Adolescer com Saúde" class="h-9 w-auto onerror-fallback">
             </div>
             <div class="w-full flex items-center justify-center space-x-4 pt-3 border-t border-slate-100">
-                <img src="imagens/logo-fensg.png" alt="Logo FENSG" class="h-7 w-auto opacity-70">
+                <img src="imagens/logo-fensg.png" alt="Logo FENSG" class="h-7 w-auto opacity-70 hover:opacity-100 transition duration-200">
                 <div class="w-px h-6 bg-slate-200"></div>
-                <img src="imagens/logo-upe.png" alt="Logo UPE" class="h-7 w-auto opacity-70">
+                <img src="imagens/logo-upe.png" alt="Logo UPE" class="h-7 w-auto opacity-70 hover:opacity-100 transition duration-200">
             </div>
         </div>
         
         <nav class="flex-grow p-4 space-y-2 mt-2">
-            <button id="btn-tab-visao-geral" onclick="switchTab('visao-geral')" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 bg-teal-50 text-saude-prime">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
-                <span>Visão Geral</span>
+            <button id="btn-tab-inicio" onclick="switchTab('inicio')" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 bg-teal-50 text-saude-prime">
+                <i class="fas fa-house text-base"></i>
+                <span>Página Inicial</span>
             </button>
-            <button id="btn-tab-homologacoes" onclick="switchTab('homologacoes')" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 text-slate-500 hover:bg-slate-50 hover:text-slate-800">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 18 14 8"/><path d="m9 15 2 2 4-4"/></svg>
-                <span>Homologar Ações</span>
+            <button id="btn-tab-acoes" onclick="switchTab('acoes')" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 text-slate-500 hover:bg-slate-50 hover:text-slate-800">
+                <i class="fas fa-folder-open text-base"></i>
+                <span>Minhas Ações</span>
             </button>
-            <button id="btn-tab-validar-horas" onclick="switchTab('validar-horas')" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 text-slate-500 hover:bg-slate-50 hover:text-slate-800">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                <span>Validar Horas</span>
-            </button>
-            <button id="btn-tab-biblioteca" onclick="switchTab('biblioteca')" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 text-slate-500 hover:bg-slate-50 hover:text-slate-800">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M6 6h10"/><path d="M6 10h10"/></svg>
+            <button id="btn-tab-atividades" onclick="switchTab('atividades')" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 text-slate-500 hover:bg-slate-50 hover:text-slate-800">
+                <i class="fas fa-lightbulb text-base"></i>
                 <span>Biblioteca de Atividades</span>
             </button>
-            <button id="btn-tab-indicadores" onclick="switchTab('indicadores')" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 text-slate-500 hover:bg-slate-50 hover:text-slate-800">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>
-                <span>Indicadores</span>
-            </button>
-            <button id="btn-tab-membros" onclick="switchTab('membros')" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 text-slate-500 hover:bg-slate-50 hover:text-slate-800">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                <span>Gestão de Membros</span>
+            <button id="btn-tab-documentos" onclick="switchTab('documentos')" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 text-slate-500 hover:bg-slate-50 hover:text-slate-800">
+                <i class="fas fa-file-pdf text-base"></i>
+                <span>Documentos Acadêmicos</span>
             </button>
         </nav>
 
         <div class="p-4 border-t border-slate-100 text-center text-[10px] text-slate-400 font-semibold tracking-wide">
-            UPE FENSG • COORDENAÇÃO
+            UPE FENSG • EXTENSÃO
         </div>
     </aside>
 
     <div class="flex-grow pl-64 flex flex-col min-h-screen">
         
         <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 sticky top-0 z-10 shadow-sm">
-            <h1 id="page-title" class="font-bold text-sm uppercase tracking-wider text-slate-500">Visão Geral</h1>
+            <h1 id="page-title" class="font-bold text-sm uppercase tracking-wider text-slate-500">Página Inicial</h1>
             
             <div class="relative">
-                <button onclick="toggleUserMenu()" class="flex items-center space-x-3 focus:outline-none group cursor-pointer">
-                    <div class="text-right">
+                <button onclick="toggleUserMenu()" class="flex items-center space-x-3 focus:outline-none group">
+                    <div class="text-right hidden sm:block">
                         <p id="header-user-name" class="text-xs font-bold text-slate-800 group-hover:text-saude-prime transition">Carregando...</p>
-                        <p class="text-[10px] text-purple-600 font-bold uppercase tracking-wider">Coordenadora Geral</p>
+                        <p class="text-[10px] text-slate-400 font-medium">Extensionista</p>
                     </div>
-                    <div id="header-user-avatar" class="w-10 h-10 rounded-full bg-purple-50 border-2 border-purple-200 flex items-center justify-center text-saude-accent font-bold text-xs shadow-sm">
+                    <div id="header-user-avatar" class="w-10 h-10 rounded-full bg-teal-50 border-2 border-teal-100 flex items-center justify-center text-saude-prime font-bold text-xs shadow-sm">
                         --
                     </div>
                 </button>
 
                 <div id="user-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-xl shadow-lg py-1 z-30">
-                    <button onclick="openModal('modal-perfil-coord')" class="w-full text-left px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-saude-prime flex items-center space-x-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                        <span>Editar Meu Perfil</span>
+                    <button onclick="openModal('modal-perfil')" class="w-full text-left px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-saude-prime flex items-center space-x-2">
+                        <i class="fas fa-user text-slate-400"></i>
+                        <span>Ver Meu Perfil</span>
                     </button>
                     <hr class="border-slate-100">
                     <button onclick="sairDoPortal()" class="w-full text-left px-4 py-2.5 text-xs font-semibold text-red-600 hover:bg-red-50 flex items-center space-x-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                        <i class="fas fa-sign-out-alt"></i>
                         <span>Sair do Portal</span>
                     </button>
                 </div>
@@ -128,133 +116,77 @@
 
         <main class="p-8 flex-grow max-w-5xl w-full mx-auto space-y-8">
             
-            <div id="tab-content-visao-geral" class="space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-center">
-                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Extensionistas Ativos</span>
-                        <h3 id="stat-extensionistas-ativos" class="text-3xl font-black text-slate-800 mt-2">Carregando...</h3>
+            <div id="tab-content-inicio" class="space-y-6">
+                
+                <div class="bg-gradient-to-r from-teal-600 to-emerald-600 p-6 rounded-2xl shadow-sm text-white relative overflow-hidden">
+                    <div class="absolute right-0 top-0 translate-x-4 -translate-y-4 w-32 h-32 bg-white/10 rounded-full filter blur-xl"></div>
+                    <div class="relative z-10 flex items-start space-x-4">
+                        <div class="bg-white/20 p-3 rounded-xl text-lg"><i class="fas fa-bullhorn"></i></div>
+                        <div>
+                            <h3 class="font-extrabold text-sm mb-1">Mural de Avisos da Coordenação</h3>
+                            <p class="text-xs text-teal-50 max-w-2xl leading-relaxed">
+                                Atenção extensionistas! Nossa próxima reunião geral ordinária acontecerá na sexta-feira às 14h via Google Meet para alinhar os preparativos da nova oficina do Eixo Escolar. Não faltem e lembrem-se de atualizar seus lançamentos de horas semanais.
+                            </p>
+                        </div>
                     </div>
-                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-center">
-                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Ações Pendentes</span>
-                        <h3 id="stat-acoes-pendentes" class="text-3xl font-black text-amber-600 mt-2">Carregando...</h3>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+                    
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                        <div>
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-4">Horas Analisadas</span>
+                            
+                            <div class="grid grid-cols-2 gap-4 pb-2">
+                                <div>
+                                    <p id="stat-horas-pendentes" class="text-2xl font-black text-amber-600">--</p>
+                                    <p class="text-xs font-semibold text-slate-400">pendentes</p>
+                                </div>
+                                <div class="border-l border-slate-100 pl-4">
+                                    <p id="stat-horas-aprovadas" class="text-2xl font-black text-saude-prime">--</p>
+                                    <p class="text-xs font-semibold text-slate-400">aprovadas</p>
+                                </div>
+                            </div>
+
+                            <div class="mt-4 mb-4">
+                                <div class="w-full bg-slate-100 rounded-full h-2">
+                                    <div id="barra-progresso-horas" class="bg-saude-prime h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-[11px] font-bold text-slate-500 bg-slate-50 p-2.5 rounded-xl flex items-center justify-between">
+                            <span><i class="fas fa-bullseye text-saude-prime mr-1"></i> Meta do Módulo:</span>
+                            <span class="text-slate-800">60 horas</span>
+                        </div>
                     </div>
-                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-center">
-                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Horas na Fila</span>
-                        <h3 id="stat-horas-fila" class="text-3xl font-black text-purple-600 mt-2">Carregando...</h3>
+
+                    <div class="md:col-span-2 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-center space-y-4">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Ações Principais</p>
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <button onclick="openModal('modal-horas')" class="flex-1 bg-saude-prime hover:bg-saude-dark text-white px-5 py-3.5 rounded-xl font-bold text-xs shadow-sm transition flex items-center justify-center space-x-2">
+                                <i class="fas fa-plus"></i> <span>Adicionar Carga Horária</span>
+                            </button>
+                            <button onclick="gerarRelatorioOficial()" class="flex-1 bg-white hover:bg-slate-50 text-saude-prime border border-slate-200 hover:border-saude-prime px-5 py-3.5 rounded-xl font-bold text-xs transition flex items-center justify-center space-x-2">
+                                <i class="fas fa-file-invoice"></i> <span id="text-relatorio">Gerar Relatório de Horas</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
                 <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                    <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-white">
-                        <div>
-                            <h4 class="font-bold text-sm text-slate-800">Monitoramento de Acessos Recentes</h4>
-                            <p class="text-[11px] text-slate-400 mt-0.5">Histórico em tempo real de atividade dos extensionistas dentro do portal.</p>
-                        </div>
-                        <span class="text-[10px] font-bold text-saude-prime bg-teal-50 px-2 py-1 rounded border border-teal-100 uppercase tracking-wider">Conexões</span>
+                    <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                        <h4 class="font-bold text-xs text-slate-400 uppercase tracking-wider">Histórico de Lançamentos</h4>
+                        <span class="text-[10px] font-bold text-teal-600 bg-teal-50 px-2 py-1 rounded-md">Lista Geral</span>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
                             <thead>
                                 <tr class="bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                                    <th class="py-3 px-6">Extensionista</th>
-                                    <th class="py-3 px-6">E-mail de Cadastro</th>
-                                    <th class="py-3 px-6 text-center">Último Acesso</th>
-                                    <th class="py-3 px-6 text-center">Tempo de Permanência</th>
-                                </tr>
-                            </thead>
-                            <tbody class="text-xs font-medium text-slate-600 divide-y divide-slate-100">
-                                <tr class="hover:bg-slate-50/40 transition-colors">
-                                    <td class="py-3.5 px-6 font-bold text-slate-800">Rivaldo de Pontes</td>
-                                    <td class="py-3.5 px-6 text-slate-500">rivaldo.pontes@upe.br</td>
-                                    <td class="py-3.5 px-6 text-center text-slate-500">Hoje às 15:42</td>
-                                    <td class="py-3.5 px-6 text-center"><span class="bg-teal-50 text-saude-prime font-bold px-2 py-1 rounded text-[11px]">45 min</span></td>
-                                </tr>
-                                <tr class="hover:bg-slate-50/40 transition-colors">
-                                    <td class="py-3.5 px-6 font-bold text-slate-800">Rayane Vitoria</td>
-                                    <td class="py-3.5 px-6 text-slate-500">rayane.vitoria@upe.br</td>
-                                    <td class="py-3.5 px-6 text-center text-slate-500">Ontem às 18:15</td>
-                                    <td class="py-3.5 px-6 text-center"><span class="bg-teal-50 text-saude-prime font-bold px-2 py-1 rounded text-[11px]">1h 12m</span></td>
-                                </tr>
-                                <tr class="hover:bg-slate-50/40 transition-colors">
-                                    <td class="py-3.5 px-6 font-bold text-slate-800">Gabriela Lins</td>
-                                    <td class="py-3.5 px-6 text-slate-500">gabriela.lins@upe.br</td>
-                                    <td class="py-3.5 px-6 text-center text-slate-400">Há 3 dias (14/07)</td>
-                                    <td class="py-3.5 px-6 text-center"><span class="bg-slate-100 text-slate-500 font-bold px-2 py-1 rounded text-[11px]">22 min</span></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <div id="tab-content-homologacoes" class="hidden space-y-8">
-                <div>
-                    <h2 class="text-xl font-bold text-slate-800">Homologação de Ações e Atas</h2>
-                    <p class="text-xs text-slate-400 mt-0.5">Analise as relatorias técnicas das intervenções para validar as atividades do projeto e consulte o histórico.</p>
-                </div>
-                
-                <div>
-                    <h3 class="font-extrabold text-slate-800 text-sm uppercase tracking-wider mb-3 text-amber-600">Fila: Aguardando Avaliação</h3>
-                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                                    <th class="py-3 px-6">Extensionista</th><th class="py-3 px-6">Local / Intervenção</th><th class="py-3 px-6">Documentos (Drive)</th><th class="py-3 px-6 text-center">Decisão</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tbody-homologacoes" class="text-xs font-medium text-slate-600 divide-y divide-slate-100">
-                                <tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Carregando...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div>
-                    <h3 class="font-extrabold text-slate-800 text-sm uppercase tracking-wider mb-3 mt-6 text-slate-500">Histórico de Ações</h3>
-                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                                    <th class="py-3 px-6">Extensionista</th><th class="py-3 px-6">Local / Intervenção</th><th class="py-3 px-6">Documentos</th><th class="py-3 px-6 text-center">Status Final</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tbody-historico-acoes" class="text-xs font-medium text-slate-600 divide-y divide-slate-100">
-                                <tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Carregando...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <div id="tab-content-validar-horas" class="hidden space-y-8">
-                <div>
-                    <h2 class="text-xl font-bold text-slate-800">Validação de Lançamentos Departamentais</h2>
-                    <p class="text-xs text-slate-400 mt-0.5">Valide cargas horárias avulsas soltas (Reuniões, Pesquisas, Redes Sociais) e consulte o histórico.</p>
-                </div>
-                
-                <div>
-                    <h3 class="font-extrabold text-slate-800 text-sm uppercase tracking-wider mb-3 text-amber-600">Fila: Horas Pendentes</h3>
-                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                                    <th class="py-3 px-6">Membro</th><th class="py-3 px-6">Atividade Detalhada</th><th class="py-3 px-6 text-center">Horas</th><th class="py-3 px-6 text-center">Decisão</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tbody-horas" class="text-xs font-medium text-slate-600 divide-y divide-slate-100">
-                                <tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Carregando...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div>
-                    <h3 class="font-extrabold text-slate-800 text-sm uppercase tracking-wider mb-3 mt-6 text-slate-500">Histórico de Horas Validadas</h3>
-                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                                    <th class="py-3 px-6">Membro</th><th class="py-3 px-6">Atividade Detalhada</th><th class="py-3 px-6 text-center">Horas</th><th class="py-3 px-6 text-center">Status Final</th>
+                                    <th class="py-3 px-6">Data</th>
+                                    <th class="py-3 px-6">Tipo de Atividade</th>
+                                    <th class="py-3 px-6 text-center">Horas</th>
+                                    <th class="py-3 px-6">Status</th>
                                 </tr>
                             </thead>
                             <tbody id="tbody-historico-horas" class="text-xs font-medium text-slate-600 divide-y divide-slate-100">
@@ -265,257 +197,272 @@
                 </div>
             </div>
 
-            <div id="tab-content-biblioteca" class="hidden space-y-8">
-                <div>
-                    <h2 class="text-xl font-bold text-slate-800">Biblioteca de Atividades</h2>
-                    <p class="text-xs text-slate-400 mt-0.5">Faça a moderação dos novos envios e consulte o acervo de materiais já aprovados.</p>
-                </div>
-
-                <div>
-                    <h3 class="font-extrabold text-slate-800 text-sm uppercase tracking-wider mb-3">Aguardando Moderação</h3>
-                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="bg-amber-50 border-b border-amber-100 text-[11px] font-bold text-amber-700 uppercase tracking-wider">
-                                    <th class="py-3 px-6">Material Didático / Dinâmica</th><th class="py-3 px-6">Autor</th><th class="py-3 px-6">Documento</th><th class="py-3 px-6 text-center">Ação</th>
-                                </tr>
-                            </thead>
-                            <tbody class="text-xs font-medium text-slate-600 divide-y divide-slate-100">
-                                <tr>
-                                    <td class="py-4 px-6">
-                                        <p class="font-bold text-slate-800">Círculo de Cultura: Autoimagem</p>
-                                        <span class="inline-block bg-teal-50 text-saude-prime font-bold text-[9px] px-2 py-0.5 rounded mt-1">Público: 12 a 15 anos</span>
-                                    </td>
-                                    <td class="py-4 px-6">Júlia Vasconcelos</td>
-                                    <td class="py-4 px-6">
-                                        <a href="#" class="inline-flex items-center space-x-1 text-purple-600 hover:underline font-semibold bg-purple-50 px-3 py-1.5 rounded-lg">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-                                            <span>Avaliar PDF</span>
-                                        </a>
-                                    </td>
-                                    <td class="py-4 px-6">
-                                        <div class="flex justify-center space-x-2">
-                                            <button onclick="alert('Material Aprovado! Adicionado ao acervo público.')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Aprovar</button>
-                                            <button onclick="alert('Material Indeferido e excluído da fila.')" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Recusar</button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+            <div id="tab-content-acoes" class="hidden space-y-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <div>
+                        <h3 class="font-extrabold text-slate-800 text-base">Minhas Ações</h3>
+                        <p class="text-xs text-slate-400 mt-0.5">Gerencie e envie as atas e relatorias das atividades de extensão executadas.</p>
                     </div>
+                    <button onclick="openModal('modal-nova-acao')" class="bg-saude-prime hover:bg-saude-dark text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm transition flex items-center space-x-1.5">
+                        <i class="fas fa-plus"></i> <span>Cadastrar uma ação</span>
+                    </button>
                 </div>
 
-                <div>
-                    <h3 class="font-extrabold text-slate-800 text-sm uppercase tracking-wider mb-3">Acervo Aprovado (Visível aos Alunos)</h3>
-                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="p-6 border-b border-slate-100">
+                        <h4 class="font-bold text-xs text-slate-400 uppercase tracking-wider">Documentação Enviada</h4>
+                    </div>
+                    <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
                             <thead>
                                 <tr class="bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                                    <th class="py-3 px-6">Material Didático / Dinâmica</th><th class="py-3 px-6">Autor</th><th class="py-3 px-6 text-center">Status</th><th class="py-3 px-6 text-center">Opções</th>
+                                    <th class="py-3 px-6">Identificação da Ação / Local</th>
+                                    <th class="py-3 px-6">Ata de Extensão</th>
+                                    <th class="py-3 px-6">Relatoria Técnica</th>
+                                    <th class="py-3 px-6">Status Geral</th>
                                 </tr>
                             </thead>
-                            <tbody class="text-xs font-medium text-slate-600 divide-y divide-slate-100">
-                                <tr>
-                                    <td class="py-4 px-6">
-                                        <p class="font-bold text-slate-800">Oficina Interativa de Saúde Mental</p>
-                                        <span class="inline-block bg-teal-50 text-saude-prime font-bold text-[9px] px-2 py-0.5 rounded mt-1">Público: 15 a 18 anos</span>
-                                    </td>
-                                    <td class="py-4 px-6">Rivaldo de Pontes</td>
-                                    <td class="py-4 px-6 text-center">
-                                        <span class="bg-emerald-50 text-emerald-600 border border-emerald-100 font-bold px-2.5 py-1 rounded text-[10px] uppercase">Público</span>
-                                    </td>
-                                    <td class="py-4 px-6">
-                                        <div class="flex justify-center space-x-3">
-                                            <button onclick="alert('Baixando material...')" class="text-saude-prime hover:text-saude-dark font-bold underline transition text-[11px]">Baixar</button>
-                                            <button onclick="confirm('Remover do acervo?') ? alert('Removido.') : null" class="text-red-600 hover:text-red-800 font-bold underline transition text-[11px]">Excluir</button>
-                                        </div>
-                                    </td>
-                                </tr>
+                            <tbody id="tbody-minhas-acoes" class="text-xs font-medium text-slate-600 divide-y divide-slate-100">
+                                <tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Carregando...</td></tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <div id="tab-content-indicadores" class="hidden space-y-6">
-                <div>
-                    <h2 class="text-xl font-bold text-slate-800">Indicadores do Projeto</h2>
-                    <p class="text-xs text-slate-400 mt-0.5">Métricas globais de engajamento, produtividade técnica e envolvimento discente extraídas em tempo real.</p>
-                </div>
-
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm text-center">
-                        <h4 class="text-[10px] font-bold text-slate-400 uppercase">Extensionistas Ativos</h4>
-                        <p class="text-3xl font-black text-slate-800 mt-1">12</p>
+            <div id="tab-content-atividades" class="hidden space-y-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <div>
+                        <h3 class="font-extrabold text-slate-800 text-base">Biblioteca Colaborativa</h3>
+                        <p class="text-xs text-slate-400 mt-0.5">Compartilhe e baixe modelos de dinâmicas e oficinas validadas.</p>
                     </div>
-                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm text-center">
-                        <h4 class="text-[10px] font-bold text-slate-400 uppercase">Ações Realizadas</h4>
-                        <p class="text-3xl font-black text-saude-prime mt-1">45</p>
-                    </div>
-                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm text-center">
-                        <h4 class="text-[10px] font-bold text-slate-400 uppercase">Materiais na Biblioteca</h4>
-                        <p class="text-3xl font-black text-saude-accent mt-1">18</p>
-                    </div>
-                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm text-center">
-                        <h4 class="text-[10px] font-bold text-slate-400 uppercase">Horas Validadas</h4>
-                        <p class="text-3xl font-black text-slate-800 mt-1">340</p>
-                    </div>
-                </div>
-
-                <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-5 max-w-3xl">
-                    <h3 class="text-sm font-bold text-slate-800 border-b border-slate-100 pb-3">Gerar Relatório Analítico de Gestão</h3>
-                    
-                    <form id="reportForm" onsubmit="gerarPDFCustomizado(event)" class="space-y-3">
-                        <label class="flex items-start p-3 rounded-xl border border-slate-100 hover:border-teal-200 hover:bg-slate-50/50 cursor-pointer transition">
-                            <input type="checkbox" name="metricas" value="consolidado_horas" checked class="w-4 h-4 rounded border-slate-300 accent-teal-600 mt-0.5">
-                            <div class="ml-3">
-                                <span class="text-xs font-bold text-slate-800 block">Consolidado de Carga Horária e Assiduidade</span>
-                                <span class="text-[11px] text-slate-400">Total de horas validadas e quadro de acesso dos alunos no portal.</span>
-                            </div>
-                        </label>
-                        <label class="flex items-start p-3 rounded-xl border border-slate-100 hover:border-teal-200 hover:bg-slate-50/50 cursor-pointer transition">
-                            <input type="checkbox" name="metricas" value="mapa_instituicoes" checked class="w-4 h-4 rounded border-slate-300 accent-teal-600 mt-0.5">
-                            <div class="ml-3">
-                                <span class="text-xs font-bold text-slate-800 block">Mapa de Instituições Atendidas</span>
-                                <span class="text-[11px] text-slate-400">Relação de escolas/clínicas alcançadas pelas intervenções e links das Atas.</span>
-                            </div>
-                        </label>
-                        <label class="flex items-start p-3 rounded-xl border border-slate-100 hover:border-teal-200 hover:bg-slate-50/50 cursor-pointer transition">
-                            <input type="checkbox" name="metricas" value="produtividade_tecnica" checked class="w-4 h-4 rounded border-slate-300 accent-teal-600 mt-0.5">
-                            <div class="ml-3">
-                                <span class="text-xs font-bold text-slate-800 block">Produtividade de Materiais Pedagógicos</span>
-                                <span class="text-[11px] text-slate-400">Relação de dinâmicas aprovadas na Biblioteca e engajamento das redes sociais.</span>
-                            </div>
-                        </label>
-
-                        <button type="submit" id="btnExport" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 rounded-xl text-xs transition shadow-md flex items-center justify-center space-x-2 mt-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
-                            <span id="btnExportText">Gerar Relatório de Indicadores (PDF)</span>
+                    <div class="flex flex-wrap gap-2">
+                        <a href="https://docs.google.com/uc?export=download&id=1IZwXz2pz8FdvCjjYZAOh1LJv94KDXzUI" target="_blank" class="bg-teal-50 text-saude-prime hover:bg-saude-prime hover:text-white text-xs font-bold px-4 py-2.5 rounded-xl border border-teal-100 transition flex items-center space-x-1.5 shadow-sm">
+                            <i class="fas fa-download"></i> <span>Baixar Modelo Padrão</span>
+                        </a>
+                        <button onclick="openModal('modal-atividades')" class="bg-saude-accent hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm transition flex items-center space-x-1.5">
+                            <i class="fas fa-plus"></i> <span>Adicionar Nova Atividade</span>
                         </button>
-                    </form>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm flex flex-col justify-between hover:shadow-md transition">
+                        <div class="space-y-3">
+                            <div class="text-saude-prime text-xl"><i class="fas fa-folder-open"></i></div>
+                            <h4 class="font-extrabold text-sm text-slate-800 leading-snug">Oficina Interativa de Saúde Mental e Escuta Ativa</h4>
+                            <p class="text-[11px] text-slate-400 font-medium"><strong>Autor:</strong> Rivaldo de Pontes</p>
+                            <span class="inline-block bg-teal-50 text-saude-prime font-bold text-[10px] px-2.5 py-0.5 rounded-md">Público: 15-18 anos</span>
+                        </div>
+                        <div class="pt-5 border-t border-slate-100 mt-4">
+                            <button onclick="alert('Fazendo download do arquivo do Drive...')" class="w-full bg-slate-50 hover:bg-teal-50 text-slate-700 hover:text-saude-prime border border-slate-200 hover:border-teal-200 text-xs font-bold py-2 rounded-xl transition flex items-center justify-center space-x-1">
+                                <i class="fas fa-download text-[10px]"></i> <span>Baixar Atividade</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm flex flex-col justify-between hover:shadow-md transition">
+                        <div class="space-y-3">
+                            <div class="text-saude-prime text-xl"><i class="fas fa-folder-open"></i></div>
+                            <h4 class="font-extrabold text-sm text-slate-800 leading-snug">Dinâmica Lúdica: Desmistificando Mitos Alimentares</h4>
+                            <p class="text-[11px] text-slate-400 font-medium"><strong>Autor:</strong> Rayane Vitoria</p>
+                            <span class="inline-block bg-indigo-50 text-saude-accent font-bold text-[10px] px-2.5 py-0.5 rounded-md">Público: 3º ao 5º ano</span>
+                        </div>
+                        <div class="pt-5 border-t border-slate-100 mt-4">
+                            <button onclick="alert('Fazendo download do arquivo do Drive...')" class="w-full bg-slate-50 hover:bg-teal-50 text-slate-700 hover:text-saude-prime border border-slate-200 hover:border-teal-200 text-xs font-bold py-2 rounded-xl transition flex items-center justify-center space-x-1">
+                                <i class="fas fa-download text-[10px]"></i> <span>Baixar Atividade</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div id="tab-content-membros" class="hidden space-y-8">
-                
-                <div>
-                    <div class="flex items-center space-x-2 mb-3">
-                        <div class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></div>
-                        <h3 class="font-extrabold text-slate-800 text-sm uppercase tracking-wider">Solicitações de Cadastro (Aguardando Aprovação)</h3>
+            <div id="tab-content-documentos" class="hidden space-y-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <div>
+                        <h3 class="font-extrabold text-slate-800 text-base">Documentos</h3>
+                        <p class="text-xs text-slate-400 mt-0.5">Documentos para utilização referente a atividades extensionistas.</p>
                     </div>
-                    <div class="bg-amber-50/50 rounded-2xl border border-amber-100 shadow-sm overflow-hidden">
-                        <table class="w-full text-left">
-                            <tbody id="tbody-pendentes" class="text-xs font-medium text-slate-700 divide-y divide-amber-100">
-                                <tr><td class="py-6 px-6 text-center text-slate-400" colspan="2">Carregando...</td></tr>
-                            </tbody>
-                        </table>
+                    <div>
+                        <button onclick="fetchDriveFiles()" class="bg-teal-50 hover:bg-teal-100 text-saude-prime text-xs font-bold px-4 py-2.5 rounded-xl border border-teal-100 transition flex items-center space-x-1.5">
+                            <i class="fas fa-sync-alt" id="sync-icon"></i> <span id="sync-text">Sincronizar com Drive</span>
+                        </button>
                     </div>
                 </div>
 
-                <div>
-                    <h3 class="font-extrabold text-slate-800 text-sm uppercase tracking-wider mb-3">Extensionistas Ativos no Sistema</h3>
-                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                                    <th class="py-3 px-6">Identificação</th>
-                                    <th class="py-3 px-6 text-center">Credenciais</th>
-                                    <th class="py-3 px-6 text-center">Revogar Acesso</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tbody-ativos" class="text-xs font-medium text-slate-600 divide-y divide-slate-100">
-                                <tr><td class="py-6 px-6 text-center text-slate-400" colspan="3">Carregando...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
+                <div id="loading-docs" class="hidden flex flex-col items-center justify-center py-12 space-y-3 bg-white rounded-2xl border border-slate-200">
+                    <div class="w-10 h-10 border-4 border-teal-200 border-t-saude-prime rounded-full animate-spin"></div>
+                    <p class="text-xs font-semibold text-slate-400">Consultando arquivos do Google Drive...</p>
                 </div>
 
+                <div id="error-docs" class="hidden p-6 bg-red-50 text-red-700 rounded-2xl border border-red-100 text-center space-y-2">
+                    <i class="fas fa-exclamation-triangle text-xl"></i>
+                    <p class="text-xs font-bold">Erro ao buscar arquivos do Drive.</p>
+                    <p class="text-[11px] text-red-500 max-w-md mx-auto">Verifique se você configurou a URL do Apps Script corretamente e se as permissões da pasta estão como "Qualquer pessoa com o link".</p>
+                </div>
+
+                <div id="empty-docs" class="hidden flex flex-col items-center justify-center py-16 bg-white rounded-2xl border border-slate-200 text-center px-4 space-y-3">
+                    <div class="text-slate-300 text-4xl"><i class="far fa-folder-open"></i></div>
+                    <p class="text-xs font-bold text-slate-500">Nenhum documento encontrado!</p>
+                    <p class="text-[11px] text-slate-400 max-w-xs leading-relaxed">Adicione arquivos na sua pasta compartilhada do Google Drive para que eles apareçam aqui.</p>
+                </div>
+
+                <div id="docs-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
             </div>
 
         </main>
     </div>
 
-    <!-- MODAL DE PERFIL DA COORDENAÇÃO -->
-    <div id="modal-perfil-coord" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center z-50 p-4">
-        <div class="modal-panel bg-white rounded-3xl max-w-md w-full shadow-xl border border-slate-100 p-6 space-y-4">
-            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
-                <h3 class="font-extrabold text-slate-800 text-base">Meu Perfil Administrativo</h3>
-                <button onclick="closeModal('modal-perfil-coord')" class="text-slate-400 hover:text-slate-600 text-sm font-bold cursor-pointer">Fechar</button>
+    <div id="modal-horas" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full shadow-xl border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                <h3 class="font-extrabold text-slate-800 text-base">Lançar Carga Horária</h3>
+                <button onclick="closeModal('modal-horas')" class="text-slate-400 hover:text-slate-600 text-lg" aria-label="Fechar"><i class="fas fa-times"></i></button>
             </div>
-            <form id="form-perfil-coord" onsubmit="salvarPerfil(event)" class="space-y-4">
-                <div class="flex flex-col items-center space-y-1">
-                    <div class="w-20 h-20 rounded-full bg-purple-50 border-2 border-purple-200 flex items-center justify-center text-saude-accent text-xl font-bold shadow shadow-purple-200 relative"><span id="modal-avatar-initials">--</span></div>
-                    <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wide cursor-pointer hover:underline">Alterar Foto</span>
+            <form id="form-horas" onsubmit="lancarHoras(event)" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Tipo de Atividade</label>
+                    <select id="tipo-atividade" onchange="toggleOutrosCampo()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium focus:outline-none focus:border-saude-prime text-slate-700">
+                        <option>Ação de Extensão Realizada</option>
+                        <option>Reunião Ordinária/Geral</option>
+                        <option>Preparação de Post para Redes Sociais</option>
+                        <option>Pesquisa para Ação ou Post</option>
+                        <option>Preparação de Material Didático/Oficina</option>
+                        <option value="Outros">Outros</option>
+                    </select>
+                </div>
+                <div id="wrapper-outros" class="hidden">
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Especifique a Atividade</label>
+                    <input type="text" id="input-outros" placeholder="Qual foi a atividade realizada?" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium focus:outline-none focus:border-saude-prime">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Data da Atividade</label>
+                        <input type="date" id="input-data-horas" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium focus:outline-none focus:border-saude-prime">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Horas Solicitadas</label>
+                        <input type="number" id="input-horas" min="1" max="24" required placeholder="Ex: 2" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium focus:outline-none focus:border-saude-prime">
+                    </div>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Nome Completo</label>
-                    <input type="text" id="modal-user-name" required value="" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:border-saude-prime">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Mini Biografia</label>
-                    <textarea id="modal-user-bio" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium text-slate-700 focus:outline-none focus:border-saude-prime"></textarea>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Descrição/Detalhes</label>
+                    <textarea id="input-descricao-horas" rows="3" placeholder="Relate o que foi realizado ou anexe links técnicos..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium focus:outline-none focus:border-saude-prime"></textarea>
                 </div>
                 <div class="pt-2 flex gap-2">
-                    <button type="button" onclick="closeModal('modal-perfil-coord')" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold py-3 rounded-xl transition">Cancelar</button>
-                    <button type="submit" id="btn-salvar-perfil" class="flex-1 bg-saude-prime hover:bg-saude-dark text-white text-xs font-bold py-3 rounded-xl transition shadow cursor-pointer">Salvar Perfil</button>
+                    <button type="button" onclick="closeModal('modal-horas')" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold py-3 rounded-xl transition">Cancelar</button>
+                    <button type="submit" id="btn-enviar-horas" class="flex-1 bg-saude-prime hover:bg-saude-dark text-white text-xs font-bold py-3 rounded-xl transition shadow-sm">Enviar Registro</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- NOVO MODAL: MOTIVO DO INDEFERIMENTO -->
-    <div id="modal-motivo-recusa" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center z-50 p-4">
-        <div class="modal-panel bg-white rounded-3xl max-w-md w-full shadow-xl border border-slate-100 p-6 space-y-4">
-            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
-                <h3 class="font-extrabold text-rose-600 text-base flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
-                    Indeferir Solicitação
-                </h3>
-                <button onclick="closeModal('modal-motivo-recusa')" class="text-slate-400 hover:text-slate-600 text-sm font-bold cursor-pointer">Fechar</button>
+    <div id="modal-atividades" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full shadow-xl border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                <h3 class="font-extrabold text-slate-800 text-base">Adicionar Atividade Pronta</h3>
+                <button onclick="closeModal('modal-atividades')" class="text-slate-400 hover:text-slate-600 text-lg" aria-label="Fechar"><i class="fas fa-times"></i></button>
             </div>
-            
-            <div>
-                <p class="text-xs text-slate-500 mb-3 leading-relaxed">Você está prestes a recusar este lançamento. Por favor, forneça o motivo para que o extensionista possa corrigir e contestar, se necessário.</p>
-                
-                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Motivo / Justificativa</label>
-                <textarea id="texto-motivo-recusa" rows="4" placeholder="Ex: A ata não possui a assinatura do preceptor do local..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium text-slate-700 focus:outline-none focus:border-rose-400"></textarea>
-            </div>
-
-            <!-- Campos ocultos para o JavaScript saber qual tabela e qual ID estamos editando -->
-            <input type="hidden" id="recusa-id-alvo" value="">
-            <input type="hidden" id="recusa-tabela-alvo" value="">
-
-            <div class="pt-2 flex gap-2">
-                <button type="button" onclick="closeModal('modal-motivo-recusa')" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold py-3 rounded-xl transition">Cancelar</button>
-                <button type="button" onclick="confirmarIndeferimentoComMotivo()" class="flex-1 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold py-3 rounded-xl transition shadow cursor-pointer">Confirmar Indeferimento</button>
-            </div>
+            <form onsubmit="event.preventDefault(); alert('Atividade compartilhada!'); closeModal('modal-atividades');" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Título da Atividade</label>
+                    <input type="text" required placeholder="Ex: Oficina Temática sobre Nutrição" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium focus:outline-none focus:border-saude-prime">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Público-Alvo</label>
+                    <input type="text" required placeholder="Ex: Crianças do 3º ao 5º ano" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium focus:outline-none focus:border-saude-prime">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Objetivo Principal</label>
+                    <input type="text" required placeholder="Ex: Incentivar hábitos alimentares saudáveis" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium focus:outline-none focus:border-saude-prime">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Documento (PDF / Word)</label>
+                    <div class="border-2 border-dashed border-slate-200 bg-slate-50 p-4 rounded-xl text-center cursor-pointer hover:border-saude-prime transition">
+                        <input type="file" required class="hidden" id="file-atividade">
+                        <label for="file-atividade" class="cursor-pointer space-y-1 block">
+                            <i class="fas fa-cloud-upload-alt text-slate-400 text-xl block"></i>
+                            <span class="text-xs font-semibold text-slate-600 block">Clique para selecionar o arquivo</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="pt-2 flex gap-2">
+                    <button type="button" onclick="closeModal('modal-atividades')" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold py-3 rounded-xl transition">Cancelar</button>
+                    <button type="submit" class="flex-1 bg-saude-accent hover:bg-indigo-700 text-white text-xs font-bold py-3 rounded-xl transition shadow-sm">Compartilhar</button>
+                </div>
+            </form>
         </div>
     </div>
 
-    <!-- O Modal de Ler Contestação foi mantido no HTML a seu pedido, 
-         embora não seja mais necessário, pois as informações aparecem agora direto na tabela! -->
-    <div id="modal-ler-contestacao" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center z-50 p-4">
-        <div class="modal-panel bg-white rounded-3xl max-w-md w-full shadow-xl border border-slate-100 p-6 space-y-4">
-            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
-                <h3 class="font-extrabold text-amber-600 text-base flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4c0-1.1.9-2 2-2h8a2 2 0 0 1 2 2v5Z"/><path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1"/></svg>
-                    Contestação do Aluno
-                </h3>
-                <button onclick="closeModal('modal-ler-contestacao')" class="text-slate-400 hover:text-slate-600 text-sm font-bold cursor-pointer">Fechar</button>
+    <div id="modal-perfil" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full shadow-xl border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                <h3 class="font-extrabold text-slate-800 text-base">Meu Perfil Acadêmico</h3>
+                <button onclick="closeModal('modal-perfil')" class="text-slate-400 hover:text-slate-600 text-lg" aria-label="Fechar"><i class="fas fa-times"></i></button>
             </div>
-            <div class="space-y-4">
-                <div class="bg-rose-50 border border-rose-100 p-3 rounded-xl">
-                    <span class="block text-[10px] font-bold text-rose-700 uppercase mb-1">Seu motivo de recusa original:</span>
-                    <p id="view-motivo-coord" class="text-xs text-rose-800 italic leading-relaxed"></p>
+            <form id="form-perfil" onsubmit="salvarPerfil(event)" class="p-6 space-y-4">
+                <div class="flex flex-col items-center space-y-2 mb-2">
+                    <div id="modal-user-avatar" class="w-20 h-20 rounded-full bg-teal-50 border-2 border-teal-100 flex items-center justify-center text-saude-prime font-bold text-xl relative shadow-md">
+                        <span id="modal-avatar-initials">--</span>
+                        <label for="avatar-input" class="absolute bottom-0 right-0 bg-saude-prime text-white w-6 h-6 rounded-full flex items-center justify-center text-[10px] cursor-pointer hover:bg-saude-dark shadow">
+                            <i class="fas fa-camera"></i>
+                        </label>
+                        <input type="file" id="avatar-input" class="hidden">
+                    </div>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Alterar Foto</span>
                 </div>
-                <div class="bg-amber-50 border border-amber-100 p-3 rounded-xl">
-                    <span class="block text-[10px] font-bold text-amber-700 uppercase mb-1">Defesa/Justificativa do Aluno:</span>
-                    <p id="view-texto-aluno" class="text-xs text-amber-900 font-medium leading-relaxed"></p>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Nome Completo</label>
+                    <input type="text" id="modal-user-name" required value="" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-semibold focus:outline-none focus:border-saude-prime text-slate-800">
                 </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">E-mail</label>
+                    <input type="email" id="modal-user-email" required value="" class="w-full bg-slate-100 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium text-slate-400 cursor-not-allowed" readonly>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Mini Biografia</label>
+                    <textarea id="modal-user-bio" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium focus:outline-none focus:border-saude-prime text-slate-700"></textarea>
+                </div>
+                <div class="pt-2 flex gap-2">
+                    <button type="button" onclick="closeModal('modal-perfil')" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold py-3 rounded-xl transition">Fechar</button>
+                    <button type="submit" id="btn-salvar-perfil" class="flex-1 bg-saude-prime hover:bg-saude-dark text-white text-xs font-bold py-3 rounded-xl transition shadow-sm">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-nova-acao" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full shadow-xl border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                <h3 class="font-extrabold text-slate-800 text-base">Cadastrar Nova Ação de Extensão</h3>
+                <button onclick="closeModal('modal-nova-acao')" class="text-slate-400 hover:text-slate-600 text-lg" aria-label="Fechar"><i class="fas fa-times"></i></button>
             </div>
-            <div class="pt-2">
-                <button type="button" onclick="closeModal('modal-ler-contestacao')" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold py-3 rounded-xl transition">Entendido, vou avaliar</button>
-            </div>
+            <form id="form-nova-acao" onsubmit="cadastrarAcao(event)" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Identificação / Local da Ação</label>
+                    <input type="text" id="input-local-acao" required placeholder="Ex: Oficina Temática na Escola X ou Roda de Conversa" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium focus:outline-none focus:border-saude-prime">
+                </div>
+                <div class="grid grid-cols-1 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Ata de Extensão (PDF / Digitalizada)</label>
+                        <div class="border-2 border-dashed border-slate-200 bg-slate-50 p-3 rounded-xl text-center cursor-pointer hover:border-saude-prime transition">
+                            <input type="file" required accept="application/pdf,image/*" class="hidden" id="file-ata">
+                            <label for="file-ata" id="label-file-ata" class="cursor-pointer text-xs font-semibold text-slate-500 block"><i class="fas fa-file-signature mr-1 text-slate-400"></i>Selecionar Ata da Ação</label>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Relatoria Técnica Descritiva (PDF)</label>
+                        <div class="border-2 border-dashed border-slate-200 bg-slate-50 p-3 rounded-xl text-center cursor-pointer hover:border-saude-prime transition">
+                            <input type="file" required accept="application/pdf,image/*" class="hidden" id="file-relatoria">
+                            <label for="file-relatoria" id="label-file-relatoria" class="cursor-pointer text-xs font-semibold text-slate-500 block"><i class="fas fa-file-invoice mr-1 text-slate-400"></i>Selecionar Relatoria</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="pt-2 flex gap-2">
+                    <button type="button" onclick="closeModal('modal-nova-acao')" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold py-3 rounded-xl transition">Cancelar</button>
+                    <button type="submit" id="btn-enviar-acao" class="flex-1 bg-saude-prime hover:bg-saude-dark text-white text-xs font-bold py-3 rounded-xl transition shadow-sm">Enviar Documentos</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -525,12 +472,25 @@
         const SUPABASE_ANON_KEY = "sb_publishable_Yc4xaOn65mSCBuj0rDPvtA_WfsrimeV";
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+        async function sairDoPortal() {
+            await supabaseClient.auth.signOut();
+            window.location.href = 'index.html';
+        }
+
         function iniciais(nome) {
             const partes = nome.trim().split(/\s+/);
             const primeiras = partes.slice(0, 2).map(p => p[0].toUpperCase());
             return primeiras.join('') || '??';
         }
 
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str ?? '';
+            return div.innerHTML;
+        }
+
+        // GUARDA DE SESSÃO: bloqueia acesso a quem não está logado, ainda pendente,
+        // recusado, ou logado como coordenação (esse painel é só para extensionistas).
         async function protegerPagina() {
             const { data: { session } } = await supabaseClient.auth.getSession();
 
@@ -545,7 +505,7 @@
                 .eq('id', session.user.id)
                 .single();
 
-            if (error || !perfil || perfil.status !== 'aprovado' || perfil.papel !== 'coordenacao') {
+            if (error || !perfil || perfil.status !== 'aprovado' || perfil.papel !== 'extensionista') {
                 window.location.href = 'login.html';
                 return null;
             }
@@ -553,11 +513,7 @@
             return perfil;
         }
 
-        async function sairDoPortal() {
-            await supabaseClient.auth.signOut();
-            window.location.href = 'index.html';
-        }
-
+        // Salva nome e bio do extensionista de verdade no Supabase
         async function salvarPerfil(e) {
             e.preventDefault();
 
@@ -585,7 +541,7 @@
                 .eq('id', session.user.id);
 
             btn.disabled = false;
-            btn.innerText = 'Salvar Perfil';
+            btn.innerText = 'Salvar Alterações';
 
             if (error) {
                 alert('Erro ao salvar perfil: ' + error.message);
@@ -596,521 +552,190 @@
             document.getElementById('header-user-avatar').innerText = iniciais(nome);
             document.getElementById('modal-avatar-initials').textContent = iniciais(nome);
 
-            closeModal('modal-perfil-coord');
+            alert('Perfil atualizado com sucesso!');
+            closeModal('modal-perfil');
         }
 
-        function escapeHtml(str) {
-            const div = document.createElement('div');
-            div.textContent = str ?? '';
-            return div.innerHTML;
-        }
+        // Lança um registro de horas avulsas de verdade no Supabase
+        async function lancarHoras(e) {
+            e.preventDefault();
 
-        function abrirModalRecusa(id, tabela) {
-            document.getElementById('recusa-id-alvo').value = id;
-            document.getElementById('recusa-tabela-alvo').value = tabela;
-            document.getElementById('texto-motivo-recusa').value = '';
-            openModal('modal-motivo-recusa');
-        }
+            const btn = document.getElementById('btn-enviar-horas');
+            const select = document.getElementById('tipo-atividade');
+            const tipo = select.value === 'Outros'
+                ? document.getElementById('input-outros').value.trim()
+                : select.value;
+            const data = document.getElementById('input-data-horas').value;
+            const horas = document.getElementById('input-horas').value;
+            const detalhes = document.getElementById('input-descricao-horas').value.trim();
 
-        async function confirmarIndeferimentoComMotivo() {
-            const id = document.getElementById('recusa-id-alvo').value;
-            const tabela = document.getElementById('recusa-tabela-alvo').value;
-            const motivo = document.getElementById('texto-motivo-recusa').value.trim();
+            if (!tipo || !data || !horas) {
+                alert('Preencha o tipo de atividade, a data e as horas.');
+                return;
+            }
 
-            if (!motivo) {
-                alert("Por favor, digite o motivo da recusa.");
+            const descricaoCompleta = detalhes
+                ? `${tipo} (${data}): ${detalhes}`
+                : `${tipo} (${data})`;
+
+            btn.disabled = true;
+            btn.innerText = 'Enviando...';
+
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) {
+                window.location.href = 'login.html';
                 return;
             }
 
             const { error } = await supabaseClient
-                .from(tabela)
-                .update({ 
-                    status: 'indeferido', 
-                    motivo_recusa: motivo 
-                })
-                .eq('id', id);
-
-            if (error) {
-                alert('Erro ao indeferir: ' + error.message);
-                return;
-            }
-
-            closeModal('modal-motivo-recusa');
-            
-            if (tabela === 'acoes_extensao') carregarHomologacoes();
-            if (tabela === 'horas_avulsas') carregarHorasAvulsas();
-            carregarIndicadoresVisaoGeral();
-        }
-
-        async function carregarContadorExtensionistas() {
-            const { count, error } = await supabaseClient
-                .from('perfis')
-                .select('*', { count: 'exact', head: true })
-                .eq('papel', 'extensionista')
-                .eq('status', 'aprovado');
-
-            const el = document.getElementById('stat-extensionistas-ativos');
-            if (!el) return;
-
-            if (error) {
-                el.innerText = '--';
-                return;
-            }
-            el.innerText = `${count} Aluno${count === 1 ? '' : 's'}`;
-        }
-
-        async function carregarMembros() {
-            const tbodyPendentes = document.getElementById('tbody-pendentes');
-            const tbodyAtivos = document.getElementById('tbody-ativos');
-
-            tbodyPendentes.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="2">Carregando...</td></tr>';
-            tbodyAtivos.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="3">Carregando...</td></tr>';
-
-            const { data: perfis, error } = await supabaseClient
-                .from('perfis')
-                .select('id, nome, email, papel, status')
-                .eq('papel', 'extensionista')
-                .order('nome', { ascending: true });
-
-            if (error) {
-                tbodyPendentes.innerHTML = `<tr><td class="py-6 px-6 text-center text-rose-500" colspan="2">Erro ao carregar: ${escapeHtml(error.message)}</td></tr>`;
-                tbodyAtivos.innerHTML = '';
-                return;
-            }
-
-            const pendentes = perfis.filter(p => p.status === 'pendente');
-            const ativos = perfis.filter(p => p.status === 'aprovado');
-
-            if (pendentes.length === 0) {
-                tbodyPendentes.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="2">Nenhuma solicitação pendente no momento.</td></tr>';
-            } else {
-                tbodyPendentes.innerHTML = pendentes.map(p => `
-                    <tr class="animate-fadeIn">
-                        <td class="py-4 px-6">
-                            <p class="font-bold text-slate-800">${escapeHtml(p.nome)}</p>
-                            <p class="text-[10px] text-slate-500">${escapeHtml(p.email)}</p>
-                        </td>
-                        <td class="py-4 px-6 text-right space-x-2">
-                            <button onclick="decidirCadastro('${p.id}', 'aprovado')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-lg transition shadow-sm">Aprovar Acesso</button>
-                            <button onclick="decidirCadastro('${p.id}', 'rejeitado')" class="bg-white hover:bg-rose-50 border border-slate-200 hover:border-rose-200 text-slate-600 hover:text-rose-600 font-bold px-4 py-2 rounded-lg transition">Recusar</button>
-                        </td>
-                    </tr>
-                `).join('');
-            }
-
-            if (ativos.length === 0) {
-                tbodyAtivos.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="3">Nenhum extensionista ativo ainda.</td></tr>';
-            } else {
-                tbodyAtivos.innerHTML = ativos.map(p => `
-                    <tr class="animate-fadeIn">
-                        <td class="py-4 px-6">
-                            <p class="font-bold text-slate-800">${escapeHtml(p.nome)}</p>
-                            <p class="text-[10px] text-slate-500">${escapeHtml(p.email)}</p>
-                        </td>
-                        <td class="py-4 px-6">
-                            <div class="flex justify-center">
-                                <button onclick="resetarSenha('${escapeHtml(p.email)}')" class="text-saude-prime hover:text-saude-dark font-bold underline decoration-saude-prime/30 underline-offset-4 transition">Resetar Senha</button>
-                            </div>
-                        </td>
-                        <td class="py-4 px-6">
-                            <div class="flex justify-center">
-                                <button onclick="revogarAcesso('${p.id}')" class="bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white border border-rose-100 p-2 rounded-xl transition cursor-pointer" title="Revogar Acesso">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                `).join('');
-            }
-
-            carregarContadorExtensionistas();
-        }
-
-        async function decidirCadastro(id, novoStatus) {
-            const acao = novoStatus === 'aprovado' ? 'aprovar' : 'recusar';
-            if (!confirm(`Tem certeza que deseja ${acao} este cadastro?`)) return;
-
-            const { error } = await supabaseClient
-                .from('perfis')
-                .update({ status: novoStatus })
-                .eq('id', id);
-
-            if (error) {
-                alert('Erro: ' + error.message);
-                return;
-            }
-
-            carregarMembros();
-        }
-
-        async function resetarSenha(email) {
-            if (!confirm(`Enviar e-mail de redefinição de senha para ${email}?`)) return;
-
-            const { error } = await supabaseClient.auth.resetPasswordForEmail(email);
-
-            if (error) {
-                alert('Erro ao enviar e-mail: ' + error.message);
-                return;
-            }
-
-            alert('E-mail de redefinição enviado para ' + email + '.');
-        }
-
-        async function revogarAcesso(id) {
-            if (!confirm('ATENÇÃO: isso vai revogar o acesso deste extensionista ao portal. Deseja continuar?')) return;
-
-            const { error } = await supabaseClient
-                .from('perfis')
-                .update({ status: 'rejeitado' })
-                .eq('id', id);
-
-            if (error) {
-                alert('Erro: ' + error.message);
-                return;
-            }
-
-            carregarMembros();
-        }
-
-        async function carregarIndicadoresVisaoGeral() {
-            const { count: countAcoes } = await supabaseClient
-                .from('acoes_extensao')
-                .select('*', { count: 'exact', head: true })
-                .in('status', ['pendente', 'contestado']);
-
-            const elAcoes = document.getElementById('stat-acoes-pendentes');
-            if (elAcoes) elAcoes.innerText = `${countAcoes ?? 0} Ata${countAcoes === 1 ? '' : 's'}`;
-
-            const { data: horasPendentes } = await supabaseClient
                 .from('horas_avulsas')
-                .select('horas')
-                .in('status', ['pendente', 'contestado']);
+                .insert({
+                    extensionista_id: session.user.id,
+                    descricao: descricaoCompleta,
+                    horas: Number(horas),
+                    status: 'pendente'
+                });
 
-            const totalHoras = (horasPendentes || []).reduce((soma, h) => soma + Number(h.horas), 0);
-            const elHoras = document.getElementById('stat-horas-fila');
-            if (elHoras) elHoras.innerText = `${totalHoras} Horas`;
-        }
-
-        async function carregarHomologacoes() {
-            const tbodyFila = document.getElementById('tbody-homologacoes');
-            const tbodyHist = document.getElementById('tbody-historico-acoes');
-
-            tbodyFila.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Carregando...</td></tr>';
-            tbodyHist.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Carregando...</td></tr>';
-
-            const { data, error } = await supabaseClient
-                .from('acoes_extensao')
-                .select('id, local_intervencao, url_ata, url_relatoria, status, motivo_recusa, texto_contestacao, created_at, perfis(nome)');
+            btn.disabled = false;
+            btn.innerText = 'Enviar Registro';
 
             if (error) {
-                const erroMsg = `<tr><td class="py-6 px-6 text-center text-rose-500" colspan="4">Erro ao carregar: ${escapeHtml(error.message)}</td></tr>`;
-                tbodyFila.innerHTML = erroMsg; tbodyHist.innerHTML = erroMsg;
+                alert('Erro ao lançar horas: ' + error.message);
                 return;
             }
 
-            const pendentes = data.filter(a => a.status === 'pendente' || a.status === 'contestado').sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
-            const historico = data.filter(a => a.status === 'deferido' || a.status === 'indeferido').sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
-
-            function agrupar(lista) {
-                return lista.reduce((acc, obj) => {
-                    const n = obj.perfis?.nome || 'Desconhecido';
-                    if(!acc[n]) acc[n] = [];
-                    acc[n].push(obj);
-                    return acc;
-                }, {});
-            }
-
-            if (pendentes.length === 0) {
-                tbodyFila.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Nenhuma ação aguardando homologação.</td></tr>';
-            } else {
-                tbodyFila.innerHTML = pendentes.map(acao => {
-                    const isContestado = acao.status === 'contestado';
-                    const trClass = isContestado ? 'bg-amber-50/40 hover:bg-amber-100/50' : 'hover:bg-slate-50/50';
-                    const badgeContestado = isContestado ? `<span class="block bg-amber-100 text-amber-700 text-[9px] font-bold px-2 py-0.5 rounded mt-1 uppercase w-max">Em Contestação</span>` : '';
-                    
-                    let detalhesLocal = escapeHtml(acao.local_intervencao);
-                    if (isContestado) {
-                        detalhesLocal += `
-                        <div class="mt-2 text-[10px] bg-white p-2 rounded border border-amber-200 leading-relaxed text-left shadow-sm animate-fadeIn">
-                            <span class="block font-bold text-rose-700 mb-0.5">Motivo da Recusa Original:</span>
-                            <span class="block text-rose-600 mb-1.5 italic">${escapeHtml(acao.motivo_recusa)}</span>
-                            <span class="block font-bold text-amber-700 mb-0.5">Defesa/Justificativa do Aluno:</span>
-                            <span class="block text-slate-700 font-medium">${escapeHtml(acao.texto_contestacao)}</span>
-                        </div>`;
-                    }
-
-                    return `
-                    <tr class="${trClass} transition-colors border-b border-slate-100 animate-fadeIn">
-                        <td class="py-4 px-6 font-bold text-slate-800">
-                            <span class="text-[10px] text-slate-400 font-semibold block mb-0.5">${new Date(acao.created_at).toLocaleDateString('pt-BR')}</span>
-                            ${escapeHtml(acao.perfis?.nome || '—')}
-                            ${badgeContestado}
-                        </td>
-                        <td class="py-4 px-6">${detalhesLocal}</td>
-                        <td class="py-4 px-6 space-y-1.5">
-                            ${acao.url_ata ? `<a href="${escapeHtml(acao.url_ata)}" target="_blank" class="text-saude-prime block font-semibold hover:underline flex items-center gap-1.5"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg> Ver Ata</a>` : '<span class="text-slate-300 text-[11px]">Sem ata</span>'}
-                            ${acao.url_relatoria ? `<a href="${escapeHtml(acao.url_relatoria)}" target="_blank" class="text-purple-600 block font-semibold hover:underline flex items-center gap-1.5"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg> Ver Relatoria</a>` : ''}
-                        </td>
-                        <td class="py-4 px-6">
-                            <div class="flex justify-center space-x-2">
-                                <button type="button" onclick="decidirAcao('${acao.id}', 'deferido')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Deferir</button>
-                                <button type="button" onclick="abrirModalRecusa('${acao.id}', 'acoes_extensao')" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Indeferir</button>
-                            </div>
-                        </td>
-                    </tr>`;
-                }).join('');
-            }
-
-            const histGrp = agrupar(historico);
-            if (Object.keys(histGrp).length === 0) {
-                tbodyHist.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Nenhum histórico registrado.</td></tr>';
-            } else {
-                let out = '';
-                for (let nome in histGrp) {
-                    out += `<tr class="bg-slate-100/70 border-y border-slate-200"><td colspan="4" class="py-2.5 px-6 font-extrabold text-slate-700 text-[11px] uppercase tracking-wider"><svg xmlns="http://www.w3.org/2000/svg" class="inline-block w-4 h-4 mr-1.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg> Histórico do Extensionista: ${escapeHtml(nome)}</td></tr>`;
-                    
-                    histGrp[nome].forEach(acao => {
-                        const badge = acao.status === 'deferido' 
-                            ? '<span class="bg-emerald-50 text-emerald-700 border border-emerald-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Deferido</span>'
-                            : '<span class="bg-rose-50 text-rose-700 border border-rose-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Indeferido</span>';
-                        
-                        out += `
-                        <tr class="hover:bg-slate-50/50 transition-colors animate-fadeIn">
-                            <td class="py-4 px-6 font-bold text-slate-800">
-                                <span class="text-[10px] text-slate-400 font-semibold block mb-0.5">${new Date(acao.created_at).toLocaleDateString('pt-BR')}</span>
-                                ${escapeHtml(acao.perfis?.nome || '—')}
-                            </td>
-                            <td class="py-4 px-6">${escapeHtml(acao.local_intervencao)}</td>
-                            <td class="py-4 px-6 space-y-1.5">
-                                ${acao.url_ata ? `<a href="${escapeHtml(acao.url_ata)}" target="_blank" class="text-slate-500 hover:text-saude-prime block font-semibold hover:underline flex items-center gap-1.5">Ata Assinada</a>` : ''}
-                                ${acao.url_relatoria ? `<a href="${escapeHtml(acao.url_relatoria)}" target="_blank" class="text-slate-500 hover:text-purple-600 block font-semibold hover:underline flex items-center gap-1.5">Relatoria</a>` : ''}
-                            </td>
-                            <td class="py-4 px-6 text-center">
-                                <div class="flex flex-col items-center space-y-1.5">
-                                    ${badge}
-                                    <button type="button" onclick="excluirAcao('${acao.id}')" class="text-[10px] font-bold text-slate-400 hover:text-red-600 underline transition cursor-pointer">Excluir do Sistema</button>
-                                </div>
-                            </td>
-                        </tr>`;
-                    });
-                }
-                tbodyHist.innerHTML = out;
-            }
+            alert('Lançamento enviado com sucesso!');
+            document.getElementById('form-horas').reset();
+            document.getElementById('wrapper-outros').classList.add('hidden');
+            closeModal('modal-horas');
+            carregarHistoricoHoras();
         }
 
-        async function decidirAcao(id, novoStatus) {
-            const acaoTexto = novoStatus === 'deferido' ? 'deferir (homologar)' : 'indeferir';
-            if (!confirm(`Tem certeza que deseja ${acaoTexto} esta ação?`)) return;
+        // Busca o histórico de horas do próprio extensionista e atualiza os cards
+        async function carregarHistoricoHoras() {
+            const tbody = document.getElementById('tbody-historico-horas');
+            tbody.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Carregando...</td></tr>';
 
-            const { error } = await supabaseClient
-                .from('acoes_extensao')
-                .update({ status: novoStatus })
-                .eq('id', id);
-
-            if (error) {
-                alert('Erro: ' + error.message);
-                return;
-            }
-
-            carregarHomologacoes();
-            carregarIndicadoresVisaoGeral();
-        }
-
-        async function excluirAcao(id) {
-            if (!confirm('ATENÇÃO COORDENAÇÃO: Tem certeza que deseja EXCLUIR PERMANENTEMENTE este registro do sistema? (O arquivo original continuará salvo no seu Google Drive como backup).')) return;
-
-            const { error } = await supabaseClient
-                .from('acoes_extensao')
-                .delete()
-                .eq('id', id);
-
-            if (error) {
-                alert('Erro ao excluir: ' + error.message);
-                return;
-            }
-
-            carregarHomologacoes();
-            carregarIndicadoresVisaoGeral();
-        }
-
-        async function carregarHorasAvulsas() {
-            const tbodyFila = document.getElementById('tbody-horas');
-            const tbodyHist = document.getElementById('tbody-historico-horas');
-
-            tbodyFila.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Carregando...</td></tr>';
-            tbodyHist.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Carregando...</td></tr>';
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) return;
 
             const { data, error } = await supabaseClient
                 .from('horas_avulsas')
-                .select('id, descricao, horas, status, motivo_recusa, texto_contestacao, created_at, perfis(nome)');
+                .select('id, descricao, horas, status, motivo_recusa, created_at')
+                .eq('extensionista_id', session.user.id)
+                .order('created_at', { ascending: false });
 
             if (error) {
-                const erroMsg = `<tr><td class="py-6 px-6 text-center text-rose-500" colspan="4">Erro ao carregar: ${escapeHtml(error.message)}</td></tr>`;
-                tbodyFila.innerHTML = erroMsg; tbodyHist.innerHTML = erroMsg;
+                tbody.innerHTML = `<tr><td class="py-6 px-6 text-center text-rose-500" colspan="4">Erro ao carregar: ${escapeHtml(error.message)}</td></tr>`;
                 return;
             }
 
-            const pendentes = data.filter(h => h.status === 'pendente' || h.status === 'contestado').sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
-            const historico = data.filter(h => h.status === 'deferido' || h.status === 'indeferido').sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+            const badge = {
+                pendente: '<span class="bg-amber-50 text-amber-700 border border-amber-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Pendente</span>',
+                deferido: '<span class="bg-emerald-50 text-emerald-700 border border-emerald-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Aprovado</span>',
+                indeferido: '<span class="bg-red-50 text-red-700 border border-red-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Recusado</span>'
+            };
 
-            function agrupar(lista) {
-                return lista.reduce((acc, obj) => {
-                    const n = obj.perfis?.nome || 'Desconhecido';
-                    if(!acc[n]) acc[n] = [];
-                    acc[n].push(obj);
-                    return acc;
-                }, {});
-            }
-
-            if (pendentes.length === 0) {
-                tbodyFila.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Nenhum lançamento de horas pendente.</td></tr>';
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Nenhum lançamento ainda. Use "Adicionar Carga Horária" para começar.</td></tr>';
             } else {
-                tbodyFila.innerHTML = pendentes.map(h => {
-                    const isContestado = h.status === 'contestado';
-                    const trClass = isContestado ? 'bg-amber-50/40 hover:bg-amber-100/50' : 'hover:bg-slate-50/50';
-                    const badgeContestado = isContestado ? `<span class="block bg-amber-100 text-amber-700 text-[9px] font-bold px-2 py-0.5 rounded mt-1 uppercase w-max">Em Contestação</span>` : '';
-                    
-                    let detalhesHora = escapeHtml(h.descricao);
-                    if (isContestado) {
-                        detalhesHora += `
-                        <div class="mt-2 text-[10px] bg-white p-2 rounded border border-amber-200 leading-relaxed text-left shadow-sm animate-fadeIn">
-                            <span class="block font-bold text-rose-700 mb-0.5">Motivo da Recusa Original:</span>
-                            <span class="block text-rose-600 mb-1.5 italic">${escapeHtml(h.motivo_recusa)}</span>
-                            <span class="block font-bold text-amber-700 mb-0.5">Defesa/Justificativa do Aluno:</span>
-                            <span class="block text-slate-700 font-medium">${escapeHtml(h.texto_contestacao)}</span>
-                        </div>`;
-                    }
-
-                    return `
-                    <tr class="${trClass} transition-colors border-b border-slate-100 animate-fadeIn">
-                        <td class="py-4 px-6 font-bold text-slate-800">
-                            <span class="text-[10px] text-slate-400 font-semibold block mb-0.5">${new Date(h.created_at).toLocaleDateString('pt-BR')}</span>
-                            ${escapeHtml(h.perfis?.nome || '—')}
-                            ${badgeContestado}
-                        </td>
-                        <td class="py-4 px-6 leading-relaxed text-slate-600">${detalhesHora}</td>
-                        <td class="py-4 px-6 text-center font-black text-purple-600 text-sm">${h.horas}h</td>
-                        <td class="py-4 px-6">
-                            <div class="flex justify-center space-x-2">
-                                <button type="button" onclick="decidirHora('${h.id}', 'deferido')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Deferir</button>
-                                <button type="button" onclick="abrirModalRecusa('${h.id}', 'horas_avulsas')" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-1.5 rounded-lg transition text-xs shadow-sm">Indeferir</button>
+                tbody.innerHTML = data.map(h => {
+                    let extra = '';
+                    if (h.status === 'indeferido') {
+                        extra = `
+                            <div class="mt-2 text-[10px] bg-red-50 border border-red-100 p-2 rounded-lg leading-relaxed animate-fadeIn">
+                                <span class="block font-bold text-red-700 mb-0.5">Motivo da recusa:</span>
+                                <span class="block text-red-600">${escapeHtml(h.motivo_recusa || 'Não informado.')}</span>
+                                <span class="block text-red-500 mt-1.5 font-semibold not-italic">Faça um novo lançamento corrigido em "Adicionar Carga Horária".</span>
                             </div>
-                        </td>
-                    </tr>`;
+                        `;
+                    }
+                    return `
+                    <tr class="animate-fadeIn">
+                        <td class="py-4 px-6 font-semibold align-top">${new Date(h.created_at).toLocaleDateString('pt-BR')}</td>
+                        <td class="py-4 px-6 align-top">${escapeHtml(h.descricao)}${extra}</td>
+                        <td class="py-4 px-6 text-center font-bold text-slate-800 align-top">${h.horas}h</td>
+                        <td class="py-4 px-6 align-top">${badge[h.status] || badge.pendente}</td>
+                    </tr>
+                `;
                 }).join('');
             }
 
-            const histGrp = agrupar(historico);
-            if (Object.keys(histGrp).length === 0) {
-                tbodyHist.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Nenhum histórico registrado.</td></tr>';
-            } else {
-                let out = '';
-                for (let nome in histGrp) {
-                    out += `<tr class="bg-slate-100/70 border-y border-slate-200"><td colspan="4" class="py-2.5 px-6 font-extrabold text-slate-700 text-[11px] uppercase tracking-wider"><svg xmlns="http://www.w3.org/2000/svg" class="inline-block w-4 h-4 mr-1.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg> Histórico do Extensionista: ${escapeHtml(nome)}</td></tr>`;
-                    
-                    histGrp[nome].forEach(h => {
-                        const badge = h.status === 'deferido' 
-                            ? '<span class="bg-emerald-50 text-emerald-700 border border-emerald-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Deferido</span>'
-                            : '<span class="bg-rose-50 text-rose-700 border border-rose-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Indeferido</span>';
-                        
-                        out += `
-                        <tr class="hover:bg-slate-50/50 transition-colors animate-fadeIn">
-                            <td class="py-4 px-6 font-bold text-slate-800">
-                                <span class="text-[10px] text-slate-400 font-semibold block mb-0.5">${new Date(h.created_at).toLocaleDateString('pt-BR')}</span>
-                                ${escapeHtml(h.perfis?.nome || '—')}
-                            </td>
-                            <td class="py-4 px-6 leading-relaxed text-slate-500">${escapeHtml(h.descricao)}</td>
-                            <td class="py-4 px-6 text-center font-black text-slate-600 text-sm">${h.horas}h</td>
-                            <td class="py-4 px-6 text-center">
-                                <div class="flex flex-col items-center space-y-1.5">
-                                    ${badge}
-                                    <button type="button" onclick="excluirHora('${h.id}')" class="text-[10px] font-bold text-slate-400 hover:text-red-600 underline transition cursor-pointer">Excluir do Sistema</button>
-                                </div>
-                            </td>
-                        </tr>`;
-                    });
+            const pendentes = data.filter(h => h.status === 'pendente').reduce((s, h) => s + Number(h.horas), 0);
+            const aprovadas = data.filter(h => h.status === 'deferido').reduce((s, h) => s + Number(h.horas), 0);
+
+            document.getElementById('stat-horas-pendentes').innerText = `${pendentes}h`;
+            document.getElementById('stat-horas-aprovadas').innerText = `${aprovadas}h`;
+
+            const meta = 60;
+            const progresso = Math.min(100, Math.round((aprovadas / meta) * 100));
+            document.getElementById('barra-progresso-horas').style.width = `${progresso}%`;
+        }
+
+        // Busca as ações/atas cadastradas pelo próprio extensionista
+        async function carregarMinhasAcoes() {
+            const tbody = document.getElementById('tbody-minhas-acoes');
+            tbody.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Carregando...</td></tr>';
+
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) return;
+
+            const { data, error } = await supabaseClient
+                .from('acoes_extensao')
+                .select('id, local_intervencao, url_ata, url_relatoria, status, motivo_recusa, created_at')
+                .eq('extensionista_id', session.user.id)
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                tbody.innerHTML = `<tr><td class="py-6 px-6 text-center text-rose-500" colspan="4">Erro ao carregar: ${escapeHtml(error.message)}</td></tr>`;
+                return;
+            }
+
+            const badge = {
+                pendente: '<span class="bg-amber-50 text-amber-700 border border-amber-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Aguardando</span>',
+                deferido: '<span class="bg-emerald-50 text-emerald-700 border border-emerald-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Homologado</span>',
+                indeferido: '<span class="bg-red-50 text-red-700 border border-red-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Indeferido</span>'
+            };
+
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Nenhuma ação cadastrada ainda.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.map(acao => {
+                let extra = '';
+                if (acao.status === 'indeferido') {
+                    extra = `
+                        <div class="mt-2 text-[10px] bg-red-50 border border-red-100 p-2 rounded-lg leading-relaxed animate-fadeIn max-w-xs">
+                            <span class="block font-bold text-red-700 mb-0.5">Motivo da recusa:</span>
+                            <span class="block text-red-600">${escapeHtml(acao.motivo_recusa || 'Não informado.')}</span>
+                            <span class="block text-red-500 mt-1.5 font-semibold not-italic">Cadastre uma nova ação com a documentação corrigida.</span>
+                        </div>
+                    `;
                 }
-                tbodyHist.innerHTML = out;
-            }
+                return `
+                <tr class="hover:bg-slate-50/50 transition-all animate-fadeIn">
+                    <td class="py-4 px-6 align-top">
+                        <span class="font-bold text-slate-800 block">${escapeHtml(acao.local_intervencao)}</span>
+                        <span class="text-[10px] text-slate-400">Enviado em: ${new Date(acao.created_at).toLocaleDateString('pt-BR')}</span>
+                        ${extra}
+                    </td>
+                    <td class="py-4 px-6 align-top">
+                        ${acao.url_ata ? `<a href="${escapeHtml(acao.url_ata)}" target="_blank" class="text-saude-prime font-semibold hover:underline"><i class="fas fa-paperclip mr-1"></i>Ver ata</a>` : '<span class="text-slate-300">—</span>'}
+                    </td>
+                    <td class="py-4 px-6 align-top">
+                        ${acao.url_relatoria ? `<a href="${escapeHtml(acao.url_relatoria)}" target="_blank" class="text-saude-prime font-semibold hover:underline"><i class="fas fa-file-invoice mr-1"></i>Ver relatoria</a>` : '<span class="text-slate-300">—</span>'}
+                    </td>
+                    <td class="py-4 px-6 align-top">${badge[acao.status] || badge.pendente}</td>
+                </tr>
+            `;
+            }).join('');
         }
 
-        async function decidirHora(id, novoStatus) {
-            const acaoTexto = novoStatus === 'deferido' ? 'deferir' : 'indeferir';
-            if (!confirm(`Tem certeza que deseja ${acaoTexto} este lançamento de horas?`)) return;
-
-            const { error } = await supabaseClient
-                .from('horas_avulsas')
-                .update({ status: novoStatus })
-                .eq('id', id);
-
-            if (error) {
-                alert('Erro: ' + error.message);
-                return;
-            }
-
-            carregarHorasAvulsas();
-            carregarIndicadoresVisaoGeral();
+        // CONTROLES DE INTERFACE COMUM
+        function toggleUserMenu() {
+            document.getElementById('user-dropdown').classList.toggle('hidden');
         }
-
-        async function excluirHora(id) {
-            if (!confirm('ATENÇÃO COORDENAÇÃO: Tem certeza que deseja EXCLUIR PERMANENTEMENTE este registro do sistema?')) return;
-
-            const { error } = await supabaseClient
-                .from('horas_avulsas')
-                .delete()
-                .eq('id', id);
-
-            if (error) {
-                alert('Erro ao excluir: ' + error.message);
-                return;
-            }
-
-            carregarHorasAvulsas();
-            carregarIndicadoresVisaoGeral();
-        }
-
-        let membrosCarregado = false;
-        let homologacoesCarregado = false;
-        let horasCarregado = false;
-
-        function switchTab(tabName) {
-            const tabs = ['visao-geral', 'homologacoes', 'validar-horas', 'biblioteca', 'indicadores', 'membros'];
-            const pageTitle = document.getElementById('page-title');
-
-            if (tabName === 'membros' && !membrosCarregado) {
-                membrosCarregado = true;
-                carregarMembros();
-            }
-            if (tabName === 'homologacoes' && !homologacoesCarregado) {
-                homologacoesCarregado = true;
-                carregarHomologacoes();
-            }
-            if (tabName === 'validar-horas' && !horasCarregado) {
-                horasCarregado = true;
-                carregarHorasAvulsas();
-            }
-
-            tabs.forEach(tab => {
-                document.getElementById(`tab-content-${tab}`).classList.add('hidden');
-                document.getElementById(`btn-tab-${tab}`).className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 text-slate-500 hover:bg-slate-50 hover:text-slate-800";
-            });
-
-            document.getElementById(`tab-content-${tabName}`).classList.remove('hidden');
-            document.getElementById(`btn-tab-${tabName}`).className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 bg-teal-50 text-saude-prime";
-
-            if (tabName === 'visao-geral') pageTitle.innerText = "Visão Geral";
-            else if (tabName === 'homologacoes') pageTitle.innerText = "Homologar Ações";
-            else if (tabName === 'validar-horas') pageTitle.innerText = "Validar Horas";
-            else if (tabName === 'biblioteca') pageTitle.innerText = "Biblioteca de Atividades";
-            else if (tabName === 'indicadores') pageTitle.innerText = "Indicadores do Projeto";
-            else if (tabName === 'membros') pageTitle.innerText = "Gestão de Membros";
-            
-            document.getElementById('user-dropdown').classList.add('hidden');
-        }
-
-        function toggleUserMenu() { document.getElementById('user-dropdown').classList.toggle('hidden'); }
-        function openModal(modalId) { document.getElementById(modalId).classList.remove('hidden'); }
-        function closeModal(modalId) { document.getElementById(modalId).classList.add('hidden'); }
 
         window.addEventListener('click', function(e) {
             const dropdown = document.getElementById('user-dropdown');
@@ -1120,46 +745,370 @@
             }
         });
 
-        document.getElementById('modal-perfil-coord').addEventListener('click', function(e) {
-            if (e.target === this) closeModal('modal-perfil-coord');
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+            document.getElementById('user-dropdown').classList.add('hidden');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        document.getElementById('modal-horas').addEventListener('click', function(e) {
+            if (e.target === this) closeModal('modal-horas');
+        });
+        document.getElementById('modal-atividades').addEventListener('click', function(e) {
+            if (e.target === this) closeModal('modal-atividades');
+        });
+        document.getElementById('modal-nova-acao').addEventListener('click', function(e) {
+            if (e.target === this) closeModal('modal-nova-acao');
+        });
+        document.getElementById('modal-perfil').addEventListener('click', function(e) {
+            if (e.target === this) closeModal('modal-perfil');
         });
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            const perfil = await protegerPagina();
-            if (!perfil) return;
+        function toggleOutrosCampo() {
+            const select = document.getElementById('tipo-atividade');
+            const inputOutros = document.getElementById('wrapper-outros');
+            if (select.value === 'Outros') {
+                inputOutros.classList.remove('hidden');
+            } else {
+                inputOutros.classList.add('hidden');
+            }
+        }
 
-            document.getElementById('header-user-name').innerText = perfil.nome;
-            document.getElementById('header-user-avatar').innerText = iniciais(perfil.nome);
-            document.getElementById('modal-avatar-initials').textContent = iniciais(perfil.nome);
-            document.getElementById('modal-user-name').value = perfil.nome;
-            document.getElementById('modal-user-bio').value = perfil.bio || '';
+        // CONFIGURAÇÃO DA INTEGRAÇÃO REAL DO GOOGLE DRIVE (Aba Documentos)
+        const APPS_SCRIPT_DOCS_URL = 'https://script.google.com/macros/s/AKfycbyByjs75MeRhRmr1ZUl4b-KCRKTe6RJO12huK6xE2kfWJLBcwcNPn4_m5mNLou9toTE/exec'; 
 
-            carregarContadorExtensionistas();
-            carregarIndicadoresVisaoGeral();
-        });
+        // CONFIGURAÇÃO DA INTEGRAÇÃO DO GERADOR DE RELATÓRIO PDF (Exclusivo e Separado)
+        const APPS_SCRIPT_RELATORIO_URL = 'https://script.google.com/macros/s/AKfycbyYpBMPzPGGVM67o1iGGHcMmje1jUDfmHaIuvOZS30A7gCIWQ3fWnVxmE-aSvOW_9zUIQ/exec';
 
-        function gerarPDFCustomizado(e) {
+        // 🟡 PENDENTE: cole aqui a URL do Apps Script de UPLOAD depois de implantar
+        // (veja instruções que o Claude te passou no chat)
+        const APPS_SCRIPT_UPLOAD_URL = 'COLOQUE_AQUI_A_URL_DO_APPS_SCRIPT_DE_UPLOAD';
+
+        function fileParaBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result.split(',')[1]);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function enviarArquivoParaDrive(file) {
+            const base64 = await fileParaBase64(file);
+            const response = await fetch(APPS_SCRIPT_UPLOAD_URL, {
+                method: 'POST',
+                mode: 'cors',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({
+                    base64: base64,
+                    nomeArquivo: file.name,
+                    mimeType: file.type
+                })
+            });
+            const resultado = await response.json();
+            if (!resultado.success) throw new Error(resultado.error || 'Falha no upload do arquivo.');
+            return resultado.url;
+        }
+
+        // Envia ata + relatoria para o Drive e cadastra a ação de verdade no Supabase
+        async function cadastrarAcao(e) {
             e.preventDefault();
-            const btnExport = document.getElementById('btnExport');
-            const btnExportText = document.getElementById('btnExportText');
-            
-            btnExport.disabled = true;
-            btnExportText.innerText = "Extraindo Dados do Supabase...";
 
-            const checkboxes = document.querySelectorAll('input[name="metricas"]:checked');
-            if (checkboxes.length === 0) {
-                alert("Selecione pelo menos um módulo para o relatório.");
-                btnExport.disabled = false;
-                btnExportText.innerText = "Gerar Relatório de Indicadores (PDF)";
+            if (APPS_SCRIPT_UPLOAD_URL.includes('COLOQUE_AQUI')) {
+                alert('O upload de arquivos ainda não foi configurado. Peça ao responsável pelo site para finalizar essa parte.');
                 return;
             }
 
-            setTimeout(() => {
-                alert("PDF Oficial gerado com sucesso! Os dados foram validados.");
-                btnExport.disabled = false;
-                btnExportText.innerText = "Gerar Relatório de Indicadores (PDF)";
-            }, 2500);
+            const btn = document.getElementById('btn-enviar-acao');
+            const local = document.getElementById('input-local-acao').value.trim();
+            const arquivoAta = document.getElementById('file-ata').files[0];
+            const arquivoRelatoria = document.getElementById('file-relatoria').files[0];
+
+            if (!local || !arquivoAta || !arquivoRelatoria) {
+                alert('Preencha o local e selecione os dois arquivos.');
+                return;
+            }
+
+            btn.disabled = true;
+
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (!session) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                btn.innerText = 'Enviando ata para o Drive...';
+                const urlAta = await enviarArquivoParaDrive(arquivoAta);
+
+                btn.innerText = 'Enviando relatoria para o Drive...';
+                const urlRelatoria = await enviarArquivoParaDrive(arquivoRelatoria);
+
+                btn.innerText = 'Salvando...';
+                const { error } = await supabaseClient
+                    .from('acoes_extensao')
+                    .insert({
+                        extensionista_id: session.user.id,
+                        local_intervencao: local,
+                        url_ata: urlAta,
+                        url_relatoria: urlRelatoria,
+                        status: 'pendente'
+                    });
+
+                if (error) throw error;
+
+                alert('Documentação da ação enviada! Aguardando homologação da ata e relatoria.');
+                document.getElementById('form-nova-acao').reset();
+                document.getElementById('label-file-ata').innerHTML = '<i class="fas fa-file-signature mr-1 text-slate-400"></i>Selecionar Ata da Ação';
+                document.getElementById('label-file-relatoria').innerHTML = '<i class="fas fa-file-invoice mr-1 text-slate-400"></i>Selecionar Relatoria';
+                closeModal('modal-nova-acao');
+                carregarMinhasAcoes();
+
+            } catch (erro) {
+                alert('Erro ao enviar: ' + erro.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Enviar Documentos';
+            }
         }
+
+        document.getElementById('file-ata').addEventListener('change', function() {
+            if (this.files[0]) document.getElementById('label-file-ata').innerHTML = `<i class="fas fa-check text-emerald-500 mr-1"></i>${escapeHtml(this.files[0].name)}`;
+        });
+        document.getElementById('file-relatoria').addEventListener('change', function() {
+            if (this.files[0]) document.getElementById('label-file-relatoria').innerHTML = `<i class="fas fa-check text-emerald-500 mr-1"></i>${escapeHtml(this.files[0].name)}`;
+        });
+
+        let acoesCarregadas = false;
+
+        function switchTab(tabName) {
+            const tabInicio = document.getElementById('tab-content-inicio');
+            const tabAcoes = document.getElementById('tab-content-acoes');
+            const tabAtividades = document.getElementById('tab-content-atividades');
+            const tabDocumentos = document.getElementById('tab-content-documentos');
+            
+            const btnInicio = document.getElementById('btn-tab-inicio');
+            const btnAcoes = document.getElementById('btn-tab-acoes');
+            const btnAtividades = document.getElementById('btn-tab-atividades');
+            const btnDocumentos = document.getElementById('btn-tab-documentos');
+            const pageTitle = document.getElementById('page-title');
+
+            if (tabName === 'acoes' && !acoesCarregadas) {
+                acoesCarregadas = true;
+                carregarMinhasAcoes();
+            }
+
+            // Esconde todas as abas
+            tabInicio.classList.add('hidden');
+            tabAcoes.classList.add('hidden');
+            tabAtividades.classList.add('hidden');
+            tabDocumentos.classList.add('hidden');
+
+            // Reseta classes de seleção dos botões
+            const btnClassPadrao = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 text-slate-500 hover:bg-slate-50 hover:text-slate-800";
+            btnInicio.className = btnClassPadrao;
+            btnAcoes.className = btnClassPadrao;
+            btnAtividades.className = btnClassPadrao;
+            btnDocumentos.className = btnClassPadrao;
+
+            if (tabName === 'inicio') {
+                tabInicio.classList.remove('hidden');
+                btnInicio.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 bg-teal-50 text-saude-prime";
+                pageTitle.innerHTML = "Página Inicial";
+            } else if (tabName === 'acoes') {
+                tabAcoes.classList.remove('hidden');
+                btnAcoes.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 bg-teal-50 text-saude-prime";
+                pageTitle.innerHTML = "Minhas Ações";
+            } else if (tabName === 'atividades') {
+                tabAtividades.classList.remove('hidden');
+                btnAtividades.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 bg-teal-50 text-saude-prime";
+                pageTitle.innerHTML = "Biblioteca de Atividades";
+            } else if (tabName === 'documentos') {
+                tabDocumentos.classList.remove('hidden');
+                btnDocumentos.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 bg-teal-50 text-saude-prime";
+                pageTitle.innerHTML = "Documentos Acadêmicos";
+                
+                // Realiza a busca automática na nuvem ao entrar na aba pela primeira vez
+                if (document.getElementById('docs-grid').children.length === 0) {
+                    fetchDriveFiles();
+                }
+            }
+            document.getElementById('user-dropdown').classList.add('hidden');
+        }
+
+        // BUSCA DINÂMICA DE ARQUIVOS DO GOOGLE DRIVE (Aba Documentos)
+        async function fetchDriveFiles() {
+            const grid = document.getElementById('docs-grid');
+            const loading = document.getElementById('loading-docs');
+            const errorContainer = document.getElementById('error-docs');
+            const emptyContainer = document.getElementById('empty-docs');
+            const syncIcon = document.getElementById('sync-icon');
+            const syncText = document.getElementById('sync-text');
+
+            // Feedback visual inicial
+            grid.innerHTML = '';
+            loading.classList.remove('hidden');
+            errorContainer.classList.add('hidden');
+            emptyContainer.classList.add('hidden');
+            syncIcon.classList.add('animate-spin');
+            syncText.innerText = "Sincronizando...";
+
+            try {
+                const response = await fetch(APPS_SCRIPT_DOCS_URL);
+                const data = await response.json();
+
+                loading.classList.add('hidden');
+                syncIcon.classList.remove('animate-spin');
+                syncText.innerText = "Sincronizar com Drive";
+
+                if (data.success) {
+                    if (!data.files || data.files.length === 0) {
+                        emptyContainer.classList.remove('hidden');
+                        return;
+                    }
+
+                    // Mapeia e renderiza os arquivos reais retornados do Google Drive
+                    data.files.forEach(file => {
+                        let iconClass = 'fa-file-alt';
+                        let colorClass = 'text-slate-400';
+                        
+                        if (file.mimeType.includes('pdf')) {
+                            iconClass = 'fa-file-pdf';
+                            colorClass = 'text-red-500';
+                        } else if (file.mimeType.includes('word') || file.mimeType.includes('document')) {
+                            iconClass = 'fa-file-word';
+                            colorClass = 'text-blue-500';
+                        } else if (file.mimeType.includes('sheet') || file.mimeType.includes('excel')) {
+                            iconClass = 'fa-file-excel';
+                            colorClass = 'text-emerald-500';
+                        } else if (file.mimeType.includes('presentation') || file.mimeType.includes('powerpoint')) {
+                            iconClass = 'fa-file-powerpoint';
+                            colorClass = 'text-orange-500';
+                        } else if (file.mimeType.includes('image')) {
+                            iconClass = 'fa-file-image';
+                            colorClass = 'text-purple-500';
+                        }
+
+                        const cardHTML = `
+                            <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm flex flex-col justify-between hover:shadow-md transition">
+                                <div class="space-y-3">
+                                    <div class="${colorClass} text-2xl"><i class="fas ${iconClass}"></i></div>
+                                    <h4 class="font-extrabold text-sm text-slate-800 leading-snug">${file.name}</h4>
+                                    <div class="flex flex-wrap gap-2 text-[10px] text-slate-400 font-medium">
+                                        <span><i class="far fa-calendar-alt"></i> ${file.dateCreated}</span>
+                                        <span>•</span>
+                                        <span><i class="fas fa-weight-hanging"></i> ${file.size}</span>
+                                    </div>
+                                </div>
+                                <div class="pt-5 border-t border-slate-100 mt-4 flex gap-2">
+                                    <a href="${file.url}" target="_blank" class="flex-1 bg-slate-50 hover:bg-teal-50 text-slate-700 hover:text-saude-prime border border-slate-200 hover:border-teal-200 text-xs font-bold py-2 rounded-xl transition flex items-center justify-center space-x-1">
+                                        <i class="fas fa-external-link-alt text-[10px]"></i> <span>Abrir no Drive</span>
+                                    </a>
+                                </div>
+                            </div>
+                        `;
+                        grid.innerHTML += cardHTML;
+                    });
+                } else {
+                    errorContainer.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error("Erro na requisição:", error);
+                loading.classList.add('hidden');
+                errorContainer.classList.remove('hidden');
+                syncIcon.classList.remove('animate-spin');
+                syncText.innerText = "Sincronizar com Drive";
+            }
+        }
+
+        // COMUNICAÇÃO ASSÍNCRONA COM O SISTEMA DE RELATÓRIO DO DRIVE (Nova versão com download direto ativado)
+        async function gerarRelatorioOficial() {
+            const btnText = document.getElementById('text-relatorio');
+            const textoOriginal = btnText.innerText;
+            
+            btnText.innerText = "Baixando PDF...";
+
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) { window.location.href = 'login.html'; return; }
+
+            const { data: perfil } = await supabaseClient
+                .from('perfis')
+                .select('nome')
+                .eq('id', session.user.id)
+                .single();
+
+            const { data: horas } = await supabaseClient
+                .from('horas_avulsas')
+                .select('descricao, horas, status, created_at')
+                .eq('extensionista_id', session.user.id)
+                .eq('status', 'deferido')
+                .order('created_at', { ascending: true });
+
+            const payload = {
+                nome: perfil ? perfil.nome : 'Extensionista',
+                atividades: (horas || []).map(h => ({
+                    data: new Date(h.created_at).toLocaleDateString('pt-BR'),
+                    tipo: h.descricao,
+                    local: '',
+                    horas: h.horas
+                }))
+            };
+
+            try {
+                const response = await fetch(APPS_SCRIPT_RELATORIO_URL, {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'text/plain;charset=utf-8'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                const resultado = await response.json();
+
+                if (resultado.success && resultado.pdfUrl) {
+                    let urlDownloadDireto = resultado.pdfUrl;
+                    if (urlDownloadDireto.includes('/view')) {
+                        const arquivoId = urlDownloadDireto.split('/d/')[1].split('/view')[0];
+                        urlDownloadDireto = `https://docs.google.com/uc?export=download&id=${arquivoId}`;
+                    }
+
+                    const linkTemporario = document.createElement('a');
+                    linkTemporario.href = urlDownloadDireto;
+                    linkTemporario.setAttribute('download', `Relatorio_Horas_${payload.nome.replace(/\s+/g, '_')}.pdf`);
+                    document.body.appendChild(linkTemporario);
+                    linkTemporario.click();
+                    document.body.removeChild(linkTemporario);
+                } else {
+                    alert("Não foi possível gerar o relatório. Detalhes: " + (resultado.error || "Erro desconhecido."));
+                }
+            } catch (error) {
+                console.error("Erro de conexão do script:", error);
+                alert("Erro de conexão: Verifique sua internet ou a implantação do script do Google.");
+            } finally {
+                btnText.innerText = textoOriginal;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+             const perfil = await protegerPagina();
+             if (!perfil) return; // já foi redirecionado para login.html
+
+             // Preenche nome/e-mail/bio/avatar reais no header e no modal de perfil
+             document.getElementById('header-user-name').innerText = perfil.nome;
+             document.getElementById('header-user-avatar').innerText = iniciais(perfil.nome);
+             document.getElementById('modal-avatar-initials').textContent = iniciais(perfil.nome);
+             document.getElementById('modal-user-name').value = perfil.nome;
+             document.getElementById('modal-user-email').value = perfil.email;
+             document.getElementById('modal-user-bio').value = perfil.bio || '';
+
+             carregarHistoricoHoras();
+
+             switchTab('inicio');
+        });
     </script>
 </body>
 </html>
