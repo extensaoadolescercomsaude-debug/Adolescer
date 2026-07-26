@@ -24,6 +24,27 @@
         }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn {
+            animation: fadeSlideIn 0.25s ease-out;
+        }
+        #tab-content-inicio,
+        #tab-content-acoes,
+        #tab-content-atividades,
+        #tab-content-documentos {
+            animation: fadeSlideIn 0.3s ease-out;
+        }
+        tbody tr {
+            transition: background-color 0.15s ease;
+        }
+        button, a {
+            transition: all 0.15s ease;
+        }
+    </style>
 </head>
 <body class="bg-slate-50 font-sans antialiased text-slate-700 flex min-h-screen">
 
@@ -445,46 +466,11 @@
         </div>
     </div>
 
-    <!-- NOVO MODAL: CONTESTAÇÃO DO EXTENSIONISTA -->
-    <div id="modal-contestar" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-3xl max-w-md w-full shadow-xl border border-slate-100 p-6 space-y-4">
-            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
-                <h3 class="font-extrabold text-amber-600 text-base flex items-center gap-2">
-                    <i class="fas fa-balance-scale"></i>
-                    Contestar Recusa
-                </h3>
-                <button onclick="closeModal('modal-contestar')" class="text-slate-400 hover:text-slate-600 text-sm font-bold cursor-pointer">Fechar</button>
-            </div>
-            
-            <div>
-                <div class="bg-rose-50 border border-rose-100 p-3 rounded-xl mb-4">
-                    <span class="block text-[10px] font-bold text-rose-700 uppercase mb-1">Motivo da Recusa (Coordenação):</span>
-                    <p id="view-motivo-recusa-aluno" class="text-xs text-rose-800 italic leading-relaxed"></p>
-                </div>
-
-                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Sua Justificativa / Defesa</label>
-                <textarea id="texto-defesa-aluno" rows="4" placeholder="Explique por que o lançamento está correto ou o que foi corrigido..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium text-slate-700 focus:outline-none focus:border-amber-400"></textarea>
-            </div>
-
-            <!-- Campos ocultos para saber o que estamos contestando -->
-            <input type="hidden" id="contestar-id-alvo" value="">
-            <input type="hidden" id="contestar-tabela-alvo" value="">
-
-            <div class="pt-2 flex gap-2">
-                <button type="button" onclick="closeModal('modal-contestar')" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold py-3 rounded-xl transition">Cancelar</button>
-                <button type="button" onclick="enviarContestacao()" class="flex-1 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold py-3 rounded-xl transition shadow cursor-pointer">Enviar Contestação</button>
-            </div>
-        </div>
-    </div>
-
     <script>
         // 🟢 CONFIGURAÇÃO DO SUPABASE
         const SUPABASE_URL = "https://hqckepxhcwvlwbhdlriy.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_Yc4xaOn65mSCBuj0rDPvtA_WfsrimeV";
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        // Variavel global para armazenar os motivos recusados de forma segura
-        window.registrosRecusados = {};
 
         async function sairDoPortal() {
             await supabaseClient.auth.signOut();
@@ -625,47 +611,6 @@
             carregarHistoricoHoras();
         }
 
-        // ==========================================
-        // FUNÇÕES DE CONTESTAÇÃO
-        // ==========================================
-        function abrirModalContestar(id, tabela) {
-            document.getElementById('contestar-id-alvo').value = id;
-            document.getElementById('contestar-tabela-alvo').value = tabela;
-            document.getElementById('view-motivo-recusa-aluno').innerText = window.registrosRecusados[id] || 'Motivo não especificado.';
-            document.getElementById('texto-defesa-aluno').value = '';
-            openModal('modal-contestar');
-        }
-
-        async function enviarContestacao() {
-            const id = document.getElementById('contestar-id-alvo').value;
-            const tabela = document.getElementById('contestar-tabela-alvo').value;
-            const defesa = document.getElementById('texto-defesa-aluno').value.trim();
-
-            if (!defesa) {
-                alert("Por favor, escreva sua justificativa para a contestação.");
-                return;
-            }
-
-            const { error } = await supabaseClient
-                .from(tabela)
-                .update({ 
-                    status: 'contestado', 
-                    texto_contestacao: defesa 
-                })
-                .eq('id', id);
-
-            if (error) {
-                alert('Erro ao enviar contestação: ' + error.message);
-                return;
-            }
-
-            alert("Contestação enviada com sucesso! A coordenação reavaliará seu lançamento.");
-            closeModal('modal-contestar');
-            
-            if (tabela === 'acoes_extensao') carregarMinhasAcoes();
-            if (tabela === 'horas_avulsas') carregarHistoricoHoras();
-        }
-
         // Busca o histórico de horas do próprio extensionista e atualiza os cards
         async function carregarHistoricoHoras() {
             const tbody = document.getElementById('tbody-historico-horas');
@@ -676,7 +621,7 @@
 
             const { data, error } = await supabaseClient
                 .from('horas_avulsas')
-                .select('id, descricao, horas, status, motivo_recusa, texto_contestacao, created_at')
+                .select('id, descricao, horas, status, motivo_recusa, created_at')
                 .eq('extensionista_id', session.user.id)
                 .order('created_at', { ascending: false });
 
@@ -688,40 +633,35 @@
             const badge = {
                 pendente: '<span class="bg-amber-50 text-amber-700 border border-amber-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Pendente</span>',
                 deferido: '<span class="bg-emerald-50 text-emerald-700 border border-emerald-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Aprovado</span>',
-                indeferido: '<span class="bg-red-50 text-red-700 border border-red-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Recusado</span>',
-                contestado: '<span class="bg-blue-50 text-blue-700 border border-blue-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Em Revisão</span>'
+                indeferido: '<span class="bg-red-50 text-red-700 border border-red-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Recusado</span>'
             };
 
             if (data.length === 0) {
                 tbody.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Nenhum lançamento ainda. Use "Adicionar Carga Horária" para começar.</td></tr>';
             } else {
                 tbody.innerHTML = data.map(h => {
+                    let extra = '';
                     if (h.status === 'indeferido') {
-                        window.registrosRecusados[h.id] = h.motivo_recusa;
-                    }
-
-                    let conteudoStatus = badge[h.status] || badge.pendente;
-                    if (h.status === 'indeferido') {
-                        conteudoStatus += `
-                            <div class="mt-2 text-[10px] text-red-600 bg-red-50 p-1.5 rounded border border-red-100 italic leading-tight text-left">
-                                Motivo: ${escapeHtml(h.motivo_recusa)}
+                        extra = `
+                            <div class="mt-2 text-[10px] bg-red-50 border border-red-100 p-2 rounded-lg leading-relaxed animate-fadeIn">
+                                <span class="block font-bold text-red-700 mb-0.5">Motivo da recusa:</span>
+                                <span class="block text-red-600">${escapeHtml(h.motivo_recusa || 'Não informado.')}</span>
+                                <span class="block text-red-500 mt-1.5 font-semibold not-italic">Faça um novo lançamento corrigido em "Adicionar Carga Horária".</span>
                             </div>
-                            <button onclick="abrirModalContestar('${h.id}', 'horas_avulsas')" class="mt-1.5 w-full text-center text-[10px] font-bold text-amber-600 hover:text-amber-800 hover:underline cursor-pointer">Contestar Recusa</button>
                         `;
                     }
-
                     return `
-                        <tr>
-                            <td class="py-4 px-6 font-semibold">${new Date(h.created_at).toLocaleDateString('pt-BR')}</td>
-                            <td class="py-4 px-6">${escapeHtml(h.descricao)}</td>
-                            <td class="py-4 px-6 text-center font-bold text-slate-800">${h.horas}h</td>
-                            <td class="py-4 px-6">${conteudoStatus}</td>
-                        </tr>
-                    `;
+                    <tr class="animate-fadeIn">
+                        <td class="py-4 px-6 font-semibold align-top">${new Date(h.created_at).toLocaleDateString('pt-BR')}</td>
+                        <td class="py-4 px-6 align-top">${escapeHtml(h.descricao)}${extra}</td>
+                        <td class="py-4 px-6 text-center font-bold text-slate-800 align-top">${h.horas}h</td>
+                        <td class="py-4 px-6 align-top">${badge[h.status] || badge.pendente}</td>
+                    </tr>
+                `;
                 }).join('');
             }
 
-            const pendentes = data.filter(h => h.status === 'pendente' || h.status === 'contestado').reduce((s, h) => s + Number(h.horas), 0);
+            const pendentes = data.filter(h => h.status === 'pendente').reduce((s, h) => s + Number(h.horas), 0);
             const aprovadas = data.filter(h => h.status === 'deferido').reduce((s, h) => s + Number(h.horas), 0);
 
             document.getElementById('stat-horas-pendentes').innerText = `${pendentes}h`;
@@ -742,7 +682,7 @@
 
             const { data, error } = await supabaseClient
                 .from('acoes_extensao')
-                .select('id, local_intervencao, url_ata, url_relatoria, status, motivo_recusa, texto_contestacao, created_at')
+                .select('id, local_intervencao, url_ata, url_relatoria, status, motivo_recusa, created_at')
                 .eq('extensionista_id', session.user.id)
                 .order('created_at', { ascending: false });
 
@@ -754,8 +694,7 @@
             const badge = {
                 pendente: '<span class="bg-amber-50 text-amber-700 border border-amber-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Aguardando</span>',
                 deferido: '<span class="bg-emerald-50 text-emerald-700 border border-emerald-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Homologado</span>',
-                indeferido: '<span class="bg-red-50 text-red-700 border border-red-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Indeferido</span>',
-                contestado: '<span class="bg-blue-50 text-blue-700 border border-blue-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Em Revisão</span>'
+                indeferido: '<span class="bg-red-50 text-red-700 border border-red-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Indeferido</span>'
             };
 
             if (data.length === 0) {
@@ -764,35 +703,32 @@
             }
 
             tbody.innerHTML = data.map(acao => {
+                let extra = '';
                 if (acao.status === 'indeferido') {
-                    window.registrosRecusados[acao.id] = acao.motivo_recusa;
-                }
-
-                let conteudoStatus = badge[acao.status] || badge.pendente;
-                if (acao.status === 'indeferido') {
-                    conteudoStatus += `
-                        <div class="mt-2 text-[10px] text-red-600 bg-red-50 p-1.5 rounded border border-red-100 italic leading-tight text-left">
-                            Motivo: ${escapeHtml(acao.motivo_recusa)}
+                    extra = `
+                        <div class="mt-2 text-[10px] bg-red-50 border border-red-100 p-2 rounded-lg leading-relaxed animate-fadeIn max-w-xs">
+                            <span class="block font-bold text-red-700 mb-0.5">Motivo da recusa:</span>
+                            <span class="block text-red-600">${escapeHtml(acao.motivo_recusa || 'Não informado.')}</span>
+                            <span class="block text-red-500 mt-1.5 font-semibold not-italic">Cadastre uma nova ação com a documentação corrigida.</span>
                         </div>
-                        <button onclick="abrirModalContestar('${acao.id}', 'acoes_extensao')" class="mt-1.5 w-full text-center text-[10px] font-bold text-amber-600 hover:text-amber-800 hover:underline cursor-pointer">Contestar Recusa</button>
                     `;
                 }
-
                 return `
-                    <tr class="hover:bg-slate-50/50 transition-all">
-                        <td class="py-4 px-6">
-                            <span class="font-bold text-slate-800 block">${escapeHtml(acao.local_intervencao)}</span>
-                            <span class="text-[10px] text-slate-400">Enviado em: ${new Date(acao.created_at).toLocaleDateString('pt-BR')}</span>
-                        </td>
-                        <td class="py-4 px-6">
-                            ${acao.url_ata ? `<a href="${escapeHtml(acao.url_ata)}" target="_blank" class="text-saude-prime font-semibold hover:underline"><i class="fas fa-paperclip mr-1"></i>Ver ata</a>` : '<span class="text-slate-300">—</span>'}
-                        </td>
-                        <td class="py-4 px-6">
-                            ${acao.url_relatoria ? `<a href="${escapeHtml(acao.url_relatoria)}" target="_blank" class="text-saude-prime font-semibold hover:underline"><i class="fas fa-file-invoice mr-1"></i>Ver relatoria</a>` : '<span class="text-slate-300">—</span>'}
-                        </td>
-                        <td class="py-4 px-6">${conteudoStatus}</td>
-                    </tr>
-                `;
+                <tr class="hover:bg-slate-50/50 transition-all animate-fadeIn">
+                    <td class="py-4 px-6 align-top">
+                        <span class="font-bold text-slate-800 block">${escapeHtml(acao.local_intervencao)}</span>
+                        <span class="text-[10px] text-slate-400">Enviado em: ${new Date(acao.created_at).toLocaleDateString('pt-BR')}</span>
+                        ${extra}
+                    </td>
+                    <td class="py-4 px-6 align-top">
+                        ${acao.url_ata ? `<a href="${escapeHtml(acao.url_ata)}" target="_blank" class="text-saude-prime font-semibold hover:underline"><i class="fas fa-paperclip mr-1"></i>Ver ata</a>` : '<span class="text-slate-300">—</span>'}
+                    </td>
+                    <td class="py-4 px-6 align-top">
+                        ${acao.url_relatoria ? `<a href="${escapeHtml(acao.url_relatoria)}" target="_blank" class="text-saude-prime font-semibold hover:underline"><i class="fas fa-file-invoice mr-1"></i>Ver relatoria</a>` : '<span class="text-slate-300">—</span>'}
+                    </td>
+                    <td class="py-4 px-6 align-top">${badge[acao.status] || badge.pendente}</td>
+                </tr>
+            `;
             }).join('');
         }
 
@@ -830,9 +766,6 @@
         document.getElementById('modal-perfil').addEventListener('click', function(e) {
             if (e.target === this) closeModal('modal-perfil');
         });
-        document.getElementById('modal-contestar').addEventListener('click', function(e) {
-            if (e.target === this) closeModal('modal-contestar');
-        });
 
         function toggleOutrosCampo() {
             const select = document.getElementById('tipo-atividade');
@@ -852,7 +785,7 @@
 
         // 🟡 PENDENTE: cole aqui a URL do Apps Script de UPLOAD depois de implantar
         // (veja instruções que o Claude te passou no chat)
-        const APPS_SCRIPT_UPLOAD_URL = 'https://script.google.com/macros/s/AKfycbygy2Dd9OkM4KFTkXzUT0Z8mku6UM_6kP_UCf2LX-mH2sVkzQ8x9CAGBwnz1BEXSgez8g/exec';
+        const APPS_SCRIPT_UPLOAD_URL = 'COLOQUE_AQUI_A_URL_DO_APPS_SCRIPT_DE_UPLOAD';
 
         function fileParaBase64(file) {
             return new Promise((resolve, reject) => {
