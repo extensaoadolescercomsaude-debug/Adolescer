@@ -246,35 +246,24 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm flex flex-col justify-between hover:shadow-md transition">
-                        <div class="space-y-3">
-                            <div class="text-saude-prime text-xl"><i class="fas fa-folder-open"></i></div>
-                            <h4 class="font-extrabold text-sm text-slate-800 leading-snug">Oficina Interativa de Saúde Mental e Escuta Ativa</h4>
-                            <p class="text-[11px] text-slate-400 font-medium"><strong>Autor:</strong> Rivaldo de Pontes</p>
-                            <span class="inline-block bg-teal-50 text-saude-prime font-bold text-[10px] px-2.5 py-0.5 rounded-md">Público: 15-18 anos</span>
-                        </div>
-                        <div class="pt-5 border-t border-slate-100 mt-4">
-                            <button onclick="alert('Fazendo download do arquivo do Drive...')" class="w-full bg-slate-50 hover:bg-teal-50 text-slate-700 hover:text-saude-prime border border-slate-200 hover:border-teal-200 text-xs font-bold py-2 rounded-xl transition flex items-center justify-center space-x-1">
-                                <i class="fas fa-download text-[10px]"></i> <span>Baixar Atividade</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm flex flex-col justify-between hover:shadow-md transition">
-                        <div class="space-y-3">
-                            <div class="text-saude-prime text-xl"><i class="fas fa-folder-open"></i></div>
-                            <h4 class="font-extrabold text-sm text-slate-800 leading-snug">Dinâmica Lúdica: Desmistificando Mitos Alimentares</h4>
-                            <p class="text-[11px] text-slate-400 font-medium"><strong>Autor:</strong> Rayane Vitoria</p>
-                            <span class="inline-block bg-indigo-50 text-saude-accent font-bold text-[10px] px-2.5 py-0.5 rounded-md">Público: 3º ao 5º ano</span>
-                        </div>
-                        <div class="pt-5 border-t border-slate-100 mt-4">
-                            <button onclick="alert('Fazendo download do arquivo do Drive...')" class="w-full bg-slate-50 hover:bg-teal-50 text-slate-700 hover:text-saude-prime border border-slate-200 hover:border-teal-200 text-xs font-bold py-2 rounded-xl transition flex items-center justify-center space-x-1">
-                                <i class="fas fa-download text-[10px]"></i> <span>Baixar Atividade</span>
-                            </button>
-                        </div>
-                    </div>
+                <div id="loading-atividades" class="hidden flex flex-col items-center justify-center py-12 space-y-3 bg-white rounded-2xl border border-slate-200">
+                    <div class="w-10 h-10 border-4 border-teal-200 border-t-saude-prime rounded-full animate-spin"></div>
+                    <p class="text-xs font-semibold text-slate-400">Carregando biblioteca de atividades...</p>
                 </div>
+
+                <div id="error-atividades" class="hidden p-6 bg-red-50 text-red-700 rounded-2xl border border-red-100 text-center space-y-2">
+                    <i class="fas fa-exclamation-triangle text-xl"></i>
+                    <p class="text-xs font-bold">Erro ao buscar as atividades.</p>
+                    <p class="text-[11px] text-red-500 max-w-md mx-auto">Tente novamente em instantes.</p>
+                </div>
+
+                <div id="empty-atividades" class="hidden flex flex-col items-center justify-center py-16 bg-white rounded-2xl border border-slate-200 text-center px-4 space-y-3">
+                    <div class="text-slate-300 text-4xl"><i class="far fa-folder-open"></i></div>
+                    <p class="text-xs font-bold text-slate-500">Nenhuma atividade encontrada!</p>
+                    <p class="text-[11px] text-slate-400 max-w-xs leading-relaxed">Seja o primeiro a compartilhar uma dinâmica ou oficina com a equipe.</p>
+                </div>
+
+                <div id="grid-biblioteca-atividades" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
             </div>
 
             <div id="tab-content-documentos" class="hidden space-y-6">
@@ -395,24 +384,24 @@
                 <h3 class="font-extrabold text-slate-800 text-base">Adicionar Atividade Pronta</h3>
                 <button onclick="closeModal('modal-atividades')" class="text-slate-400 hover:text-slate-600 text-lg" aria-label="Fechar"><i class="fas fa-times"></i></button>
             </div>
-            <form onsubmit="event.preventDefault(); alert('Atividade compartilhada!'); closeModal('modal-atividades');" class="p-6 space-y-4">
+            <form id="form-nova-atividade" onsubmit="compartilharAtividade(event)" class="p-6 space-y-4">
                 <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Título da Atividade</label>
-                    <input type="text" required placeholder="Ex: Oficina Temática sobre Nutrição" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium focus:outline-none focus:border-saude-prime">
+                    <input type="text" id="input-titulo-atividade" required placeholder="Ex: Oficina Temática sobre Nutrição" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium focus:outline-none focus:border-saude-prime">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Público-Alvo</label>
-                    <input type="text" required placeholder="Ex: Crianças do 3º ao 5º ano" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium focus:outline-none focus:border-saude-prime">
+                    <input type="text" id="input-publico-atividade" required placeholder="Ex: Crianças do 3º ao 5º ano" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium focus:outline-none focus:border-saude-prime">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Objetivo Principal</label>
-                    <input type="text" required placeholder="Ex: Incentivar hábitos alimentares saudáveis" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium focus:outline-none focus:border-saude-prime">
+                    <input type="text" id="input-objetivo-atividade" required placeholder="Ex: Incentivar hábitos alimentares saudáveis" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium focus:outline-none focus:border-saude-prime">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Documento (PDF / Word)</label>
                     <div class="border-2 border-dashed border-slate-200 bg-slate-50 p-4 rounded-xl text-center cursor-pointer hover:border-saude-prime transition">
                         <input type="file" required class="hidden" id="file-atividade">
-                        <label for="file-atividade" class="cursor-pointer space-y-1 block">
+                        <label for="file-atividade" id="label-file-atividade" class="cursor-pointer space-y-1 block">
                             <i class="fas fa-cloud-upload-alt text-slate-400 text-xl block"></i>
                             <span class="text-xs font-semibold text-slate-600 block">Clique para selecionar o arquivo</span>
                         </label>
@@ -420,7 +409,7 @@
                 </div>
                 <div class="pt-2 flex gap-2">
                     <button type="button" onclick="closeModal('modal-atividades')" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold py-3 rounded-xl transition">Cancelar</button>
-                    <button type="submit" class="flex-1 bg-saude-accent hover:bg-indigo-700 text-white text-xs font-bold py-3 rounded-xl transition shadow-sm">Compartilhar</button>
+                    <button type="submit" id="btn-compartilhar-atividade" class="flex-1 bg-saude-accent hover:bg-indigo-700 text-white text-xs font-bold py-3 rounded-xl transition shadow-sm">Compartilhar</button>
                 </div>
             </form>
         </div>
@@ -820,6 +809,7 @@
         const APPS_SCRIPT_DOCS_URL = 'https://script.google.com/macros/s/AKfycbyByjs75MeRhRmr1ZUl4b-KCRKTe6RJO12huK6xE2kfWJLBcwcNPn4_m5mNLou9toTE/exec'; 
         const APPS_SCRIPT_RELATORIO_URL = 'https://script.google.com/macros/s/AKfycbyYpBMPzPGGVM67o1iGGHcMmje1jUDfmHaIuvOZS30A7gCIWQ3fWnVxmE-aSvOW_9zUIQ/exec';
         const APPS_SCRIPT_UPLOAD_URL = 'https://script.google.com/macros/s/AKfycbygy2Dd9OkM4KFTkXzUT0Z8mku6UM_6kP_UCf2LX-mH2sVkzQ8x9CAGBwnz1BEXSgez8g/exec';
+        const APPS_SCRIPT_ATIVIDADE_UPLOAD_URL = 'https://script.google.com/macros/s/AKfycbyK2ZCTs35IPZWdT4RFryauHuK2J7OZjvhHhlLiny87Xr1WaDlGFFGE_6vc-RFwkKDQ/exec';
 
         function fileParaBase64(file) {
             return new Promise((resolve, reject) => {
@@ -833,6 +823,24 @@
         async function enviarArquivoParaDrive(file) {
             const base64 = await fileParaBase64(file);
             const response = await fetch(APPS_SCRIPT_UPLOAD_URL, {
+                method: 'POST',
+                mode: 'cors',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({
+                    base64: base64,
+                    nomeArquivo: file.name,
+                    mimeType: file.type
+                })
+            });
+            const resultado = await response.json();
+            if (!resultado.success) throw new Error(resultado.error || 'Falha no upload do arquivo.');
+            return resultado.url;
+        }
+
+        // Upload do arquivo de uma nova atividade da biblioteca para o Drive (script dedicado)
+        async function enviarArquivoAtividadeParaDrive(file) {
+            const base64 = await fileParaBase64(file);
+            const response = await fetch(APPS_SCRIPT_ATIVIDADE_UPLOAD_URL, {
                 method: 'POST',
                 mode: 'cors',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -914,8 +922,153 @@
         document.getElementById('file-relatoria').addEventListener('change', function() {
             if (this.files[0]) document.getElementById('label-file-relatoria').innerHTML = `<i class="fas fa-check text-emerald-500 mr-1"></i>${escapeHtml(this.files[0].name)}`;
         });
+        document.getElementById('file-atividade').addEventListener('change', function() {
+            const label = document.getElementById('label-file-atividade');
+            if (this.files[0]) {
+                label.innerHTML = `<i class="fas fa-check text-emerald-500 mr-1 block text-lg"></i><span class="text-xs font-semibold text-slate-600 block">${escapeHtml(this.files[0].name)}</span>`;
+            } else {
+                label.innerHTML = '<i class="fas fa-cloud-upload-alt text-slate-400 text-xl block"></i><span class="text-xs font-semibold text-slate-600 block">Clique para selecionar o arquivo</span>';
+            }
+        });
+
+        // Envia uma nova atividade para homologação (arquivo -> Drive, metadados -> Supabase)
+        async function compartilharAtividade(e) {
+            e.preventDefault();
+
+            if (APPS_SCRIPT_ATIVIDADE_UPLOAD_URL.includes('COLOQUE_AQUI')) {
+                alert('O upload de atividades ainda não foi configurado. Peça ao responsável pelo site para finalizar essa parte.');
+                return;
+            }
+
+            const btn = document.getElementById('btn-compartilhar-atividade');
+            const titulo = document.getElementById('input-titulo-atividade').value.trim();
+            const publico = document.getElementById('input-publico-atividade').value.trim();
+            const objetivo = document.getElementById('input-objetivo-atividade').value.trim();
+            const arquivo = document.getElementById('file-atividade').files[0];
+
+            if (!titulo || !publico || !objetivo || !arquivo) {
+                alert('Preencha todos os campos e selecione um arquivo.');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = 'Enviando arquivo...';
+
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (!session) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                const urlArquivo = await enviarArquivoAtividadeParaDrive(arquivo);
+
+                btn.innerText = 'Salvando...';
+                const { error } = await supabaseClient
+                    .from('biblioteca_atividades')
+                    .insert({
+                        extensionista_id: session.user.id,
+                        titulo: titulo,
+                        publico_alvo: publico,
+                        objetivo: objetivo,
+                        url_arquivo: urlArquivo,
+                        status: 'pendente'
+                    });
+
+                if (error) throw error;
+
+                alert('Atividade enviada! Ela aparecerá na biblioteca assim que for homologada pela coordenação.');
+                document.getElementById('form-nova-atividade').reset();
+                document.getElementById('label-file-atividade').innerHTML = '<i class="fas fa-cloud-upload-alt text-slate-400 text-xl block"></i><span class="text-xs font-semibold text-slate-600 block">Clique para selecionar o arquivo</span>';
+                closeModal('modal-atividades');
+                carregarBibliotecaAtividades();
+
+            } catch (erro) {
+                alert('Erro ao compartilhar atividade: ' + erro.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Compartilhar';
+            }
+        }
+
+        // Carrega a biblioteca: atividades aprovadas (de todos) + as próprias (mesmo pendentes/recusadas)
+        async function carregarBibliotecaAtividades() {
+            const grid = document.getElementById('grid-biblioteca-atividades');
+            const loading = document.getElementById('loading-atividades');
+            const errorContainer = document.getElementById('error-atividades');
+            const emptyContainer = document.getElementById('empty-atividades');
+
+            grid.innerHTML = '';
+            loading.classList.remove('hidden');
+            errorContainer.classList.add('hidden');
+            emptyContainer.classList.add('hidden');
+
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) return;
+
+            const { data, error } = await supabaseClient
+                .from('biblioteca_atividades')
+                .select('id, titulo, publico_alvo, objetivo, url_arquivo, status, motivo_recusa, extensionista_id, created_at, perfis(nome)')
+                .or(`status.eq.aprovado,extensionista_id.eq.${session.user.id}`)
+                .order('created_at', { ascending: false });
+
+            loading.classList.add('hidden');
+
+            if (error) {
+                errorContainer.classList.remove('hidden');
+                console.error('Erro ao carregar biblioteca:', error.message);
+                return;
+            }
+
+            if (!data || data.length === 0) {
+                emptyContainer.classList.remove('hidden');
+                return;
+            }
+
+            const statusBadge = {
+                pendente: '<span class="bg-amber-50 text-amber-700 border border-amber-100 px-2.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wide">Em análise</span>',
+                indeferido: '<span class="bg-red-50 text-red-700 border border-red-100 px-2.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wide">Recusada</span>'
+            };
+
+            grid.innerHTML = data.map(item => {
+                const ehPropria = item.extensionista_id === session.user.id;
+                const autorNome = item.perfis ? item.perfis.nome : 'Extensionista';
+
+                let extraStatus = '';
+                if (ehPropria && item.status !== 'aprovado') {
+                    extraStatus = `<div class="pt-1">${statusBadge[item.status] || ''}</div>`;
+                    if (item.status === 'indeferido' && item.motivo_recusa) {
+                        extraStatus += `
+                            <div class="mt-2 text-[10px] bg-red-50 border border-red-100 p-2 rounded-lg leading-relaxed">
+                                <span class="block font-bold text-red-700 mb-0.5">Motivo da recusa:</span>
+                                <span class="block text-red-600">${escapeHtml(item.motivo_recusa)}</span>
+                            </div>
+                        `;
+                    }
+                }
+
+                return `
+                    <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm flex flex-col justify-between hover:shadow-md transition animate-fadeIn">
+                        <div class="space-y-3">
+                            <div class="text-saude-prime text-xl"><i class="fas fa-folder-open"></i></div>
+                            <h4 class="font-extrabold text-sm text-slate-800 leading-snug">${escapeHtml(item.titulo)}</h4>
+                            <p class="text-[11px] text-slate-400 font-medium"><strong>Autor:</strong> ${escapeHtml(autorNome)}</p>
+                            <p class="text-[11px] text-slate-400 font-medium"><strong>Objetivo:</strong> ${escapeHtml(item.objetivo)}</p>
+                            <span class="inline-block bg-teal-50 text-saude-prime font-bold text-[10px] px-2.5 py-0.5 rounded-md">Público: ${escapeHtml(item.publico_alvo)}</span>
+                            ${extraStatus}
+                        </div>
+                        <div class="pt-5 border-t border-slate-100 mt-4">
+                            <a href="${escapeHtml(item.url_arquivo)}" target="_blank" class="w-full bg-slate-50 hover:bg-teal-50 text-slate-700 hover:text-saude-prime border border-slate-200 hover:border-teal-200 text-xs font-bold py-2 rounded-xl transition flex items-center justify-center space-x-1">
+                                <i class="fas fa-download text-[10px]"></i> <span>Baixar Atividade</span>
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
 
         let acoesCarregadas = false;
+        let atividadesCarregadas = false;
 
         function switchTab(tabName) {
             const tabInicio = document.getElementById('tab-content-inicio');
@@ -959,6 +1112,11 @@
                 tabAtividades.classList.remove('hidden');
                 btnAtividades.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 bg-teal-50 text-saude-prime";
                 pageTitle.innerHTML = "Biblioteca de Atividades";
+
+                if (!atividadesCarregadas) {
+                    atividadesCarregadas = true;
+                    carregarBibliotecaAtividades();
+                }
             } else if (tabName === 'documentos') {
                 tabDocumentos.classList.remove('hidden');
                 btnDocumentos.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 bg-teal-50 text-saude-prime";
