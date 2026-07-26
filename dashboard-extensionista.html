@@ -167,7 +167,7 @@
                             <button onclick="openModal('modal-horas')" class="flex-1 bg-saude-prime hover:bg-saude-dark text-white px-5 py-3.5 rounded-xl font-bold text-xs shadow-sm transition flex items-center justify-center space-x-2">
                                 <i class="fas fa-plus"></i> <span>Adicionar Carga Horária</span>
                             </button>
-                            <button onclick="gerarRelatorioOficial()" class="flex-1 bg-white hover:bg-slate-50 text-saude-prime border border-slate-200 hover:border-saude-prime px-5 py-3.5 rounded-xl font-bold text-xs transition flex items-center justify-center space-x-2">
+                            <button onclick="openModal('modal-relatorio')" class="flex-1 bg-white hover:bg-slate-50 text-saude-prime border border-slate-200 hover:border-saude-prime px-5 py-3.5 rounded-xl font-bold text-xs transition flex items-center justify-center space-x-2">
                                 <i class="fas fa-file-invoice"></i> <span id="text-relatorio">Gerar Relatório de Horas</span>
                             </button>
                         </div>
@@ -184,7 +184,7 @@
                             <thead>
                                 <tr class="bg-slate-50 border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
                                     <th class="py-3 px-6">Data</th>
-                                    <th class="py-3 px-6">Tipo de Atividade</th>
+                                    <th class="py-3 px-6">Tipo / Local</th>
                                     <th class="py-3 px-6 text-center">Horas</th>
                                     <th class="py-3 px-6">Status</th>
                                 </tr>
@@ -335,6 +335,10 @@
                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Especifique a Atividade</label>
                     <input type="text" id="input-outros" placeholder="Qual foi a atividade realizada?" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium focus:outline-none focus:border-saude-prime">
                 </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Local da Atividade</label>
+                    <input type="text" id="input-local-horas" required placeholder="Ex: Ambulatório FENSG, Escola de Aplicação..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium focus:outline-none focus:border-saude-prime">
+                </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Data da Atividade</label>
@@ -352,6 +356,34 @@
                 <div class="pt-2 flex gap-2">
                     <button type="button" onclick="closeModal('modal-horas')" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold py-3 rounded-xl transition">Cancelar</button>
                     <button type="submit" id="btn-enviar-horas" class="flex-1 bg-saude-prime hover:bg-saude-dark text-white text-xs font-bold py-3 rounded-xl transition shadow-sm">Enviar Registro</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-relatorio" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full shadow-xl border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                <h3 class="font-extrabold text-slate-800 text-base">Gerar Relatório de Horas</h3>
+                <button onclick="closeModal('modal-relatorio')" class="text-slate-400 hover:text-slate-600 text-lg" aria-label="Fechar"><i class="fas fa-times"></i></button>
+            </div>
+            <form onsubmit="gerarRelatorioOficial(event)" class="p-6 space-y-4">
+                <p class="text-xs text-slate-500 mb-2">Preencha o período do ciclo que deseja exportar. Deixe em branco para exportar todo o histórico de horas aprovadas.</p>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Data Inicial</label>
+                        <input type="date" id="relatorio-data-inicio" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium focus:outline-none focus:border-saude-prime">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Data Final</label>
+                        <input type="date" id="relatorio-data-fim" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium focus:outline-none focus:border-saude-prime">
+                    </div>
+                </div>
+                <div class="pt-4 flex gap-2">
+                    <button type="button" onclick="closeModal('modal-relatorio')" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold py-3 rounded-xl transition">Cancelar</button>
+                    <button type="submit" id="btn-submit-relatorio" class="flex-1 bg-saude-prime hover:bg-saude-dark text-white text-xs font-bold py-3 rounded-xl transition shadow-sm flex justify-center items-center gap-2">
+                        <i class="fas fa-file-pdf"></i> <span id="text-btn-relatorio">Gerar PDF</span>
+                    </button>
                 </div>
             </form>
         </div>
@@ -489,8 +521,7 @@
             return div.innerHTML;
         }
 
-        // GUARDA DE SESSÃO: bloqueia acesso a quem não está logado, ainda pendente,
-        // recusado, ou logado como coordenação (esse painel é só para extensionistas).
+        // GUARDA DE SESSÃO
         async function protegerPagina() {
             const { data: { session } } = await supabaseClient.auth.getSession();
 
@@ -513,7 +544,6 @@
             return perfil;
         }
 
-        // Salva nome e bio do extensionista de verdade no Supabase
         async function salvarPerfil(e) {
             e.preventDefault();
 
@@ -556,7 +586,7 @@
             closeModal('modal-perfil');
         }
 
-        // Lança um registro de horas avulsas de verdade no Supabase
+        // Lança um registro de horas avulsas com DATA e LOCAL
         async function lancarHoras(e) {
             e.preventDefault();
 
@@ -565,18 +595,20 @@
             const tipo = select.value === 'Outros'
                 ? document.getElementById('input-outros').value.trim()
                 : select.value;
-            const data = document.getElementById('input-data-horas').value;
+            
+            const dataAtividade = document.getElementById('input-data-horas').value;
+            const localAtividade = document.getElementById('input-local-horas').value.trim() || 'Não informado';
             const horas = document.getElementById('input-horas').value;
             const detalhes = document.getElementById('input-descricao-horas').value.trim();
 
-            if (!tipo || !data || !horas) {
-                alert('Preencha o tipo de atividade, a data e as horas.');
+            if (!tipo || !dataAtividade || !horas) {
+                alert('Preencha os campos obrigatórios.');
                 return;
             }
 
             const descricaoCompleta = detalhes
-                ? `${tipo} (${data}): ${detalhes}`
-                : `${tipo} (${data})`;
+                ? `${tipo} (${dataAtividade}): ${detalhes}`
+                : `${tipo} (${dataAtividade})`;
 
             btn.disabled = true;
             btn.innerText = 'Enviando...';
@@ -593,7 +625,9 @@
                     extensionista_id: session.user.id,
                     descricao: descricaoCompleta,
                     horas: Number(horas),
-                    status: 'pendente'
+                    status: 'pendente',
+                    data_atividade: dataAtividade,
+                    local: localAtividade
                 });
 
             btn.disabled = false;
@@ -611,7 +645,7 @@
             carregarHistoricoHoras();
         }
 
-        // Busca o histórico de horas do próprio extensionista e atualiza os cards
+        // Busca o histórico de horas e formata a exibição do novo Local e Data
         async function carregarHistoricoHoras() {
             const tbody = document.getElementById('tbody-historico-horas');
             tbody.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Carregando...</td></tr>';
@@ -621,7 +655,7 @@
 
             const { data, error } = await supabaseClient
                 .from('horas_avulsas')
-                .select('id, descricao, horas, status, motivo_recusa, created_at')
+                .select('id, descricao, horas, status, motivo_recusa, created_at, data_atividade, local')
                 .eq('extensionista_id', session.user.id)
                 .order('created_at', { ascending: false });
 
@@ -631,9 +665,9 @@
             }
 
             const badge = {
-                pendente: '<span class="bg-amber-50 text-amber-700 border border-amber-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Pendente</span>',
-                deferido: '<span class="bg-emerald-50 text-emerald-700 border border-emerald-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Aprovado</span>',
-                indeferido: '<span class="bg-red-50 text-red-700 border border-red-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Recusado</span>'
+                pendente: '<span class="bg-amber-50 text-amber-700 border border-amber-100 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide">Pendente</span>',
+                deferido: '<span class="bg-emerald-50 text-emerald-700 border border-emerald-100 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide">Aprovado</span>',
+                indeferido: '<span class="bg-red-50 text-red-700 border border-red-100 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide">Recusado</span>'
             };
 
             if (data.length === 0) {
@@ -650,10 +684,20 @@
                             </div>
                         `;
                     }
+                    
+                    let strTipo = h.descricao.split(' (')[0];
+                    let dateToShow = h.data_atividade 
+                        ? new Date(h.data_atividade + 'T12:00:00').toLocaleDateString('pt-BR') 
+                        : new Date(h.created_at).toLocaleDateString('pt-BR');
+
                     return `
-                    <tr class="animate-fadeIn">
-                        <td class="py-4 px-6 font-semibold align-top">${new Date(h.created_at).toLocaleDateString('pt-BR')}</td>
-                        <td class="py-4 px-6 align-top">${escapeHtml(h.descricao)}${extra}</td>
+                    <tr class="animate-fadeIn hover:bg-slate-50">
+                        <td class="py-4 px-6 font-semibold align-top text-slate-600">${dateToShow}</td>
+                        <td class="py-4 px-6 align-top">
+                            <p class="font-bold text-slate-800">${escapeHtml(strTipo)}</p>
+                            <p class="text-[10px] text-slate-400 mt-0.5"><i class="fas fa-map-marker-alt"></i> ${escapeHtml(h.local || 'Não informado')}</p>
+                            ${extra}
+                        </td>
                         <td class="py-4 px-6 text-center font-bold text-slate-800 align-top">${h.horas}h</td>
                         <td class="py-4 px-6 align-top">${badge[h.status] || badge.pendente}</td>
                     </tr>
@@ -672,7 +716,6 @@
             document.getElementById('barra-progresso-horas').style.width = `${progresso}%`;
         }
 
-        // Busca as ações/atas cadastradas pelo próprio extensionista
         async function carregarMinhasAcoes() {
             const tbody = document.getElementById('tbody-minhas-acoes');
             tbody.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Carregando...</td></tr>';
@@ -754,17 +797,14 @@
             document.getElementById(modalId).classList.add('hidden');
         }
 
-        document.getElementById('modal-horas').addEventListener('click', function(e) {
-            if (e.target === this) closeModal('modal-horas');
-        });
-        document.getElementById('modal-atividades').addEventListener('click', function(e) {
-            if (e.target === this) closeModal('modal-atividades');
-        });
-        document.getElementById('modal-nova-acao').addEventListener('click', function(e) {
-            if (e.target === this) closeModal('modal-nova-acao');
-        });
-        document.getElementById('modal-perfil').addEventListener('click', function(e) {
-            if (e.target === this) closeModal('modal-perfil');
+        // FECHAR TODOS OS MODAIS AO CLICAR FORA
+        ['modal-horas', 'modal-atividades', 'modal-nova-acao', 'modal-perfil', 'modal-relatorio'].forEach(id => {
+            const el = document.getElementById(id);
+            if(el) {
+                el.addEventListener('click', function(e) {
+                    if (e.target === this) closeModal(id);
+                });
+            }
         });
 
         function toggleOutrosCampo() {
@@ -777,14 +817,8 @@
             }
         }
 
-        // CONFIGURAÇÃO DA INTEGRAÇÃO REAL DO GOOGLE DRIVE (Aba Documentos)
         const APPS_SCRIPT_DOCS_URL = 'https://script.google.com/macros/s/AKfycbyByjs75MeRhRmr1ZUl4b-KCRKTe6RJO12huK6xE2kfWJLBcwcNPn4_m5mNLou9toTE/exec'; 
-
-        // CONFIGURAÇÃO DA INTEGRAÇÃO DO GERADOR DE RELATÓRIO PDF (Exclusivo e Separado)
         const APPS_SCRIPT_RELATORIO_URL = 'https://script.google.com/macros/s/AKfycbyYpBMPzPGGVM67o1iGGHcMmje1jUDfmHaIuvOZS30A7gCIWQ3fWnVxmE-aSvOW_9zUIQ/exec';
-
-        // 🟡 PENDENTE: cole aqui a URL do Apps Script de UPLOAD depois de implantar
-        // (veja instruções que o Claude te passou no chat)
         const APPS_SCRIPT_UPLOAD_URL = 'COLOQUE_AQUI_A_URL_DO_APPS_SCRIPT_DE_UPLOAD';
 
         function fileParaBase64(file) {
@@ -813,7 +847,6 @@
             return resultado.url;
         }
 
-        // Envia ata + relatoria para o Drive e cadastra a ação de verdade no Supabase
         async function cadastrarAcao(e) {
             e.preventDefault();
 
@@ -948,7 +981,6 @@
             const syncIcon = document.getElementById('sync-icon');
             const syncText = document.getElementById('sync-text');
 
-            // Feedback visual inicial
             grid.innerHTML = '';
             loading.classList.remove('hidden');
             errorContainer.classList.add('hidden');
@@ -970,7 +1002,6 @@
                         return;
                     }
 
-                    // Mapeia e renderiza os arquivos reais retornados do Google Drive
                     data.files.forEach(file => {
                         let iconClass = 'fa-file-alt';
                         let colorClass = 'text-slate-400';
@@ -1024,46 +1055,64 @@
             }
         }
 
-        // COMUNICAÇÃO ASSÍNCRONA COM O SISTEMA DE RELATÓRIO DO DRIVE (Nova versão com download direto ativado)
-        async function gerarRelatorioOficial() {
-            const btnText = document.getElementById('text-relatorio');
+        // GERAR RELATÓRIO COM FILTRO DE DATA, LOCAL E ATIVIDADE LIMPA
+        async function gerarRelatorioOficial(e) {
+            e.preventDefault();
+            const btnText = document.getElementById('text-btn-relatorio');
             const textoOriginal = btnText.innerText;
+            const btnSubmit = document.getElementById('btn-submit-relatorio');
             
-            btnText.innerText = "Baixando PDF...";
+            btnText.innerText = "Consultando dados...";
+            btnSubmit.disabled = true;
 
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) { window.location.href = 'login.html'; return; }
-
-            const { data: perfil } = await supabaseClient
-                .from('perfis')
-                .select('nome')
-                .eq('id', session.user.id)
-                .single();
-
-            const { data: horas } = await supabaseClient
-                .from('horas_avulsas')
-                .select('descricao, horas, status, created_at')
-                .eq('extensionista_id', session.user.id)
-                .eq('status', 'deferido')
-                .order('created_at', { ascending: true });
-
-            const payload = {
-                nome: perfil ? perfil.nome : 'Extensionista',
-                atividades: (horas || []).map(h => ({
-                    data: new Date(h.created_at).toLocaleDateString('pt-BR'),
-                    tipo: h.descricao,
-                    local: '',
-                    horas: h.horas
-                }))
-            };
+            const dataInicio = document.getElementById('relatorio-data-inicio').value;
+            const dataFim = document.getElementById('relatorio-data-fim').value;
 
             try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (!session) { window.location.href = 'login.html'; return; }
+
+                const { data: perfil } = await supabaseClient.from('perfis').select('nome').eq('id', session.user.id).single();
+
+                // Monta a consulta de horas aprovadas no Supabase com ou sem filtro
+                let query = supabaseClient
+                    .from('horas_avulsas')
+                    .select('descricao, horas, status, created_at, data_atividade, local')
+                    .eq('extensionista_id', session.user.id)
+                    .eq('status', 'deferido');
+
+                if (dataInicio) query = query.gte('data_atividade', dataInicio);
+                if (dataFim) query = query.lte('data_atividade', dataFim);
+
+                const { data: horas, error } = await query.order('data_atividade', { ascending: true });
+
+                if (error) throw error;
+                if (!horas || horas.length === 0) {
+                    alert("Nenhuma hora aprovada encontrada no período selecionado.");
+                    btnText.innerText = textoOriginal;
+                    btnSubmit.disabled = false;
+                    return;
+                }
+
+                btnText.innerText = "Baixando PDF...";
+
+                const payload = {
+                    nome: perfil ? perfil.nome : 'Extensionista',
+                    atividades: horas.map(h => {
+                        // Limpa a descrição para pegar só o tipo puro da atividade (cortando a data do texto)
+                        const tipoPuro = h.descricao.split(' (')[0].trim();
+                        return {
+                            data: h.data_atividade ? new Date(h.data_atividade + 'T12:00:00').toLocaleDateString('pt-BR') : new Date(h.created_at).toLocaleDateString('pt-BR'),
+                            tipo: tipoPuro,
+                            local: h.local || "Não informado", // O Google Apps Script lerá isso perfeitamente
+                            horas: h.horas
+                        };
+                    })
+                };
+
                 const response = await fetch(APPS_SCRIPT_RELATORIO_URL, {
-                    method: 'POST',
-                    mode: 'cors',
-                    headers: {
-                        'Content-Type': 'text/plain;charset=utf-8'
-                    },
+                    method: 'POST', mode: 'cors',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify(payload)
                 });
                 
@@ -1075,29 +1124,29 @@
                         const arquivoId = urlDownloadDireto.split('/d/')[1].split('/view')[0];
                         urlDownloadDireto = `https://docs.google.com/uc?export=download&id=${arquivoId}`;
                     }
-
                     const linkTemporario = document.createElement('a');
                     linkTemporario.href = urlDownloadDireto;
-                    linkTemporario.setAttribute('download', `Relatorio_Horas_${payload.nome.replace(/\s+/g, '_')}.pdf`);
+                    linkTemporario.setAttribute('download', `Relatorio_${payload.nome.replace(/\s+/g, '_')}.pdf`);
                     document.body.appendChild(linkTemporario);
                     linkTemporario.click();
                     document.body.removeChild(linkTemporario);
+                    closeModal('modal-relatorio');
                 } else {
                     alert("Não foi possível gerar o relatório. Detalhes: " + (resultado.error || "Erro desconhecido."));
                 }
             } catch (error) {
                 console.error("Erro de conexão do script:", error);
-                alert("Erro de conexão: Verifique sua internet ou a implantação do script do Google.");
+                alert("Erro de conexão com o gerador do Google Docs.");
             } finally {
                 btnText.innerText = textoOriginal;
+                btnSubmit.disabled = false;
             }
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
              const perfil = await protegerPagina();
-             if (!perfil) return; // já foi redirecionado para login.html
+             if (!perfil) return;
 
-             // Preenche nome/e-mail/bio/avatar reais no header e no modal de perfil
              document.getElementById('header-user-name').innerText = perfil.nome;
              document.getElementById('header-user-avatar').innerText = iniciais(perfil.nome);
              document.getElementById('modal-avatar-initials').textContent = iniciais(perfil.nome);
@@ -1106,7 +1155,6 @@
              document.getElementById('modal-user-bio').value = perfil.bio || '';
 
              carregarHistoricoHoras();
-
              switchTab('inicio');
         });
     </script>
