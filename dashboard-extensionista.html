@@ -120,19 +120,6 @@
         <main class="p-8 flex-grow max-w-5xl w-full mx-auto space-y-8">
             
             <div id="tab-content-inicio" class="space-y-6">
-                
-                <div class="bg-gradient-to-r from-teal-600 to-emerald-600 p-6 rounded-2xl shadow-sm text-white relative overflow-hidden">
-                    <div class="absolute right-0 top-0 translate-x-4 -translate-y-4 w-32 h-32 bg-white/10 rounded-full filter blur-xl"></div>
-                    <div class="relative z-10 flex items-start space-x-4">
-                        <div class="bg-white/20 p-3 rounded-xl text-lg"><i class="fas fa-bullhorn"></i></div>
-                        <div>
-                            <h3 class="font-extrabold text-sm mb-1">Mural de Avisos da Coordenação</h3>
-                            <p class="text-xs text-teal-50 max-w-2xl leading-relaxed">
-                                Atenção extensionistas! Nossa próxima reunião geral ordinária acontecerá na sexta-feira às 14h via Google Meet para alinhar os preparativos da nova oficina do Eixo Escolar. Não faltem e lembrem-se de atualizar seus lançamentos de horas semanais.
-                            </p>
-                        </div>
-                    </div>
-                </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
                     
@@ -1398,8 +1385,22 @@
                 }
             });
 
+            // ===== TOTAL DE HORAS =====
+            const totalHoras = atividades.reduce((soma, a) => soma + Number(a.horas || 0), 0);
+            let yTotal = doc.lastAutoTable.finalY + 8;
+
+            // Se não houver espaço suficiente na página atual, pula para a próxima
+            if (yTotal + 45 > pageHeight - margin) {
+                doc.addPage();
+                yTotal = margin + 10;
+            }
+
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(10);
+            doc.text(`TOTAL DE HORAS APROVADAS: ${totalHoras}h`, pageWidth - margin, yTotal, { align: 'right' });
+
             // ===== ASSINATURAS (rodapé) =====
-            let finalY = doc.lastAutoTable.finalY + 20;
+            let finalY = yTotal + 20;
             const assinaturaW = (usableWidth - 20) / 2;
 
             // Se não houver espaço suficiente na página atual, pula para a próxima
