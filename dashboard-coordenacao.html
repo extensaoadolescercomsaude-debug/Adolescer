@@ -364,6 +364,17 @@
                     <h3 class="text-sm font-bold text-slate-800 border-b border-slate-100 pb-3">Gerar Relatório Analítico de Gestão</h3>
                     
                     <form id="reportForm" onsubmit="gerarPDFCustomizado(event)" class="space-y-3">
+                        
+                        <div class="grid grid-cols-2 gap-4 mb-4 pb-4 border-b border-slate-100">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Data Inicial (Opcional)</label>
+                                <input type="date" id="relatorio-data-inicio" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium focus:outline-none focus:border-saude-prime">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Data Final (Opcional)</label>
+                                <input type="date" id="relatorio-data-fim" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium focus:outline-none focus:border-saude-prime">
+                            </div>
+                        </div>
                         <label class="flex items-start p-3 rounded-xl border border-slate-100 hover:border-teal-200 hover:bg-slate-50/50 cursor-pointer transition">
                             <input type="checkbox" name="metricas" value="consolidado_horas" checked class="w-4 h-4 rounded border-slate-300 accent-teal-600 mt-0.5">
                             <div class="ml-3">
@@ -461,7 +472,6 @@
         </main>
     </div>
 
-    <!-- MODAL DE PERFIL DA COORDENAÇÃO -->
     <div id="modal-perfil-coord" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center z-50 p-4">
         <div class="modal-panel bg-white rounded-3xl max-w-md w-full shadow-xl border border-slate-100 p-6 space-y-4">
             <div class="flex justify-between items-center border-b border-slate-100 pb-3">
@@ -489,7 +499,6 @@
         </div>
     </div>
 
-    <!-- MODAL: MOTIVO DO INDEFERIMENTO -->
     <div id="modal-motivo-recusa" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center z-50 p-4">
         <div class="modal-panel bg-white rounded-3xl max-w-md w-full shadow-xl border border-slate-100 p-6 space-y-4">
             <div class="flex justify-between items-center border-b border-slate-100 pb-3">
@@ -507,7 +516,6 @@
                 <textarea id="texto-motivo-recusa" rows="4" placeholder="Ex: A ata não possui a assinatura do preceptor do local..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-medium text-slate-700 focus:outline-none focus:border-rose-400"></textarea>
             </div>
 
-            <!-- Campos ocultos para o JavaScript saber qual tabela e qual ID estamos editando -->
             <input type="hidden" id="recusa-id-alvo" value="">
             <input type="hidden" id="recusa-tabela-alvo" value="">
 
@@ -536,8 +544,19 @@
             'Pesquisa para Ação ou Post': 'Digital / Comunicação',
             'Outros': 'Outros'
         };
+        
         function categorizarDescricao(descricao) {
-            return CATEGORIAS_ATIVIDADE[descricao] || 'Outros';
+            if (!descricao) return 'Outros';
+            // Pega apenas a string antes do primeiro " (" para bater com a lista acima
+            const tipoPuro = descricao.split(' (')[0].trim();
+            return CATEGORIAS_ATIVIDADE[tipoPuro] || 'Outros';
+        }
+
+        // Função auxiliar nova para filtrar dados por data no Relatório PDF
+        function aplicarFiltroData(query, coluna, dataInicio, dataFim) {
+            if (dataInicio) query = query.gte(coluna, dataInicio + 'T00:00:00');
+            if (dataFim) query = query.lte(coluna, dataFim + 'T23:59:59');
+            return query;
         }
 
         function iniciais(nome) {
@@ -1564,9 +1583,154 @@
             return y;
         }
 
-        async function adicionarSecaoConsolidadoHoras(doc, y, numero) {
+        // Carrega uma imagem (mesma origem) e converte para base64, para uso no jsPDF
+        async function carregarImagemBase64(url) {
+            try {
+                const resp = await fetch(url);
+                if (!resp.ok) return null;
+                const blob = await resp.blob();
+                return await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = () => reject(new Error('Falha ao ler imagem'));
+                    reader.readAsDataURL(blob);
+                });
+            } catch (err) {
+                return null;
+            }
+        }
+
+        // Monta a página de capa com filtro de datas e totais precisos do período
+        async function montarCapaConsolidada(doc, dataInicio, dataFim) {
+            const [logoExtenso, logoFensg, logoUpe] = await Promise.all([
+                carregarImagemBase64('imagens/logo-extenso.png'),
+                carregarImagemBase64('imagens/logo-fensg.png'),
+                carregarImagemBase64('imagens/logo-upe.png')
+            ]);
+
+            let yTopo = 15;
+
+            if (logoExtenso) { try { doc.addImage(logoExtenso, 'PNG', 14, yTopo, 55, 16, undefined, 'FAST'); } catch (err) {} }
+            if (logoFensg) { try { doc.addImage(logoFensg, 'PNG', 145, yTopo, 20, 16, undefined, 'FAST'); } catch (err) {} }
+            if (logoUpe) { try { doc.addImage(logoUpe, 'PNG', 175, yTopo, 20, 16, undefined, 'FAST'); } catch (err) {} }
+
+            let y = yTopo + 24;
+
+            doc.setDrawColor(226, 232, 240);
+            doc.line(14, y, 196, y);
+            y += 10;
+
+            doc.setFontSize(17);
+            doc.setTextColor(17, 94, 89);
+            doc.text('Relatório de Indicadores de Gestão', 14, y);
+            y += 6;
+            doc.setFontSize(10);
+            doc.setTextColor(100);
+            doc.text('Projeto de Extensão Adolescer com Saúde — UPE / FENSG', 14, y);
+            y += 10;
+
+            const nomeEmissor = perfilAtual?.nome || 'Coordenação';
+            const agora = new Date().toLocaleString('pt-BR');
+
+            doc.setFontSize(9);
+            doc.setTextColor(80);
+            doc.text(`Relatório emitido por: ${nomeEmissor} em ${agora}`, 14, y);
+            y += 6;
+
+            let periodoTexto = 'Todo o histórico (Geral)';
+            if (dataInicio && dataFim) {
+                periodoTexto = `De ${dataInicio.split('-').reverse().join('/')} a ${dataFim.split('-').reverse().join('/')}`;
+            } else if (dataInicio) {
+                periodoTexto = `A partir de ${dataInicio.split('-').reverse().join('/')}`;
+            } else if (dataFim) {
+                periodoTexto = `Até ${dataFim.split('-').reverse().join('/')}`;
+            }
+            
+            doc.setFontSize(9);
+            doc.setTextColor(139, 92, 246); // Cor roxinha para destacar
+            doc.text(`Período analisado: ${periodoTexto}`, 14, y);
+            y += 12;
+
+            // Monta queries com filtros
+            let qAcoesDef = supabaseClient.from('acoes_extensao').select('*', { count: 'exact', head: true }).eq('status', 'deferido');
+            let qAcoesIndef = supabaseClient.from('acoes_extensao').select('*', { count: 'exact', head: true }).eq('status', 'indeferido');
+            let qMatAprov = supabaseClient.from('biblioteca_atividades').select('*', { count: 'exact', head: true }).eq('status', 'aprovado');
+            let qMatIndef = supabaseClient.from('biblioteca_atividades').select('*', { count: 'exact', head: true }).eq('status', 'indeferido');
+            let qHorasDef = supabaseClient.from('horas_avulsas').select('horas').eq('status', 'deferido');
+            let qHorasIndef = supabaseClient.from('horas_avulsas').select('*', { count: 'exact', head: true }).eq('status', 'indeferido');
+
+            // Aplica os filtros de data
+            qAcoesDef = aplicarFiltroData(qAcoesDef, 'created_at', dataInicio, dataFim);
+            qAcoesIndef = aplicarFiltroData(qAcoesIndef, 'created_at', dataInicio, dataFim);
+            qMatAprov = aplicarFiltroData(qMatAprov, 'created_at', dataInicio, dataFim);
+            qMatIndef = aplicarFiltroData(qMatIndef, 'created_at', dataInicio, dataFim);
+            qHorasDef = aplicarFiltroData(qHorasDef, 'created_at', dataInicio, dataFim);
+            qHorasIndef = aplicarFiltroData(qHorasIndef, 'created_at', dataInicio, dataFim);
+
+            const [
+                { count: countExt },
+                { count: countAcoesDeferidas },
+                { count: countAcoesIndeferidas },
+                { count: countMateriais },
+                { data: horasDeferidas },
+                { count: countHorasIndeferidas },
+                { count: countBibliotecaIndeferida }
+            ] = await Promise.all([
+                supabaseClient.from('perfis').select('*', { count: 'exact', head: true }).eq('papel', 'extensionista').eq('status', 'aprovado'), // Extensionistas ativos não sofrem filtro de data
+                qAcoesDef, qAcoesIndef, qMatAprov, qHorasDef, qHorasIndef, qMatIndef
+            ]);
+
+            const totalHoras = (horasDeferidas || []).reduce((soma, h) => soma + Number(h.horas), 0);
+            const totalRecusas = (countAcoesIndeferidas ?? 0) + (countHorasIndeferidas ?? 0) + (countBibliotecaIndeferida ?? 0);
+
+            doc.setFontSize(11);
+            doc.setTextColor(20);
+            doc.text('Resumo Consolidado do Período', 14, y);
+            y += 5;
+
+            doc.autoTable({
+                startY: y,
+                head: [['Indicador', 'Valor no Período']],
+                body: [
+                    ['Extensionistas Ativos no Sistema', `${countExt ?? 0}`],
+                    ['Ações de Extensão Homologadas', `${countAcoesDeferidas ?? 0}`],
+                    ['Materiais na Biblioteca Aprovados', `${countMateriais ?? 0}`],
+                    ['Carga Horária Aprovada no Período', `${totalHoras}h`],
+                    ['Total de Recusas/Indeferimentos', `${totalRecusas}`]
+                ],
+                theme: 'grid',
+                headStyles: { fillColor: [17, 94, 89] },
+                styles: { fontSize: 10, cellPadding: 4, fontStyle: 'bold' },
+                columnStyles: { 1: { halign: 'right' } },
+                margin: { left: 14, right: 14 }
+            });
+
+            return doc.lastAutoTable.finalY + 10;
+        }
+
+        // Carimba rodapé oficial em todas as páginas do documento
+        function aplicarRodapeEmTodasPaginas(doc) {
+            const totalPaginas = doc.internal.getNumberOfPages();
+            const largura = doc.internal.pageSize.getWidth();
+            const altura = doc.internal.pageSize.getHeight();
+
+            for (let i = 1; i <= totalPaginas; i++) {
+                doc.setPage(i);
+                doc.setDrawColor(226, 232, 240);
+                doc.line(14, altura - 15, largura - 14, altura - 15);
+                doc.setFontSize(7.5);
+                doc.setTextColor(150);
+                doc.text('Relatório gerado através do portal Adolescer com Saúde', 14, altura - 10);
+                doc.text(`Página ${i} de ${totalPaginas}`, largura - 14, altura - 10, { align: 'right' });
+            }
+        }
+
+        async function adicionarSecaoConsolidadoHoras(doc, y, numero, dataInicio, dataFim) {
+            let qHoras = supabaseClient.from('horas_avulsas').select('horas, status, perfis(nome)').eq('status', 'deferido');
+            qHoras = aplicarFiltroData(qHoras, 'created_at', dataInicio, dataFim);
+
             const [{ data: horas }, { data: sessoes }] = await Promise.all([
-                supabaseClient.from('horas_avulsas').select('horas, status, perfis(nome)').eq('status', 'deferido'),
+                qHoras,
                 supabaseClient.from('sessoes_acesso').select('login_at, perfis(nome)').order('login_at', { ascending: false })
             ]);
 
@@ -1597,7 +1761,7 @@
 
             doc.autoTable({
                 startY: y,
-                head: [['Extensionista', 'Horas Validadas', 'Último Acesso ao Portal']],
+                head: [['Extensionista', 'Horas no Período', 'Último Acesso Geral ao Portal']],
                 body: linhas.length ? linhas : [['Nenhum dado disponível', '-', '-']],
                 theme: 'striped',
                 headStyles: { fillColor: [13, 148, 136] },
@@ -1608,12 +1772,10 @@
             return doc.lastAutoTable.finalY + 12;
         }
 
-        async function adicionarSecaoMapaInstituicoes(doc, y, numero) {
-            const { data } = await supabaseClient
-                .from('acoes_extensao')
-                .select('local_intervencao, created_at, perfis(nome)')
-                .eq('status', 'deferido')
-                .order('created_at', { ascending: false });
+        async function adicionarSecaoMapaInstituicoes(doc, y, numero, dataInicio, dataFim) {
+            let qAcoes = supabaseClient.from('acoes_extensao').select('local_intervencao, created_at, perfis(nome)').eq('status', 'deferido').order('created_at', { ascending: false });
+            qAcoes = aplicarFiltroData(qAcoes, 'created_at', dataInicio, dataFim);
+            const { data } = await qAcoes;
 
             const linhas = (data || []).map(a => [
                 a.local_intervencao || '—',
@@ -1622,105 +1784,71 @@
             ]);
 
             y = verificarQuebraDePagina(doc, y);
-            doc.setFontSize(12);
-            doc.setTextColor(20);
-            doc.text(`${numero}. Mapa de Instituições Atendidas (Ações Homologadas)`, 14, y);
-            y += 5;
+            doc.setFontSize(12); doc.setTextColor(20);
+            doc.text(`${numero}. Mapa de Instituições Atendidas (Ações Homologadas)`, 14, y); y += 5;
 
             doc.autoTable({
                 startY: y,
                 head: [['Local / Instituição', 'Extensionista Responsável', 'Data']],
-                body: linhas.length ? linhas : [['Nenhuma ação homologada até o momento', '-', '-']],
-                theme: 'striped',
-                headStyles: { fillColor: [139, 92, 246] },
-                styles: { fontSize: 8, cellPadding: 2.5 },
-                margin: { left: 14, right: 14 }
+                body: linhas.length ? linhas : [['Nenhuma ação homologada no período', '-', '-']],
+                theme: 'striped', headStyles: { fillColor: [139, 92, 246] }, styles: { fontSize: 8, cellPadding: 2.5 }, margin: { left: 14, right: 14 }
             });
-
             return doc.lastAutoTable.finalY + 12;
         }
 
-        async function adicionarSecaoProdutividade(doc, y, numero) {
-            const { data } = await supabaseClient
-                .from('biblioteca_atividades')
-                .select('titulo, publico_alvo, created_at, perfis(nome)')
-                .eq('status', 'aprovado')
-                .order('created_at', { ascending: false });
+        async function adicionarSecaoProdutividade(doc, y, numero, dataInicio, dataFim) {
+            let qMat = supabaseClient.from('biblioteca_atividades').select('titulo, publico_alvo, created_at, perfis(nome)').eq('status', 'aprovado').order('created_at', { ascending: false });
+            qMat = aplicarFiltroData(qMat, 'created_at', dataInicio, dataFim);
+            const { data } = await qMat;
 
             const linhas = (data || []).map(m => [
-                m.titulo || '—',
-                m.publico_alvo || '—',
-                m.perfis?.nome || 'Desconhecido',
-                new Date(m.created_at).toLocaleDateString('pt-BR')
+                m.titulo || '—', m.publico_alvo || '—', m.perfis?.nome || 'Desconhecido', new Date(m.created_at).toLocaleDateString('pt-BR')
             ]);
 
             y = verificarQuebraDePagina(doc, y);
-            doc.setFontSize(12);
-            doc.setTextColor(20);
-            doc.text(`${numero}. Produtividade de Materiais Pedagógicos (Biblioteca Aprovada)`, 14, y);
-            y += 5;
+            doc.setFontSize(12); doc.setTextColor(20);
+            doc.text(`${numero}. Produtividade de Materiais Pedagógicos (Biblioteca)`, 14, y); y += 5;
 
             doc.autoTable({
-                startY: y,
-                head: [['Material / Dinâmica', 'Público-Alvo', 'Autor', 'Data de Aprovação']],
-                body: linhas.length ? linhas : [['Nenhum material aprovado até o momento', '-', '-', '-']],
-                theme: 'striped',
-                headStyles: { fillColor: [17, 94, 89] },
-                styles: { fontSize: 8, cellPadding: 2.5 },
-                margin: { left: 14, right: 14 }
+                startY: y, head: [['Material / Dinâmica', 'Público-Alvo', 'Autor', 'Data de Aprovação']],
+                body: linhas.length ? linhas : [['Nenhum material aprovado no período', '-', '-', '-']],
+                theme: 'striped', headStyles: { fillColor: [17, 94, 89] }, styles: { fontSize: 8, cellPadding: 2.5 }, margin: { left: 14, right: 14 }
             });
-
             return doc.lastAutoTable.finalY + 12;
         }
 
-        async function adicionarSecaoRanking(doc, y, numero) {
-            const [{ data: horas }, { data: acoes }] = await Promise.all([
-                supabaseClient.from('horas_avulsas').select('horas, perfis(nome)').eq('status', 'deferido'),
-                supabaseClient.from('acoes_extensao').select('id, perfis(nome)').eq('status', 'deferido')
-            ]);
+        async function adicionarSecaoRanking(doc, y, numero, dataInicio, dataFim) {
+            let qHoras = supabaseClient.from('horas_avulsas').select('horas, perfis(nome)').eq('status', 'deferido');
+            let qAcoes = supabaseClient.from('acoes_extensao').select('id, perfis(nome)').eq('status', 'deferido');
+            
+            qHoras = aplicarFiltroData(qHoras, 'created_at', dataInicio, dataFim);
+            qAcoes = aplicarFiltroData(qAcoes, 'created_at', dataInicio, dataFim);
+
+            const [{ data: horas }, { data: acoes }] = await Promise.all([qHoras, qAcoes]);
 
             const totais = {};
-            (horas || []).forEach(h => {
-                const nome = h.perfis?.nome || 'Desconhecido';
-                if (!totais[nome]) totais[nome] = { horas: 0, acoes: 0 };
-                totais[nome].horas += Number(h.horas);
-            });
-            (acoes || []).forEach(a => {
-                const nome = a.perfis?.nome || 'Desconhecido';
-                if (!totais[nome]) totais[nome] = { horas: 0, acoes: 0 };
-                totais[nome].acoes += 1;
-            });
+            (horas || []).forEach(h => { const n = h.perfis?.nome || 'Desconhecido'; if (!totais[n]) totais[n] = { horas: 0, acoes: 0 }; totais[n].horas += Number(h.horas); });
+            (acoes || []).forEach(a => { const n = a.perfis?.nome || 'Desconhecido'; if (!totais[n]) totais[n] = { horas: 0, acoes: 0 }; totais[n].acoes += 1; });
 
-            const linhas = Object.entries(totais)
-                .map(([nome, dados]) => [nome, `${dados.horas}h`, `${dados.acoes}`])
-                .sort((a, b) => parseFloat(b[1]) - parseFloat(a[1]));
-
+            const linhas = Object.entries(totais).map(([n, d]) => [n, `${d.horas}h`, `${d.acoes}`]).sort((a, b) => parseFloat(b[1]) - parseFloat(a[1]));
             linhas.forEach((linha, idx) => linha.unshift(`${idx + 1}º`));
 
             y = verificarQuebraDePagina(doc, y);
-            doc.setFontSize(12);
-            doc.setTextColor(20);
-            doc.text(`${numero}. Ranking de Extensionistas`, 14, y);
-            y += 5;
+            doc.setFontSize(12); doc.setTextColor(20);
+            doc.text(`${numero}. Ranking de Extensionistas no Período`, 14, y); y += 5;
 
             doc.autoTable({
-                startY: y,
-                head: [['Posição', 'Extensionista', 'Horas Validadas', 'Ações Homologadas']],
-                body: linhas.length ? linhas : [['-', 'Nenhum dado disponível', '-', '-']],
-                theme: 'striped',
-                headStyles: { fillColor: [13, 148, 136] },
-                styles: { fontSize: 8, cellPadding: 2.5 },
-                margin: { left: 14, right: 14 }
+                startY: y, head: [['Posição', 'Extensionista', 'Horas Validadas', 'Ações Homologadas']],
+                body: linhas.length ? linhas : [['-', 'Nenhum dado no período', '-', '-']],
+                theme: 'striped', headStyles: { fillColor: [13, 148, 136] }, styles: { fontSize: 8, cellPadding: 2.5 }, margin: { left: 14, right: 14 }
             });
-
             return doc.lastAutoTable.finalY + 12;
         }
 
-        async function adicionarSecaoSazonalidade(doc, y, numero) {
-            const { data } = await supabaseClient
-                .from('acoes_extensao')
-                .select('created_at')
-                .eq('status', 'deferido');
+        async function adicionarSecaoSazonalidade(doc, y, numero, dataInicio, dataFim) {
+            let qAcoes = supabaseClient.from('acoes_extensao').select('created_at').eq('status', 'deferido');
+            qAcoes = aplicarFiltroData(qAcoes, 'created_at', dataInicio, dataFim);
+            const { data } = await qAcoes;
 
             const contagemPorMes = {};
             (data || []).forEach(a => {
@@ -1729,72 +1857,57 @@
                 contagemPorMes[chave] = (contagemPorMes[chave] || 0) + 1;
             });
 
-            const linhas = Object.entries(contagemPorMes)
-                .sort((a, b) => a[0].localeCompare(b[0]))
-                .map(([chave, qtd]) => {
-                    const [ano, mes] = chave.split('-');
-                    const label = new Date(Number(ano), Number(mes) - 1, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
-                    return [label, `${qtd}`];
-                });
-
-            y = verificarQuebraDePagina(doc, y);
-            doc.setFontSize(12);
-            doc.setTextColor(20);
-            doc.text(`${numero}. Sazonalidade — Ações Homologadas por Mês`, 14, y);
-            y += 5;
-
-            doc.autoTable({
-                startY: y,
-                head: [['Mês', 'Ações Homologadas']],
-                body: linhas.length ? linhas : [['Nenhuma ação homologada até o momento', '-']],
-                theme: 'striped',
-                headStyles: { fillColor: [139, 92, 246] },
-                styles: { fontSize: 8, cellPadding: 2.5 },
-                margin: { left: 14, right: 14 }
+            const linhas = Object.entries(contagemPorMes).sort((a, b) => a[0].localeCompare(b[0])).map(([chave, qtd]) => {
+                const [ano, mes] = chave.split('-');
+                const label = new Date(Number(ano), Number(mes) - 1, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+                return [label, `${qtd}`];
             });
 
+            y = verificarQuebraDePagina(doc, y);
+            doc.setFontSize(12); doc.setTextColor(20);
+            doc.text(`${numero}. Sazonalidade — Ações Homologadas por Mês`, 14, y); y += 5;
+
+            doc.autoTable({
+                startY: y, head: [['Mês', 'Ações Homologadas']],
+                body: linhas.length ? linhas : [['Nenhuma ação homologada no período', '-']],
+                theme: 'striped', headStyles: { fillColor: [139, 92, 246] }, styles: { fontSize: 8, cellPadding: 2.5 }, margin: { left: 14, right: 14 }
+            });
             return doc.lastAutoTable.finalY + 12;
         }
 
-        async function adicionarSecaoDistribuicao(doc, y, numero) {
-            const { data } = await supabaseClient
-                .from('horas_avulsas')
-                .select('descricao')
-                .eq('status', 'deferido');
+        async function adicionarSecaoDistribuicao(doc, y, numero, dataInicio, dataFim) {
+            let qHoras = supabaseClient.from('horas_avulsas').select('descricao').eq('status', 'deferido');
+            qHoras = aplicarFiltroData(qHoras, 'created_at', dataInicio, dataFim);
+            const { data } = await qHoras;
 
             const contagem = { 'Intervenções / Oficinas': 0, 'Reuniões': 0, 'Digital / Comunicação': 0, 'Outros': 0 };
             (data || []).forEach(h => { contagem[categorizarDescricao(h.descricao)] += 1; });
             const total = Object.values(contagem).reduce((a, b) => a + b, 0);
 
-            const linhas = Object.entries(contagem).map(([categoria, qtd]) => [
-                categoria, `${qtd}`, total > 0 ? `${Math.round((qtd / total) * 100)}%` : '-'
-            ]);
+            const linhas = Object.entries(contagem).map(([cat, qtd]) => [cat, `${qtd}`, total > 0 ? `${Math.round((qtd / total) * 100)}%` : '-']);
 
             y = verificarQuebraDePagina(doc, y);
-            doc.setFontSize(12);
-            doc.setTextColor(20);
-            doc.text(`${numero}. Distribuição de Atividades`, 14, y);
-            y += 5;
+            doc.setFontSize(12); doc.setTextColor(20);
+            doc.text(`${numero}. Distribuição de Atividades`, 14, y); y += 5;
 
             doc.autoTable({
-                startY: y,
-                head: [['Categoria', 'Lançamentos Homologados', '% do Total']],
-                body: total > 0 ? linhas : [['Nenhum lançamento homologado até o momento', '-', '-']],
-                theme: 'striped',
-                headStyles: { fillColor: [17, 94, 89] },
-                styles: { fontSize: 8, cellPadding: 2.5 },
-                margin: { left: 14, right: 14 }
+                startY: y, head: [['Categoria', 'Lançamentos Homologados', '% do Total no Período']],
+                body: total > 0 ? linhas : [['Nenhum lançamento homologado no período', '-', '-']],
+                theme: 'striped', headStyles: { fillColor: [17, 94, 89] }, styles: { fontSize: 8, cellPadding: 2.5 }, margin: { left: 14, right: 14 }
             });
-
             return doc.lastAutoTable.finalY + 12;
         }
 
-        async function adicionarSecaoEficiencia(doc, y, numero) {
-            const [{ data: acoes }, { data: horas }, { data: biblioteca }] = await Promise.all([
-                supabaseClient.from('acoes_extensao').select('status').in('status', ['deferido', 'indeferido']),
-                supabaseClient.from('horas_avulsas').select('status').in('status', ['deferido', 'indeferido']),
-                supabaseClient.from('biblioteca_atividades').select('status').in('status', ['aprovado', 'indeferido'])
-            ]);
+        async function adicionarSecaoEficiencia(doc, y, numero, dataInicio, dataFim) {
+            let qAcoes = supabaseClient.from('acoes_extensao').select('status').in('status', ['deferido', 'indeferido']);
+            let qHoras = supabaseClient.from('horas_avulsas').select('status').in('status', ['deferido', 'indeferido']);
+            let qBiblioteca = supabaseClient.from('biblioteca_atividades').select('status').in('status', ['aprovado', 'indeferido']);
+            
+            qAcoes = aplicarFiltroData(qAcoes, 'created_at', dataInicio, dataFim);
+            qHoras = aplicarFiltroData(qHoras, 'created_at', dataInicio, dataFim);
+            qBiblioteca = aplicarFiltroData(qBiblioteca, 'created_at', dataInicio, dataFim);
+
+            const [{ data: acoes }, { data: horas }, { data: biblioteca }] = await Promise.all([qAcoes, qHoras, qBiblioteca]);
 
             function taxa(lista, statusPositivo) {
                 const total = (lista || []).length;
@@ -1802,10 +1915,7 @@
                 return { total, positivos, recusados: total - positivos, pct: total > 0 ? Math.round((positivos / total) * 100) : null };
             }
 
-            const rAcoes = taxa(acoes, 'deferido');
-            const rHoras = taxa(horas, 'deferido');
-            const rBiblioteca = taxa(biblioteca, 'aprovado');
-
+            const rAcoes = taxa(acoes, 'deferido'); const rHoras = taxa(horas, 'deferido'); const rBiblioteca = taxa(biblioteca, 'aprovado');
             const linhas = [
                 ['Ações de Extensão', `${rAcoes.positivos}`, `${rAcoes.recusados}`, rAcoes.pct !== null ? `${rAcoes.pct}%` : '-'],
                 ['Horas Avulsas', `${rHoras.positivos}`, `${rHoras.recusados}`, rHoras.pct !== null ? `${rHoras.pct}%` : '-'],
@@ -1813,152 +1923,24 @@
             ];
 
             y = verificarQuebraDePagina(doc, y);
-            doc.setFontSize(12);
-            doc.setTextColor(20);
-            doc.text(`${numero}. Eficiência da Coordenação`, 14, y);
-            y += 5;
+            doc.setFontSize(12); doc.setTextColor(20);
+            doc.text(`${numero}. Eficiência da Coordenação no Período`, 14, y); y += 5;
 
             doc.autoTable({
-                startY: y,
-                head: [['Módulo', 'Deferidos/Aprovados', 'Indeferidos', 'Taxa de Deferimento']],
-                body: linhas,
-                theme: 'striped',
-                headStyles: { fillColor: [180, 83, 9] },
-                styles: { fontSize: 8, cellPadding: 2.5 },
-                margin: { left: 14, right: 14 }
+                startY: y, head: [['Módulo', 'Deferidos/Aprovados', 'Indeferidos', 'Taxa de Deferimento']],
+                body: linhas, theme: 'striped', headStyles: { fillColor: [180, 83, 9] }, styles: { fontSize: 8, cellPadding: 2.5 }, margin: { left: 14, right: 14 }
             });
-
             return doc.lastAutoTable.finalY + 12;
-        }
-
-        // Carrega uma imagem (mesma origem) e converte para base64, para uso no jsPDF
-        async function carregarImagemBase64(url) {
-            try {
-                const resp = await fetch(url);
-                if (!resp.ok) return null;
-                const blob = await resp.blob();
-                return await new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(reader.result);
-                    reader.onerror = () => reject(new Error('Falha ao ler imagem'));
-                    reader.readAsDataURL(blob);
-                });
-            } catch (err) {
-                return null;
-            }
-        }
-
-        // Monta a página de capa: "dashboard impresso" com logos, autoria e resumo consolidado geral
-        async function montarCapaConsolidada(doc) {
-            const [logoExtenso, logoFensg, logoUpe] = await Promise.all([
-                carregarImagemBase64('imagens/logo-extenso.png'),
-                carregarImagemBase64('imagens/logo-fensg.png'),
-                carregarImagemBase64('imagens/logo-upe.png')
-            ]);
-
-            let yTopo = 15;
-
-            if (logoExtenso) {
-                try { doc.addImage(logoExtenso, 'PNG', 14, yTopo, 55, 16, undefined, 'FAST'); } catch (err) {}
-            }
-            if (logoFensg) {
-                try { doc.addImage(logoFensg, 'PNG', 145, yTopo, 20, 16, undefined, 'FAST'); } catch (err) {}
-            }
-            if (logoUpe) {
-                try { doc.addImage(logoUpe, 'PNG', 175, yTopo, 20, 16, undefined, 'FAST'); } catch (err) {}
-            }
-
-            let y = yTopo + 24;
-
-            doc.setDrawColor(226, 232, 240);
-            doc.line(14, y, 196, y);
-            y += 10;
-
-            doc.setFontSize(17);
-            doc.setTextColor(17, 94, 89);
-            doc.text('Relatório de Indicadores de Gestão', 14, y);
-            y += 6;
-            doc.setFontSize(10);
-            doc.setTextColor(100);
-            doc.text('Projeto de Extensão Adolescer com Saúde — UPE / FENSG', 14, y);
-            y += 10;
-
-            const nomeEmissor = perfilAtual?.nome || 'Coordenação';
-            const agora = new Date().toLocaleString('pt-BR');
-
-            doc.setFontSize(9);
-            doc.setTextColor(80);
-            doc.text(`Relatório emitido por: ${nomeEmissor} em ${agora}`, 14, y);
-            y += 12;
-
-            // Resumo consolidado (independente dos módulos marcados na tela)
-            const [
-                { count: countExt },
-                { count: countAcoesDeferidas },
-                { count: countAcoesIndeferidas },
-                { count: countMateriais },
-                { data: horasDeferidas },
-                { count: countHorasIndeferidas },
-                { count: countBibliotecaIndeferida }
-            ] = await Promise.all([
-                supabaseClient.from('perfis').select('*', { count: 'exact', head: true }).eq('papel', 'extensionista').eq('status', 'aprovado'),
-                supabaseClient.from('acoes_extensao').select('*', { count: 'exact', head: true }).eq('status', 'deferido'),
-                supabaseClient.from('acoes_extensao').select('*', { count: 'exact', head: true }).eq('status', 'indeferido'),
-                supabaseClient.from('biblioteca_atividades').select('*', { count: 'exact', head: true }).eq('status', 'aprovado'),
-                supabaseClient.from('horas_avulsas').select('horas').eq('status', 'deferido'),
-                supabaseClient.from('horas_avulsas').select('*', { count: 'exact', head: true }).eq('status', 'indeferido'),
-                supabaseClient.from('biblioteca_atividades').select('*', { count: 'exact', head: true }).eq('status', 'indeferido')
-            ]);
-
-            const totalHoras = (horasDeferidas || []).reduce((soma, h) => soma + Number(h.horas), 0);
-            const totalRecusas = (countAcoesIndeferidas ?? 0) + (countHorasIndeferidas ?? 0) + (countBibliotecaIndeferida ?? 0);
-
-            doc.setFontSize(11);
-            doc.setTextColor(20);
-            doc.text('Resumo Consolidado do Projeto', 14, y);
-            y += 5;
-
-            doc.autoTable({
-                startY: y,
-                head: [['Indicador', 'Valor']],
-                body: [
-                    ['Extensionistas Ativos', `${countExt ?? 0}`],
-                    ['Ações de Extensão Homologadas', `${countAcoesDeferidas ?? 0}`],
-                    ['Materiais na Biblioteca Aprovados', `${countMateriais ?? 0}`],
-                    ['Carga Horária Total do Projeto', `${totalHoras}h`],
-                    ['Total de Recusas/Indeferimentos (todos os módulos)', `${totalRecusas}`]
-                ],
-                theme: 'grid',
-                headStyles: { fillColor: [17, 94, 89] },
-                styles: { fontSize: 10, cellPadding: 4, fontStyle: 'bold' },
-                columnStyles: { 1: { halign: 'right' } },
-                margin: { left: 14, right: 14 }
-            });
-
-            return doc.lastAutoTable.finalY + 10;
-        }
-
-        // Carimba rodapé oficial em todas as páginas do documento
-        function aplicarRodapeEmTodasPaginas(doc) {
-            const totalPaginas = doc.internal.getNumberOfPages();
-            const largura = doc.internal.pageSize.getWidth();
-            const altura = doc.internal.pageSize.getHeight();
-
-            for (let i = 1; i <= totalPaginas; i++) {
-                doc.setPage(i);
-                doc.setDrawColor(226, 232, 240);
-                doc.line(14, altura - 15, largura - 14, altura - 15);
-                doc.setFontSize(7.5);
-                doc.setTextColor(150);
-                doc.text('Relatório gerado através do portal Adolescer com Saúde', 14, altura - 10);
-                doc.text(`Página ${i} de ${totalPaginas}`, largura - 14, altura - 10, { align: 'right' });
-            }
         }
 
         async function gerarPDFCustomizado(e) {
             e.preventDefault();
             const btnExport = document.getElementById('btnExport');
             const btnExportText = document.getElementById('btnExportText');
+            
+            // Pega as datas informadas na tela
+            const dataInicio = document.getElementById('relatorio-data-inicio').value;
+            const dataFim = document.getElementById('relatorio-data-fim').value;
 
             const modulos = Array.from(document.querySelectorAll('input[name="metricas"]:checked')).map(cb => cb.value);
             if (modulos.length === 0) {
@@ -1973,10 +1955,9 @@
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
 
-                // Página 1 — Dashboard impresso: logos, autoria e resumo consolidado geral
-                await montarCapaConsolidada(doc);
+                // Passa as datas para as funções!
+                await montarCapaConsolidada(doc, dataInicio, dataFim);
 
-                // Páginas seguintes — detalhamento dos módulos marcados pela coordenação
                 doc.addPage();
                 let y = 20;
                 let numeroSecao = 1;
@@ -1984,35 +1965,27 @@
                 btnExportText.innerText = "Extraindo dados do Supabase...";
 
                 if (modulos.includes('consolidado_horas')) {
-                    y = await adicionarSecaoConsolidadoHoras(doc, y, numeroSecao);
-                    numeroSecao++;
+                    y = await adicionarSecaoConsolidadoHoras(doc, y, numeroSecao, dataInicio, dataFim); numeroSecao++;
                 }
                 if (modulos.includes('mapa_instituicoes')) {
-                    y = await adicionarSecaoMapaInstituicoes(doc, y, numeroSecao);
-                    numeroSecao++;
+                    y = await adicionarSecaoMapaInstituicoes(doc, y, numeroSecao, dataInicio, dataFim); numeroSecao++;
                 }
                 if (modulos.includes('produtividade_tecnica')) {
-                    y = await adicionarSecaoProdutividade(doc, y, numeroSecao);
-                    numeroSecao++;
+                    y = await adicionarSecaoProdutividade(doc, y, numeroSecao, dataInicio, dataFim); numeroSecao++;
                 }
                 if (modulos.includes('ranking_extensionistas')) {
-                    y = await adicionarSecaoRanking(doc, y, numeroSecao);
-                    numeroSecao++;
+                    y = await adicionarSecaoRanking(doc, y, numeroSecao, dataInicio, dataFim); numeroSecao++;
                 }
                 if (modulos.includes('sazonalidade')) {
-                    y = await adicionarSecaoSazonalidade(doc, y, numeroSecao);
-                    numeroSecao++;
+                    y = await adicionarSecaoSazonalidade(doc, y, numeroSecao, dataInicio, dataFim); numeroSecao++;
                 }
                 if (modulos.includes('distribuicao_atividades')) {
-                    y = await adicionarSecaoDistribuicao(doc, y, numeroSecao);
-                    numeroSecao++;
+                    y = await adicionarSecaoDistribuicao(doc, y, numeroSecao, dataInicio, dataFim); numeroSecao++;
                 }
                 if (modulos.includes('eficiencia_coordenacao')) {
-                    y = await adicionarSecaoEficiencia(doc, y, numeroSecao);
-                    numeroSecao++;
+                    y = await adicionarSecaoEficiencia(doc, y, numeroSecao, dataInicio, dataFim); numeroSecao++;
                 }
 
-                // Rodapé oficial em todas as páginas do documento
                 aplicarRodapeEmTodasPaginas(doc);
 
                 doc.save(`relatorio-indicadores-adolescer-${new Date().toISOString().slice(0,10)}.pdf`);
