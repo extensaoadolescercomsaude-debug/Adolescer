@@ -7,6 +7,10 @@
     <link rel="icon" type="image/png" href="imagens/logo-vetor.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
     <script>
         tailwind.config = {
             theme: {
@@ -117,19 +121,6 @@
         <main class="p-8 flex-grow max-w-5xl w-full mx-auto space-y-8">
             
             <div id="tab-content-inicio" class="space-y-6">
-                
-                <div class="bg-gradient-to-r from-teal-600 to-emerald-600 p-6 rounded-2xl shadow-sm text-white relative overflow-hidden">
-                    <div class="absolute right-0 top-0 translate-x-4 -translate-y-4 w-32 h-32 bg-white/10 rounded-full filter blur-xl"></div>
-                    <div class="relative z-10 flex items-start space-x-4">
-                        <div class="bg-white/20 p-3 rounded-xl text-lg"><i class="fas fa-bullhorn"></i></div>
-                        <div>
-                            <h3 class="font-extrabold text-sm mb-1">Mural de Avisos da Coordenação</h3>
-                            <p class="text-xs text-teal-50 max-w-2xl leading-relaxed">
-                                Atenção extensionistas! Nossa próxima reunião geral ordinária acontecerá na sexta-feira às 14h via Google Meet para alinhar os preparativos da nova oficina do Eixo Escolar. Não faltem e lembrem-se de atualizar seus lançamentos de horas semanais.
-                            </p>
-                        </div>
-                    </div>
-                </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
                     
@@ -168,7 +159,7 @@
                                 <i class="fas fa-plus"></i> <span>Adicionar Carga Horária</span>
                             </button>
                             <button onclick="openModal('modal-relatorio')" class="flex-1 bg-white hover:bg-slate-50 text-saude-prime border border-slate-200 hover:border-saude-prime px-5 py-3.5 rounded-xl font-bold text-xs transition flex items-center justify-center space-x-2">
-                                <i class="fas fa-file-invoice"></i> <span id="text-relatorio">Gerar Relatório de Horas</span>
+                                <i class="fas fa-file-pdf"></i> <span id="text-relatorio">Gerar Relatório de Horas Oficial</span>
                             </button>
                         </div>
                     </div>
@@ -357,7 +348,7 @@
                 <button onclick="closeModal('modal-relatorio')" class="text-slate-400 hover:text-slate-600 text-lg" aria-label="Fechar"><i class="fas fa-times"></i></button>
             </div>
             <form onsubmit="gerarRelatorioOficial(event)" class="p-6 space-y-4">
-                <p class="text-xs text-slate-500 mb-2">Preencha o período do ciclo que deseja exportar. Deixe em branco para exportar todo o histórico de horas aprovadas.</p>
+                <p class="text-xs text-slate-500 mb-2">Preencha o período para exportar suas horas validadas. Deixe em branco para exportar todo o histórico.</p>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Data Inicial</label>
@@ -371,7 +362,7 @@
                 <div class="pt-4 flex gap-2">
                     <button type="button" onclick="closeModal('modal-relatorio')" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold py-3 rounded-xl transition">Cancelar</button>
                     <button type="submit" id="btn-submit-relatorio" class="flex-1 bg-saude-prime hover:bg-saude-dark text-white text-xs font-bold py-3 rounded-xl transition shadow-sm flex justify-center items-center gap-2">
-                        <i class="fas fa-file-pdf"></i> <span id="text-btn-relatorio">Gerar PDF</span>
+                        <i class="fas fa-file-pdf"></i> <span id="text-btn-relatorio">Gerar PDF Oficial</span>
                     </button>
                 </div>
             </form>
@@ -510,7 +501,7 @@
             return div.innerHTML;
         }
 
-        // GUARDA DE SESSÃO
+        // GUARDA DE SESSÃO E PERFIL
         async function protegerPagina() {
             const { data: { session } } = await supabaseClient.auth.getSession();
 
@@ -521,7 +512,7 @@
 
             const { data: perfil, error } = await supabaseClient
                 .from('perfis')
-                .select('id, nome, email, papel, status, bio') // <-- ID FOI INSERIDO AQUI
+                .select('id, nome, email, papel, status, bio')
                 .eq('id', session.user.id)
                 .single();
 
@@ -546,7 +537,7 @@
             if (error || !data) return;
             sessaoAtualId = data.id;
 
-            setInterval(atualizarPing, 60000); // heartbeat a cada 1 min
+            setInterval(atualizarPing, 60000); 
             document.addEventListener('visibilitychange', () => {
                 if (document.visibilityState === 'hidden') atualizarPing();
             });
@@ -555,54 +546,34 @@
 
         async function atualizarPing() {
             if (!sessaoAtualId) return;
-            await supabaseClient
-                .from('sessoes_acesso')
-                .update({ last_ping_at: new Date().toISOString() })
-                .eq('id', sessaoAtualId);
+            await supabaseClient.from('sessoes_acesso').update({ last_ping_at: new Date().toISOString() }).eq('id', sessaoAtualId);
         }
 
         function atualizarPingSync() {
             if (!sessaoAtualId) return;
-            navigator.sendBeacon(
-                `${SUPABASE_URL}/rest/v1/sessoes_acesso?id=eq.${sessaoAtualId}`,
-                new Blob([JSON.stringify({ last_ping_at: new Date().toISOString() })], { type: 'application/json' })
-            );
+            navigator.sendBeacon(`${SUPABASE_URL}/rest/v1/sessoes_acesso?id=eq.${sessaoAtualId}`, new Blob([JSON.stringify({ last_ping_at: new Date().toISOString() })], { type: 'application/json' }));
         }
-        // -------------------------------------
 
         async function salvarPerfil(e) {
             e.preventDefault();
-
             const btn = document.getElementById('btn-salvar-perfil');
             const nome = document.getElementById('modal-user-name').value.trim();
             const bio = document.getElementById('modal-user-bio').value.trim();
 
-            if (!nome) {
-                alert('O nome não pode ficar em branco.');
-                return;
-            }
+            if (!nome) { alert('O nome não pode ficar em branco.'); return; }
 
             btn.disabled = true;
             btn.innerText = 'Salvando...';
 
             const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) {
-                window.location.href = 'login.html';
-                return;
-            }
+            if (!session) { window.location.href = 'login.html'; return; }
 
-            const { error } = await supabaseClient
-                .from('perfis')
-                .update({ nome: nome, bio: bio })
-                .eq('id', session.user.id);
+            const { error } = await supabaseClient.from('perfis').update({ nome: nome, bio: bio }).eq('id', session.user.id);
 
             btn.disabled = false;
             btn.innerText = 'Salvar Alterações';
 
-            if (error) {
-                alert('Erro ao salvar perfil: ' + error.message);
-                return;
-            }
+            if (error) { alert('Erro ao salvar perfil: ' + error.message); return; }
 
             document.getElementById('header-user-name').innerText = nome;
             document.getElementById('header-user-avatar').innerText = iniciais(nome);
@@ -612,57 +583,40 @@
             closeModal('modal-perfil');
         }
 
-        // Lança um registro de horas avulsas com DATA e LOCAL
+        // Lança um registro de horas avulsas
         async function lancarHoras(e) {
             e.preventDefault();
-
             const btn = document.getElementById('btn-enviar-horas');
             const select = document.getElementById('tipo-atividade');
-            const tipo = select.value === 'Outros'
-                ? document.getElementById('input-outros').value.trim()
-                : select.value;
-            
+            const tipo = select.value === 'Outros' ? document.getElementById('input-outros').value.trim() : select.value;
             const dataAtividade = document.getElementById('input-data-horas').value;
             const localAtividade = document.getElementById('input-local-horas').value.trim() || 'Não informado';
             const horas = document.getElementById('input-horas').value;
             const detalhes = document.getElementById('input-descricao-horas').value.trim();
 
-            if (!tipo || !dataAtividade || !horas) {
-                alert('Preencha os campos obrigatórios.');
-                return;
-            }
+            if (!tipo || !dataAtividade || !horas) { alert('Preencha os campos obrigatórios.'); return; }
 
-            const descricaoCompleta = detalhes
-                ? `${tipo} (${dataAtividade}): ${detalhes}`
-                : `${tipo} (${dataAtividade})`;
+            const descricaoCompleta = detalhes ? `${tipo} (${dataAtividade}): ${detalhes}` : `${tipo} (${dataAtividade})`;
 
             btn.disabled = true;
             btn.innerText = 'Enviando...';
 
             const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) {
-                window.location.href = 'login.html';
-                return;
-            }
+            if (!session) { window.location.href = 'login.html'; return; }
 
-            const { error } = await supabaseClient
-                .from('horas_avulsas')
-                .insert({
-                    extensionista_id: session.user.id,
-                    descricao: descricaoCompleta,
-                    horas: Number(horas),
-                    status: 'pendente',
-                    data_atividade: dataAtividade,
-                    local: localAtividade
-                });
+            const { error } = await supabaseClient.from('horas_avulsas').insert({
+                extensionista_id: session.user.id,
+                descricao: descricaoCompleta,
+                horas: Number(horas),
+                status: 'pendente',
+                data_atividade: dataAtividade,
+                local: localAtividade
+            });
 
             btn.disabled = false;
             btn.innerText = 'Enviar Registro';
 
-            if (error) {
-                alert('Erro ao lançar horas: ' + error.message);
-                return;
-            }
+            if (error) { alert('Erro ao lançar horas: ' + error.message); return; }
 
             alert('Lançamento enviado com sucesso!');
             document.getElementById('form-horas').reset();
@@ -671,7 +625,6 @@
             carregarHistoricoHoras();
         }
 
-        // Busca o histórico de horas e formata a exibição do novo Local e Data
         async function carregarHistoricoHoras() {
             const tbody = document.getElementById('tbody-historico-horas');
             tbody.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Carregando...</td></tr>';
@@ -679,16 +632,11 @@
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (!session) return;
 
-            const { data, error } = await supabaseClient
-                .from('horas_avulsas')
+            const { data, error } = await supabaseClient.from('horas_avulsas')
                 .select('id, descricao, horas, status, motivo_recusa, created_at, data_atividade, local')
-                .eq('extensionista_id', session.user.id)
-                .order('created_at', { ascending: false });
+                .eq('extensionista_id', session.user.id).order('created_at', { ascending: false });
 
-            if (error) {
-                tbody.innerHTML = `<tr><td class="py-6 px-6 text-center text-rose-500" colspan="4">Erro ao carregar: ${escapeHtml(error.message)}</td></tr>`;
-                return;
-            }
+            if (error) { tbody.innerHTML = `<tr><td class="py-6 px-6 text-center text-rose-500" colspan="4">Erro: ${escapeHtml(error.message)}</td></tr>`; return; }
 
             const badge = {
                 pendente: '<span class="bg-amber-50 text-amber-700 border border-amber-100 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide">Pendente</span>',
@@ -697,37 +645,19 @@
             };
 
             if (data.length === 0) {
-                tbody.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Nenhum lançamento ainda. Use "Adicionar Carga Horária" para começar.</td></tr>';
+                tbody.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Nenhum lançamento.</td></tr>';
             } else {
                 tbody.innerHTML = data.map(h => {
-                    let extra = '';
-                    if (h.status === 'indeferido') {
-                        extra = `
-                            <div class="mt-2 text-[10px] bg-red-50 border border-red-100 p-2 rounded-lg leading-relaxed animate-fadeIn">
-                                <span class="block font-bold text-red-700 mb-0.5">Motivo da recusa:</span>
-                                <span class="block text-red-600">${escapeHtml(h.motivo_recusa || 'Não informado.')}</span>
-                                <span class="block text-red-500 mt-1.5 font-semibold not-italic">Faça um novo lançamento corrigido em "Adicionar Carga Horária".</span>
-                            </div>
-                        `;
-                    }
-                    
+                    let extra = h.status === 'indeferido' ? `<div class="mt-2 text-[10px] bg-red-50 border border-red-100 p-2 rounded-lg"><span class="block font-bold text-red-700">Recusa:</span><span class="block text-red-600">${escapeHtml(h.motivo_recusa || '')}</span></div>` : '';
                     let strTipo = h.descricao.split(' (')[0];
-                    let dateToShow = h.data_atividade 
-                        ? new Date(h.data_atividade + 'T12:00:00').toLocaleDateString('pt-BR') 
-                        : new Date(h.created_at).toLocaleDateString('pt-BR');
+                    let dateToShow = h.data_atividade ? new Date(h.data_atividade + 'T12:00:00').toLocaleDateString('pt-BR') : new Date(h.created_at).toLocaleDateString('pt-BR');
 
-                    return `
-                    <tr class="animate-fadeIn hover:bg-slate-50">
+                    return `<tr class="animate-fadeIn hover:bg-slate-50">
                         <td class="py-4 px-6 font-semibold align-top text-slate-600">${dateToShow}</td>
-                        <td class="py-4 px-6 align-top">
-                            <p class="font-bold text-slate-800">${escapeHtml(strTipo)}</p>
-                            <p class="text-[10px] text-slate-400 mt-0.5"><i class="fas fa-map-marker-alt"></i> ${escapeHtml(h.local || 'Não informado')}</p>
-                            ${extra}
-                        </td>
+                        <td class="py-4 px-6 align-top"><p class="font-bold text-slate-800">${escapeHtml(strTipo)}</p><p class="text-[10px] text-slate-400 mt-0.5"><i class="fas fa-map-marker-alt"></i> ${escapeHtml(h.local || 'Não informado')}</p>${extra}</td>
                         <td class="py-4 px-6 text-center font-bold text-slate-800 align-top">${h.horas}h</td>
                         <td class="py-4 px-6 align-top">${badge[h.status] || badge.pendente}</td>
-                    </tr>
-                `;
+                    </tr>`;
                 }).join('');
             }
 
@@ -736,115 +666,61 @@
 
             document.getElementById('stat-horas-pendentes').innerText = `${pendentes}h`;
             document.getElementById('stat-horas-aprovadas').innerText = `${aprovadas}h`;
-
-            const meta = 60;
-            const progresso = Math.min(100, Math.round((aprovadas / meta) * 100));
+            const progresso = Math.min(100, Math.round((aprovadas / 60) * 100));
             document.getElementById('barra-progresso-horas').style.width = `${progresso}%`;
         }
 
         async function carregarMinhasAcoes() {
             const tbody = document.getElementById('tbody-minhas-acoes');
             tbody.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Carregando...</td></tr>';
-
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (!session) return;
 
-            const { data, error } = await supabaseClient
-                .from('acoes_extensao')
-                .select('id, local_intervencao, url_ata, url_relatoria, status, motivo_recusa, created_at')
-                .eq('extensionista_id', session.user.id)
-                .order('created_at', { ascending: false });
+            const { data, error } = await supabaseClient.from('acoes_extensao').select('id, local_intervencao, url_ata, url_relatoria, status, motivo_recusa, created_at').eq('extensionista_id', session.user.id).order('created_at', { ascending: false });
 
-            if (error) {
-                tbody.innerHTML = `<tr><td class="py-6 px-6 text-center text-rose-500" colspan="4">Erro ao carregar: ${escapeHtml(error.message)}</td></tr>`;
-                return;
-            }
+            if (error) { tbody.innerHTML = `<tr><td class="py-6 px-6 text-center text-rose-500" colspan="4">Erro: ${escapeHtml(error.message)}</td></tr>`; return; }
 
-            const badge = {
-                pendente: '<span class="bg-amber-50 text-amber-700 border border-amber-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Aguardando</span>',
-                deferido: '<span class="bg-emerald-50 text-emerald-700 border border-emerald-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Homologado</span>',
-                indeferido: '<span class="bg-red-50 text-red-700 border border-red-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Indeferido</span>'
-            };
+            const badge = { pendente: '<span class="bg-amber-50 text-amber-700 border border-amber-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Aguardando</span>', deferido: '<span class="bg-emerald-50 text-emerald-700 border border-emerald-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Homologado</span>', indeferido: '<span class="bg-red-50 text-red-700 border border-red-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Indeferido</span>' };
 
             if (data.length === 0) {
-                tbody.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Nenhuma ação cadastrada ainda.</td></tr>';
-                return;
+                tbody.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Nenhuma ação cadastrada.</td></tr>'; return;
             }
 
             tbody.innerHTML = data.map(acao => {
-                let extra = '';
-                if (acao.status === 'indeferido') {
-                    extra = `
-                        <div class="mt-2 text-[10px] bg-red-50 border border-red-100 p-2 rounded-lg leading-relaxed animate-fadeIn max-w-xs">
-                            <span class="block font-bold text-red-700 mb-0.5">Motivo da recusa:</span>
-                            <span class="block text-red-600">${escapeHtml(acao.motivo_recusa || 'Não informado.')}</span>
-                            <span class="block text-red-500 mt-1.5 font-semibold not-italic">Cadastre uma nova ação com a documentação corrigida.</span>
-                        </div>
-                    `;
-                }
+                let extra = acao.status === 'indeferido' ? `<div class="mt-2 text-[10px] bg-red-50 border border-red-100 p-2 rounded-lg max-w-xs"><span class="block font-bold text-red-700">Recusa:</span><span class="block text-red-600">${escapeHtml(acao.motivo_recusa || '')}</span></div>` : '';
                 return `
                 <tr class="hover:bg-slate-50/50 transition-all animate-fadeIn">
-                    <td class="py-4 px-6 align-top">
-                        <span class="font-bold text-slate-800 block">${escapeHtml(acao.local_intervencao)}</span>
-                        <span class="text-[10px] text-slate-400">Enviado em: ${new Date(acao.created_at).toLocaleDateString('pt-BR')}</span>
-                        ${extra}
-                    </td>
-                    <td class="py-4 px-6 align-top">
-                        ${acao.url_ata ? `<a href="${escapeHtml(acao.url_ata)}" target="_blank" class="text-saude-prime font-semibold hover:underline"><i class="fas fa-paperclip mr-1"></i>Ver ata</a>` : '<span class="text-slate-300">—</span>'}
-                    </td>
-                    <td class="py-4 px-6 align-top">
-                        ${acao.url_relatoria ? `<a href="${escapeHtml(acao.url_relatoria)}" target="_blank" class="text-saude-prime font-semibold hover:underline"><i class="fas fa-file-invoice mr-1"></i>Ver relatoria</a>` : '<span class="text-slate-300">—</span>'}
-                    </td>
+                    <td class="py-4 px-6 align-top"><span class="font-bold text-slate-800 block">${escapeHtml(acao.local_intervencao)}</span><span class="text-[10px] text-slate-400">Em: ${new Date(acao.created_at).toLocaleDateString('pt-BR')}</span>${extra}</td>
+                    <td class="py-4 px-6 align-top">${acao.url_ata ? `<a href="${escapeHtml(acao.url_ata)}" target="_blank" class="text-saude-prime font-semibold hover:underline">Ver ata</a>` : '—'}</td>
+                    <td class="py-4 px-6 align-top">${acao.url_relatoria ? `<a href="${escapeHtml(acao.url_relatoria)}" target="_blank" class="text-saude-prime font-semibold hover:underline">Ver relatoria</a>` : '—'}</td>
                     <td class="py-4 px-6 align-top">${badge[acao.status] || badge.pendente}</td>
-                </tr>
-            `;
+                </tr>`;
             }).join('');
         }
 
         // CONTROLES DE INTERFACE COMUM
-        function toggleUserMenu() {
-            document.getElementById('user-dropdown').classList.toggle('hidden');
-        }
-
+        function toggleUserMenu() { document.getElementById('user-dropdown').classList.toggle('hidden'); }
         window.addEventListener('click', function(e) {
             const dropdown = document.getElementById('user-dropdown');
             const btn = dropdown.previousElementSibling;
-            if (!dropdown.contains(e.target) && !btn.contains(e.target)) {
-                dropdown.classList.add('hidden');
-            }
+            if (!dropdown.contains(e.target) && !btn.contains(e.target)) dropdown.classList.add('hidden');
         });
 
-        function openModal(modalId) {
-            document.getElementById(modalId).classList.remove('hidden');
-            document.getElementById('user-dropdown').classList.add('hidden');
-        }
+        function openModal(modalId) { document.getElementById(modalId).classList.remove('hidden'); document.getElementById('user-dropdown').classList.add('hidden'); }
+        function closeModal(modalId) { document.getElementById(modalId).classList.add('hidden'); }
 
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.add('hidden');
-        }
-
-        // FECHAR TODOS OS MODAIS AO CLICAR FORA
         ['modal-horas', 'modal-atividades', 'modal-nova-acao', 'modal-perfil', 'modal-relatorio'].forEach(id => {
             const el = document.getElementById(id);
-            if(el) {
-                el.addEventListener('click', function(e) {
-                    if (e.target === this) closeModal(id);
-                });
-            }
+            if(el) el.addEventListener('click', function(e) { if (e.target === this) closeModal(id); });
         });
 
         function toggleOutrosCampo() {
             const select = document.getElementById('tipo-atividade');
             const inputOutros = document.getElementById('wrapper-outros');
-            if (select.value === 'Outros') {
-                inputOutros.classList.remove('hidden');
-            } else {
-                inputOutros.classList.add('hidden');
-            }
+            if (select.value === 'Outros') inputOutros.classList.remove('hidden'); else inputOutros.classList.add('hidden');
         }
 
         const APPS_SCRIPT_DOCS_URL = 'https://script.google.com/macros/s/AKfycbyByjs75MeRhRmr1ZUl4b-KCRKTe6RJO12huK6xE2kfWJLBcwcNPn4_m5mNLou9toTE/exec'; 
-        const APPS_SCRIPT_RELATORIO_URL = 'https://script.google.com/macros/s/AKfycbyYpBMPzPGGVM67o1iGGHcMmje1jUDfmHaIuvOZS30A7gCIWQ3fWnVxmE-aSvOW_9zUIQ/exec';
         const APPS_SCRIPT_UPLOAD_URL = 'https://script.google.com/macros/s/AKfycbygy2Dd9OkM4KFTkXzUT0Z8mku6UM_6kP_UCf2LX-mH2sVkzQ8x9CAGBwnz1BEXSgez8g/exec';
         const APPS_SCRIPT_ATIVIDADE_UPLOAD_URL = 'https://script.google.com/macros/s/AKfycbyK2ZCTs35IPZWdT4RFryauHuK2J7OZjvhHhlLiny87Xr1WaDlGFFGE_6vc-RFwkKDQ/exec';
 
@@ -859,248 +735,112 @@
 
         async function enviarArquivoParaDrive(file) {
             const base64 = await fileParaBase64(file);
-            const response = await fetch(APPS_SCRIPT_UPLOAD_URL, {
-                method: 'POST',
-                mode: 'cors',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify({
-                    base64: base64,
-                    nomeArquivo: file.name,
-                    mimeType: file.type
-                })
-            });
+            const response = await fetch(APPS_SCRIPT_UPLOAD_URL, { method: 'POST', mode: 'cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ base64: base64, nomeArquivo: file.name, mimeType: file.type }) });
             const resultado = await response.json();
-            if (!resultado.success) throw new Error(resultado.error || 'Falha no upload do arquivo.');
+            if (!resultado.success) throw new Error(resultado.error || 'Falha no upload.');
             return resultado.url;
         }
 
-        // Upload do arquivo de uma nova atividade da biblioteca para o Drive (script dedicado)
         async function enviarArquivoAtividadeParaDrive(file) {
             const base64 = await fileParaBase64(file);
-            const response = await fetch(APPS_SCRIPT_ATIVIDADE_UPLOAD_URL, {
-                method: 'POST',
-                mode: 'cors',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify({
-                    base64: base64,
-                    nomeArquivo: file.name,
-                    mimeType: file.type
-                })
-            });
+            const response = await fetch(APPS_SCRIPT_ATIVIDADE_UPLOAD_URL, { method: 'POST', mode: 'cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ base64: base64, nomeArquivo: file.name, mimeType: file.type }) });
             const resultado = await response.json();
-            if (!resultado.success) throw new Error(resultado.error || 'Falha no upload do arquivo.');
+            if (!resultado.success) throw new Error(resultado.error || 'Falha no upload.');
             return resultado.url;
         }
 
         async function cadastrarAcao(e) {
             e.preventDefault();
-
-            if (APPS_SCRIPT_UPLOAD_URL.includes('COLOQUE_AQUI')) {
-                alert('O upload de arquivos ainda não foi configurado. Peça ao responsável pelo site para finalizar essa parte.');
-                return;
-            }
+            if (APPS_SCRIPT_UPLOAD_URL.includes('COLOQUE_AQUI')) { alert('O upload de arquivos não foi configurado.'); return; }
 
             const btn = document.getElementById('btn-enviar-acao');
             const local = document.getElementById('input-local-acao').value.trim();
             const arquivoAta = document.getElementById('file-ata').files[0];
             const arquivoRelatoria = document.getElementById('file-relatoria').files[0];
 
-            if (!local || !arquivoAta || !arquivoRelatoria) {
-                alert('Preencha o local e selecione os dois arquivos.');
-                return;
-            }
+            if (!local || !arquivoAta || !arquivoRelatoria) { alert('Preencha o local e selecione os arquivos.'); return; }
 
             btn.disabled = true;
 
             try {
                 const { data: { session } } = await supabaseClient.auth.getSession();
-                if (!session) {
-                    window.location.href = 'login.html';
-                    return;
-                }
+                if (!session) { window.location.href = 'login.html'; return; }
 
-                btn.innerText = 'Enviando ata para o Drive...';
+                btn.innerText = 'Enviando ata...';
                 const urlAta = await enviarArquivoParaDrive(arquivoAta);
-
-                btn.innerText = 'Enviando relatoria para o Drive...';
+                btn.innerText = 'Enviando relatoria...';
                 const urlRelatoria = await enviarArquivoParaDrive(arquivoRelatoria);
 
                 btn.innerText = 'Salvando...';
-                const { error } = await supabaseClient
-                    .from('acoes_extensao')
-                    .insert({
-                        extensionista_id: session.user.id,
-                        local_intervencao: local,
-                        url_ata: urlAta,
-                        url_relatoria: urlRelatoria,
-                        status: 'pendente'
-                    });
+                const { error } = await supabaseClient.from('acoes_extensao').insert({ extensionista_id: session.user.id, local_intervencao: local, url_ata: urlAta, url_relatoria: urlRelatoria, status: 'pendente' });
 
                 if (error) throw error;
-
-                alert('Documentação da ação enviada! Aguardando homologação da ata e relatoria.');
+                alert('Ação enviada com sucesso!');
                 document.getElementById('form-nova-acao').reset();
-                document.getElementById('label-file-ata').innerHTML = '<i class="fas fa-file-signature mr-1 text-slate-400"></i>Selecionar Ata da Ação';
-                document.getElementById('label-file-relatoria').innerHTML = '<i class="fas fa-file-invoice mr-1 text-slate-400"></i>Selecionar Relatoria';
+                document.getElementById('label-file-ata').innerHTML = 'Selecionar Ata';
+                document.getElementById('label-file-relatoria').innerHTML = 'Selecionar Relatoria';
                 closeModal('modal-nova-acao');
                 carregarMinhasAcoes();
-
-            } catch (erro) {
-                alert('Erro ao enviar: ' + erro.message);
-            } finally {
-                btn.disabled = false;
-                btn.innerText = 'Enviar Documentos';
-            }
+            } catch (erro) { alert('Erro: ' + erro.message); } finally { btn.disabled = false; btn.innerText = 'Enviar Documentos'; }
         }
 
-        document.getElementById('file-ata').addEventListener('change', function() {
-            if (this.files[0]) document.getElementById('label-file-ata').innerHTML = `<i class="fas fa-check text-emerald-500 mr-1"></i>${escapeHtml(this.files[0].name)}`;
-        });
-        document.getElementById('file-relatoria').addEventListener('change', function() {
-            if (this.files[0]) document.getElementById('label-file-relatoria').innerHTML = `<i class="fas fa-check text-emerald-500 mr-1"></i>${escapeHtml(this.files[0].name)}`;
-        });
-        document.getElementById('file-atividade').addEventListener('change', function() {
-            const label = document.getElementById('label-file-atividade');
-            if (this.files[0]) {
-                label.innerHTML = `<i class="fas fa-check text-emerald-500 mr-1 block text-lg"></i><span class="text-xs font-semibold text-slate-600 block">${escapeHtml(this.files[0].name)}</span>`;
-            } else {
-                label.innerHTML = '<i class="fas fa-cloud-upload-alt text-slate-400 text-xl block"></i><span class="text-xs font-semibold text-slate-600 block">Clique para selecionar o arquivo</span>';
-            }
-        });
+        document.getElementById('file-ata').addEventListener('change', function() { if (this.files[0]) document.getElementById('label-file-ata').innerHTML = `<i class="fas fa-check text-emerald-500 mr-1"></i>${escapeHtml(this.files[0].name)}`; });
+        document.getElementById('file-relatoria').addEventListener('change', function() { if (this.files[0]) document.getElementById('label-file-relatoria').innerHTML = `<i class="fas fa-check text-emerald-500 mr-1"></i>${escapeHtml(this.files[0].name)}`; });
+        document.getElementById('file-atividade').addEventListener('change', function() { const l = document.getElementById('label-file-atividade'); if (this.files[0]) { l.innerHTML = `<i class="fas fa-check text-emerald-500 mr-1"></i>${escapeHtml(this.files[0].name)}`; } else { l.innerHTML = '<i class="fas fa-cloud-upload-alt text-slate-400 block"></i>Clique para selecionar o arquivo'; } });
 
-        // Envia uma nova atividade para homologação (arquivo -> Drive, metadados -> Supabase)
         async function compartilharAtividade(e) {
             e.preventDefault();
-
-            if (APPS_SCRIPT_ATIVIDADE_UPLOAD_URL.includes('COLOQUE_AQUI')) {
-                alert('O upload de atividades ainda não foi configurado. Peça ao responsável pelo site para finalizar essa parte.');
-                return;
-            }
-
             const btn = document.getElementById('btn-compartilhar-atividade');
             const titulo = document.getElementById('input-titulo-atividade').value.trim();
             const publico = document.getElementById('input-publico-atividade').value.trim();
             const objetivo = document.getElementById('input-objetivo-atividade').value.trim();
             const arquivo = document.getElementById('file-atividade').files[0];
 
-            if (!titulo || !publico || !objetivo || !arquivo) {
-                alert('Preencha todos os campos e selecione um arquivo.');
-                return;
-            }
-
-            btn.disabled = true;
-            btn.innerText = 'Enviando arquivo...';
+            if (!titulo || !publico || !objetivo || !arquivo) return;
+            btn.disabled = true; btn.innerText = 'Enviando...';
 
             try {
                 const { data: { session } } = await supabaseClient.auth.getSession();
-                if (!session) {
-                    window.location.href = 'login.html';
-                    return;
-                }
-
+                if (!session) { window.location.href = 'login.html'; return; }
                 const urlArquivo = await enviarArquivoAtividadeParaDrive(arquivo);
-
-                btn.innerText = 'Salvando...';
-                const { error } = await supabaseClient
-                    .from('biblioteca_atividades')
-                    .insert({
-                        extensionista_id: session.user.id,
-                        titulo: titulo,
-                        publico_alvo: publico,
-                        objetivo: objetivo,
-                        url_arquivo: urlArquivo,
-                        status: 'pendente'
-                    });
-
+                const { error } = await supabaseClient.from('biblioteca_atividades').insert({ extensionista_id: session.user.id, titulo: titulo, publico_alvo: publico, objetivo: objetivo, url_arquivo: urlArquivo, status: 'pendente' });
                 if (error) throw error;
 
-                alert('Atividade enviada! Ela aparecerá na biblioteca assim que for homologada pela coordenação.');
+                alert('Atividade enviada para moderação!');
                 document.getElementById('form-nova-atividade').reset();
-                document.getElementById('label-file-atividade').innerHTML = '<i class="fas fa-cloud-upload-alt text-slate-400 text-xl block"></i><span class="text-xs font-semibold text-slate-600 block">Clique para selecionar o arquivo</span>';
                 closeModal('modal-atividades');
                 carregarBibliotecaAtividades();
-
-            } catch (erro) {
-                alert('Erro ao compartilhar atividade: ' + erro.message);
-            } finally {
-                btn.disabled = false;
-                btn.innerText = 'Compartilhar';
-            }
+            } catch (erro) { alert('Erro: ' + erro.message); } finally { btn.disabled = false; btn.innerText = 'Compartilhar'; }
         }
 
-        // Carrega a biblioteca: atividades aprovadas (de todos) + as próprias (mesmo pendentes/recusadas)
         async function carregarBibliotecaAtividades() {
             const grid = document.getElementById('grid-biblioteca-atividades');
             const loading = document.getElementById('loading-atividades');
-            const errorContainer = document.getElementById('error-atividades');
             const emptyContainer = document.getElementById('empty-atividades');
-
-            grid.innerHTML = '';
-            loading.classList.remove('hidden');
-            errorContainer.classList.add('hidden');
-            emptyContainer.classList.add('hidden');
+            grid.innerHTML = ''; loading.classList.remove('hidden'); emptyContainer.classList.add('hidden');
 
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (!session) return;
 
-            const { data, error } = await supabaseClient
-                .from('biblioteca_atividades')
-                .select('id, titulo, publico_alvo, objetivo, url_arquivo, status, motivo_recusa, extensionista_id, created_at, perfis(nome)')
-                .or(`status.eq.aprovado,extensionista_id.eq.${session.user.id}`)
-                .order('created_at', { ascending: false });
-
+            const { data, error } = await supabaseClient.from('biblioteca_atividades').select('id, titulo, publico_alvo, objetivo, url_arquivo, status, motivo_recusa, extensionista_id, perfis(nome)').or(`status.eq.aprovado,extensionista_id.eq.${session.user.id}`).order('created_at', { ascending: false });
             loading.classList.add('hidden');
 
-            if (error) {
-                errorContainer.classList.remove('hidden');
-                console.error('Erro ao carregar biblioteca:', error.message);
-                return;
-            }
-
-            if (!data || data.length === 0) {
-                emptyContainer.classList.remove('hidden');
-                return;
-            }
-
-            const statusBadge = {
-                pendente: '<span class="bg-amber-50 text-amber-700 border border-amber-100 px-2.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wide">Em análise</span>',
-                indeferido: '<span class="bg-red-50 text-red-700 border border-red-100 px-2.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wide">Recusada</span>'
-            };
+            if (error || !data || data.length === 0) { emptyContainer.classList.remove('hidden'); return; }
 
             grid.innerHTML = data.map(item => {
                 const ehPropria = item.extensionista_id === session.user.id;
-                const autorNome = item.perfis ? item.perfis.nome : 'Extensionista';
-
                 let extraStatus = '';
                 if (ehPropria && item.status !== 'aprovado') {
-                    extraStatus = `<div class="pt-1">${statusBadge[item.status] || ''}</div>`;
-                    if (item.status === 'indeferido' && item.motivo_recusa) {
-                        extraStatus += `
-                            <div class="mt-2 text-[10px] bg-red-50 border border-red-100 p-2 rounded-lg leading-relaxed">
-                                <span class="block font-bold text-red-700 mb-0.5">Motivo da recusa:</span>
-                                <span class="block text-red-600">${escapeHtml(item.motivo_recusa)}</span>
-                            </div>
-                        `;
-                    }
+                    const cor = item.status === 'pendente' ? 'amber' : 'red';
+                    extraStatus = `<div class="pt-1"><span class="bg-${cor}-50 text-${cor}-700 px-2 py-0.5 rounded text-[9px] font-bold uppercase">${item.status}</span></div>`;
                 }
-
-                return `
-                    <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm flex flex-col justify-between hover:shadow-md transition animate-fadeIn">
-                        <div class="space-y-3">
-                            <div class="text-saude-prime text-xl"><i class="fas fa-folder-open"></i></div>
-                            <h4 class="font-extrabold text-sm text-slate-800 leading-snug">${escapeHtml(item.titulo)}</h4>
-                            <p class="text-[11px] text-slate-400 font-medium"><strong>Autor:</strong> ${escapeHtml(autorNome)}</p>
-                            <p class="text-[11px] text-slate-400 font-medium"><strong>Objetivo:</strong> ${escapeHtml(item.objetivo)}</p>
-                            <span class="inline-block bg-teal-50 text-saude-prime font-bold text-[10px] px-2.5 py-0.5 rounded-md">Público: ${escapeHtml(item.publico_alvo)}</span>
-                            ${extraStatus}
-                        </div>
-                        <div class="pt-5 border-t border-slate-100 mt-4">
-                            <a href="${escapeHtml(item.url_arquivo)}" target="_blank" class="w-full bg-slate-50 hover:bg-teal-50 text-slate-700 hover:text-saude-prime border border-slate-200 hover:border-teal-200 text-xs font-bold py-2 rounded-xl transition flex items-center justify-center space-x-1">
-                                <i class="fas fa-download text-[10px]"></i> <span>Baixar Atividade</span>
-                            </a>
-                        </div>
-                    </div>
-                `;
+                return `<div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm hover:shadow-md transition">
+                    <h4 class="font-extrabold text-sm text-slate-800">${escapeHtml(item.titulo)}</h4>
+                    <p class="text-[11px] text-slate-400 mt-1">Autor: ${escapeHtml(item.perfis?.nome || '—')}</p>
+                    <p class="text-[11px] text-slate-400 mt-1">Público: ${escapeHtml(item.publico_alvo)}</p>
+                    ${extraStatus}
+                    <a href="${escapeHtml(item.url_arquivo)}" target="_blank" class="mt-4 w-full bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold py-2 rounded-xl flex items-center justify-center">Baixar</a>
+                </div>`;
             }).join('');
         }
 
@@ -1108,149 +848,45 @@
         let atividadesCarregadas = false;
 
         function switchTab(tabName) {
-            const tabInicio = document.getElementById('tab-content-inicio');
-            const tabAcoes = document.getElementById('tab-content-acoes');
-            const tabAtividades = document.getElementById('tab-content-atividades');
-            const tabDocumentos = document.getElementById('tab-content-documentos');
+            ['inicio', 'acoes', 'atividades', 'documentos'].forEach(tab => {
+                document.getElementById(`tab-content-${tab}`).classList.add('hidden');
+                document.getElementById(`btn-tab-${tab}`).className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 text-slate-500 hover:bg-slate-50";
+            });
+
+            document.getElementById(`tab-content-${tabName}`).classList.remove('hidden');
+            document.getElementById(`btn-tab-${tabName}`).className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 bg-teal-50 text-saude-prime";
+
+            if (tabName === 'acoes' && !acoesCarregadas) { acoesCarregadas = true; carregarMinhasAcoes(); }
+            if (tabName === 'atividades' && !atividadesCarregadas) { atividadesCarregadas = true; carregarBibliotecaAtividades(); }
+            if (tabName === 'documentos' && document.getElementById('docs-grid').children.length === 0) fetchDriveFiles();
             
-            const btnInicio = document.getElementById('btn-tab-inicio');
-            const btnAcoes = document.getElementById('btn-tab-acoes');
-            const btnAtividades = document.getElementById('btn-tab-atividades');
-            const btnDocumentos = document.getElementById('btn-tab-documentos');
-            const pageTitle = document.getElementById('page-title');
-
-            if (tabName === 'acoes' && !acoesCarregadas) {
-                acoesCarregadas = true;
-                carregarMinhasAcoes();
-            }
-
-            // Esconde todas as abas
-            tabInicio.classList.add('hidden');
-            tabAcoes.classList.add('hidden');
-            tabAtividades.classList.add('hidden');
-            tabDocumentos.classList.add('hidden');
-
-            // Reseta classes de seleção dos botões
-            const btnClassPadrao = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 text-slate-500 hover:bg-slate-50 hover:text-slate-800";
-            btnInicio.className = btnClassPadrao;
-            btnAcoes.className = btnClassPadrao;
-            btnAtividades.className = btnClassPadrao;
-            btnDocumentos.className = btnClassPadrao;
-
-            if (tabName === 'inicio') {
-                tabInicio.classList.remove('hidden');
-                btnInicio.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 bg-teal-50 text-saude-prime";
-                pageTitle.innerHTML = "Página Inicial";
-            } else if (tabName === 'acoes') {
-                tabAcoes.classList.remove('hidden');
-                btnAcoes.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 bg-teal-50 text-saude-prime";
-                pageTitle.innerHTML = "Minhas Ações";
-            } else if (tabName === 'atividades') {
-                tabAtividades.classList.remove('hidden');
-                btnAtividades.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 bg-teal-50 text-saude-prime";
-                pageTitle.innerHTML = "Biblioteca de Atividades";
-
-                if (!atividadesCarregadas) {
-                    atividadesCarregadas = true;
-                    carregarBibliotecaAtividades();
-                }
-            } else if (tabName === 'documentos') {
-                tabDocumentos.classList.remove('hidden');
-                btnDocumentos.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 bg-teal-50 text-saude-prime";
-                pageTitle.innerHTML = "Documentos Acadêmicos";
-                
-                // Realiza a busca automática na nuvem ao entrar na aba pela primeira vez
-                if (document.getElementById('docs-grid').children.length === 0) {
-                    fetchDriveFiles();
-                }
-            }
+            const pt = { 'inicio': 'Página Inicial', 'acoes': 'Minhas Ações', 'atividades': 'Biblioteca', 'documentos': 'Documentos' };
+            document.getElementById('page-title').innerText = pt[tabName];
             document.getElementById('user-dropdown').classList.add('hidden');
         }
 
-        // BUSCA DINÂMICA DE ARQUIVOS DO GOOGLE DRIVE (Aba Documentos)
         async function fetchDriveFiles() {
             const grid = document.getElementById('docs-grid');
             const loading = document.getElementById('loading-docs');
-            const errorContainer = document.getElementById('error-docs');
-            const emptyContainer = document.getElementById('empty-docs');
-            const syncIcon = document.getElementById('sync-icon');
-            const syncText = document.getElementById('sync-text');
-
-            grid.innerHTML = '';
-            loading.classList.remove('hidden');
-            errorContainer.classList.add('hidden');
-            emptyContainer.classList.add('hidden');
-            syncIcon.classList.add('animate-spin');
-            syncText.innerText = "Sincronizando...";
-
+            grid.innerHTML = ''; loading.classList.remove('hidden');
             try {
                 const response = await fetch(APPS_SCRIPT_DOCS_URL);
                 const data = await response.json();
-
                 loading.classList.add('hidden');
-                syncIcon.classList.remove('animate-spin');
-                syncText.innerText = "Sincronizar com Drive";
-
-                if (data.success) {
-                    if (!data.files || data.files.length === 0) {
-                        emptyContainer.classList.remove('hidden');
-                        return;
-                    }
-
+                if (data.success && data.files && data.files.length > 0) {
                     data.files.forEach(file => {
-                        let iconClass = 'fa-file-alt';
-                        let colorClass = 'text-slate-400';
-                        
-                        if (file.mimeType.includes('pdf')) {
-                            iconClass = 'fa-file-pdf';
-                            colorClass = 'text-red-500';
-                        } else if (file.mimeType.includes('word') || file.mimeType.includes('document')) {
-                            iconClass = 'fa-file-word';
-                            colorClass = 'text-blue-500';
-                        } else if (file.mimeType.includes('sheet') || file.mimeType.includes('excel')) {
-                            iconClass = 'fa-file-excel';
-                            colorClass = 'text-emerald-500';
-                        } else if (file.mimeType.includes('presentation') || file.mimeType.includes('powerpoint')) {
-                            iconClass = 'fa-file-powerpoint';
-                            colorClass = 'text-orange-500';
-                        } else if (file.mimeType.includes('image')) {
-                            iconClass = 'fa-file-image';
-                            colorClass = 'text-purple-500';
-                        }
-
-                        const cardHTML = `
-                            <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm flex flex-col justify-between hover:shadow-md transition">
-                                <div class="space-y-3">
-                                    <div class="${colorClass} text-2xl"><i class="fas ${iconClass}"></i></div>
-                                    <h4 class="font-extrabold text-sm text-slate-800 leading-snug">${file.name}</h4>
-                                    <div class="flex flex-wrap gap-2 text-[10px] text-slate-400 font-medium">
-                                        <span><i class="far fa-calendar-alt"></i> ${file.dateCreated}</span>
-                                        <span>•</span>
-                                        <span><i class="fas fa-weight-hanging"></i> ${file.size}</span>
-                                    </div>
-                                </div>
-                                <div class="pt-5 border-t border-slate-100 mt-4 flex gap-2">
-                                    <a href="${file.url}" target="_blank" class="flex-1 bg-slate-50 hover:bg-teal-50 text-slate-700 hover:text-saude-prime border border-slate-200 hover:border-teal-200 text-xs font-bold py-2 rounded-xl transition flex items-center justify-center space-x-1">
-                                        <i class="fas fa-external-link-alt text-[10px]"></i> <span>Abrir no Drive</span>
-                                    </a>
-                                </div>
-                            </div>
-                        `;
-                        grid.innerHTML += cardHTML;
+                        grid.innerHTML += `<div class="bg-white border border-slate-200 p-6 rounded-2xl flex flex-col justify-between">
+                            <h4 class="font-extrabold text-sm text-slate-800">${file.name}</h4>
+                            <a href="${file.url}" target="_blank" class="mt-4 bg-slate-50 border border-slate-200 text-xs font-bold py-2 rounded-xl text-center">Abrir</a>
+                        </div>`;
                     });
-                } else {
-                    errorContainer.classList.remove('hidden');
                 }
-            } catch (error) {
-                console.error("Erro na requisição:", error);
-                loading.classList.add('hidden');
-                errorContainer.classList.remove('hidden');
-                syncIcon.classList.remove('animate-spin');
-                syncText.innerText = "Sincronizar com Drive";
-            }
+            } catch (err) { loading.classList.add('hidden'); }
         }
 
-        // GERAR RELATÓRIO COM FILTRO DE DATA, LOCAL E ATIVIDADE LIMPA
+        // ==============================================================
+        // NOVO GERADOR DE RELATÓRIO DO EXTENSIONISTA (JSPDF + AUTOTABLE)
+        // ==============================================================
         async function gerarRelatorioOficial(e) {
             e.preventDefault();
             const btnText = document.getElementById('text-btn-relatorio');
@@ -1267,9 +903,11 @@
                 const { data: { session } } = await supabaseClient.auth.getSession();
                 if (!session) { window.location.href = 'login.html'; return; }
 
+                // Puxa o nome do aluno do banco
                 const { data: perfil } = await supabaseClient.from('perfis').select('nome').eq('id', session.user.id).single();
+                const nomeAluno = perfil ? perfil.nome : 'EXTENSIONISTA';
 
-                // Monta a consulta de horas aprovadas no Supabase com ou sem filtro
+                // Busca as horas homologadas
                 let query = supabaseClient
                     .from('horas_avulsas')
                     .select('descricao, horas, status, created_at, data_atividade, local')
@@ -1283,69 +921,157 @@
 
                 if (error) throw error;
                 if (!horas || horas.length === 0) {
-                    alert("Nenhuma hora aprovada encontrada no período selecionado.");
+                    alert("Nenhuma hora validada encontrada no período selecionado.");
                     btnText.innerText = textoOriginal;
                     btnSubmit.disabled = false;
                     return;
                 }
 
-                btnText.innerText = "Baixando PDF...";
+                btnText.innerText = "Gerando Documento Oficial...";
 
-                const payload = {
-                    nome: perfil ? perfil.nome : 'Extensionista',
-                    atividades: horas.map(h => {
-                        // Limpa a descrição para pegar só o tipo puro da atividade (cortando a data do texto)
-                        const tipoPuro = h.descricao.split(' (')[0].trim();
-                        return {
-                            data: h.data_atividade ? new Date(h.data_atividade + 'T12:00:00').toLocaleDateString('pt-BR') : new Date(h.created_at).toLocaleDateString('pt-BR'),
-                            tipo: tipoPuro,
-                            local: h.local || "Não informado", // O Google Apps Script lerá isso perfeitamente
-                            horas: h.horas
-                        };
-                    })
-                };
-
-                const response = await fetch(APPS_SCRIPT_RELATORIO_URL, {
-                    method: 'POST', mode: 'cors',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify(payload)
-                });
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
                 
-                const resultado = await response.json();
+                let y = 20;
 
-                if (resultado.success && resultado.pdfUrl) {
-                    let urlDownloadDireto = resultado.pdfUrl;
-                    if (urlDownloadDireto.includes('/view')) {
-                        const arquivoId = urlDownloadDireto.split('/d/')[1].split('/view')[0];
-                        urlDownloadDireto = `https://docs.google.com/uc?export=download&id=${arquivoId}`;
-                    }
-                    const linkTemporario = document.createElement('a');
-                    linkTemporario.href = urlDownloadDireto;
-                    linkTemporario.setAttribute('download', `Relatorio_${payload.nome.replace(/\s+/g, '_')}.pdf`);
-                    document.body.appendChild(linkTemporario);
-                    linkTemporario.click();
-                    document.body.removeChild(linkTemporario);
-                    closeModal('modal-relatorio');
-                } else {
-                    alert("Não foi possível gerar o relatório. Detalhes: " + (resultado.error || "Erro desconhecido."));
+                // --- 1. CABEÇALHO DA INSTITUIÇÃO ---
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(12);
+                doc.text("FACULDADE DE ENFERMAGEM NOSSA SENHORA DAS GRAÇAS / UPE", 105, y, { align: "center" });
+                y += 6;
+                doc.setFontSize(10);
+                doc.text("COORDENAÇÃO SETORIAL DE EXTENSÃO E CULTURA", 105, y, { align: "center" });
+                y += 12;
+
+                // Título
+                doc.setFontSize(14);
+                doc.text("RELATÓRIO DE CARGA HORÁRIA", 105, y, { align: "center" });
+                y += 12;
+
+                // Metadados do doc
+                doc.setFontSize(9);
+                doc.setFont("helvetica", "normal");
+                
+                doc.text("CÓDIGO: ADLCR-002", 14, y);
+                doc.text("VERSÃO: 00", 160, y);
+                y += 6;
+                
+                doc.text("APROVADO POR: ANA VIRGINIA RODRIGUES VERISSIMO", 14, y);
+                const dataDoc = new Date().toLocaleDateString('pt-BR');
+                doc.text(`DATA DA EMISSÃO: ${dataDoc}`, 160, y);
+                y += 8;
+
+                // --- 2. CAIXA DE DADOS DO PROJETO E DO ALUNO ---
+                doc.setDrawColor(180, 180, 180); // Cor da borda
+                doc.setFillColor(250, 250, 250); // Cor de fundo
+                doc.rect(14, y, 182, 34, 'FD'); // Desenha um retângulo
+                y += 7;
+                
+                doc.setFont("helvetica", "bold");
+                doc.text("TÍTULO DO PROJETO:", 18, y);
+                doc.setFont("helvetica", "normal");
+                doc.text("ADOLESCER SAUDÁVEL: CUIDADO EDUCATIVO EM SAÚDE", 58, y);
+                y += 5;
+                doc.text("NO CONTEXTO ESCOLAR E DIGITAL", 58, y);
+                y += 7;
+
+                doc.setFont("helvetica", "bold");
+                doc.text("COORDENADOR DO PROJETO:", 18, y);
+                doc.setFont("helvetica", "normal");
+                doc.text("ANA VIRGINIA RODRIGUES VERISSIMO", 74, y);
+                y += 7;
+
+                doc.setFont("helvetica", "bold");
+                doc.text("EDITAL PIAEXT:", 18, y);
+                doc.setFont("helvetica", "normal");
+                doc.text("2026", 48, y);
+
+                doc.setFont("helvetica", "bold");
+                doc.text("EXTENSIONISTA:", 74, y);
+                doc.setFont("helvetica", "normal");
+                doc.text(nomeAluno.toUpperCase(), 106, y);
+
+                y += 15; // Desce a caneta para baixo da caixa
+
+                // --- 3. PREPARANDO OS DADOS DA TABELA ---
+                const linhasTabela = horas.map(h => {
+                    // Pega só o texto "Oficina" ou "Reunião" removendo a data que o sistema embute
+                    const tipoPuro = h.descricao.split(' (')[0].trim();
+                    const dataAtv = h.data_atividade ? new Date(h.data_atividade + 'T12:00:00').toLocaleDateString('pt-BR') : new Date(h.created_at).toLocaleDateString('pt-BR');
+                    
+                    // A última coluna ("") fica vazia para o preceptor assinar à caneta
+                    return [tipoPuro, h.local || "Não informado", dataAtv, h.horas, ""]; 
+                });
+
+                // Cria uma linha extra no final com o Somatório das Horas
+                const totalH = horas.reduce((soma, h) => soma + Number(h.horas), 0);
+                linhasTabela.push([
+                    { content: 'TOTAL GERAL DE HORAS', colSpan: 3, styles: { halign: 'right', fontStyle: 'bold' } }, 
+                    { content: `${totalH}h`, styles: { halign: 'center', fontStyle: 'bold' } }, 
+                    "" // Célula vazia abaixo de Assinatura
+                ]);
+
+                // --- 4. DESENHANDO A TABELA (AutoTable) ---
+                doc.autoTable({
+                    startY: y,
+                    head: [['ATIVIDADE REALIZADA', 'LOCAL', 'DATA', 'C.H', 'ASSINATURA']],
+                    body: linhasTabela,
+                    theme: 'grid',
+                    headStyles: { fillColor: [230, 230, 230], textColor: [0, 0, 0], fontStyle: 'bold', halign: 'center' },
+                    styles: { fontSize: 8, cellPadding: 3, valign: 'middle' },
+                    columnStyles: {
+                        0: { cellWidth: 50 },
+                        1: { cellWidth: 40 },
+                        2: { cellWidth: 20, halign: 'center' },
+                        3: { cellWidth: 15, halign: 'center' },
+                        4: { cellWidth: 57 } // Espaço largo para assinatura manual
+                    },
+                    margin: { left: 14, right: 14 }
+                });
+
+                // --- 5. ASSINATURAS FINAIS ---
+                let finalY = doc.lastAutoTable.finalY + 35; // Distância da tabela até a linha de assinatura
+
+                // Se não houver espaço na folha atual para as assinaturas, criamos uma folha nova
+                if (finalY > 260) {
+                    doc.addPage();
+                    finalY = 40;
                 }
+
+                doc.setDrawColor(0); // Cor preta para a linha
+                
+                // Assinatura 1 (Esquerda)
+                doc.line(20, finalY, 90, finalY);
+                doc.setFontSize(8);
+                doc.setFont("helvetica", "bold");
+                doc.text("ANA VIRGINIA RODRIGUES VERISSIMO", 55, finalY + 5, { align: "center" });
+                doc.setFont("helvetica", "normal");
+                doc.text("Coordenadora do Projeto", 55, finalY + 10, { align: "center" });
+
+                // Assinatura 2 (Direita)
+                doc.line(120, finalY, 190, finalY);
+                doc.setFontSize(8);
+                doc.setFont("helvetica", "bold");
+                doc.text("COORDENAÇÃO SETORIAL DE EXTENSÃO E CULTURA", 155, finalY + 5, { align: "center" });
+                doc.text("FENSG / UPE", 155, finalY + 10, { align: "center" });
+
+                // --- 6. SALVANDO O ARQUIVO ---
+                doc.save(`Carga_Horaria_${nomeAluno.replace(/\s+/g, '_')}.pdf`);
+                closeModal('modal-relatorio');
+
             } catch (error) {
-                console.error("Erro de conexão do script:", error);
-                alert("Erro de conexão com o gerador do Google Docs.");
+                console.error("Erro na geração do PDF:", error);
+                alert("Erro ao gerar PDF: " + error.message);
             } finally {
                 btnText.innerText = textoOriginal;
                 btnSubmit.disabled = false;
             }
         }
 
-        // INICIALIZAÇÃO DA PÁGINA (AQUI É ONDE O RASTREIO É LIGADO!)
         document.addEventListener('DOMContentLoaded', async () => {
              const perfil = await protegerPagina();
              if (!perfil) return;
-
-             // CHAMA O RASTREIO AQUI!
              iniciarRastreioAcesso(perfil.id);
-
              document.getElementById('header-user-name').innerText = perfil.nome;
              document.getElementById('header-user-avatar').innerText = iniciais(perfil.nome);
              document.getElementById('modal-avatar-initials').textContent = iniciais(perfil.nome);
