@@ -1367,46 +1367,46 @@
             doc.setFontSize(10);
             doc.text(`EXTENSIONISTA: ${nomeAluno.toUpperCase()}`, margin, y);
 
-            // ===== TABELA DE ATIVIDADES =====
+            // ===== TABELA DE ATIVIDADES (com linha de total ao final) =====
+            const totalHoras = atividades.reduce((soma, a) => soma + Number(a.horas || 0), 0);
+
             doc.autoTable({
                 startY: y + 5,
                 margin: { left: margin, right: margin },
                 theme: 'grid',
                 head: [['ATIVIDADE REALIZADA', 'LOCAL', 'DATA', 'C.H', 'ASSINATURA']],
                 body: atividades.map(a => [a.tipo, a.local, a.data, `${a.horas}h`, '']),
+                foot: [['TOTAL DE HORAS APROVADAS', '', '', `${totalHoras}h`, '']],
                 styles: { fontSize: 8, cellPadding: 2.5, valign: 'middle' },
                 headStyles: { fillColor: [13, 148, 136], textColor: 255, fontStyle: 'bold', halign: 'center' },
+                footStyles: { fillColor: [240, 253, 244], textColor: [17, 94, 89], fontStyle: 'bold', halign: 'center' },
                 columnStyles: {
                     0: { cellWidth: 'auto' },
                     1: { cellWidth: 38 },
                     2: { cellWidth: 22, halign: 'center' },
                     3: { cellWidth: 14, halign: 'center' },
                     4: { cellWidth: 34 }
+                },
+                didParseCell: function(data) {
+                    if (data.section === 'foot' && data.column.index === 0) {
+                        data.cell.colSpan = 3;
+                        data.cell.styles.halign = 'right';
+                    }
+                    if (data.section === 'foot' && (data.column.index === 1 || data.column.index === 2)) {
+                        data.cell.text = [];
+                    }
                 }
             });
 
-            // ===== TOTAL DE HORAS =====
-            const totalHoras = atividades.reduce((soma, a) => soma + Number(a.horas || 0), 0);
-            let yTotal = doc.lastAutoTable.finalY + 8;
-
-            // Se não houver espaço suficiente na página atual, pula para a próxima
-            if (yTotal + 45 > pageHeight - margin) {
-                doc.addPage();
-                yTotal = margin + 10;
-            }
-
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(10);
-            doc.text(`TOTAL DE HORAS APROVADAS: ${totalHoras}h`, pageWidth - margin, yTotal, { align: 'right' });
-
-            // ===== ASSINATURAS (rodapé) =====
-            let finalY = yTotal + 20;
+            // ===== ASSINATURAS (fixas no rodapé da página, não logo após a tabela) =====
             const assinaturaW = (usableWidth - 20) / 2;
+            const alturaBlocoAssinaturas = 20; // espaço reservado no rodapé para as assinaturas
+            let finalY = pageHeight - margin - alturaBlocoAssinaturas;
 
-            // Se não houver espaço suficiente na página atual, pula para a próxima
-            if (finalY + 25 > pageHeight - margin) {
+            // Se a tabela terminar depois de onde as assinaturas ficariam, empurra para uma nova página
+            if (doc.lastAutoTable.finalY > finalY - 5) {
                 doc.addPage();
-                finalY = margin + 15;
+                finalY = pageHeight - margin - alturaBlocoAssinaturas;
             }
 
             doc.setLineWidth(0.2);
