@@ -301,7 +301,7 @@
                     <p class="text-xs text-slate-400 mt-0.5">Métricas globais de engajamento, produtividade técnica e envolvimento discente extraídas em tempo real.</p>
                 </div>
 
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
                     <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm text-center">
                         <h4 class="text-[10px] font-bold text-slate-400 uppercase">Extensionistas Ativos</h4>
                         <p id="ind-extensionistas-ativos" class="text-3xl font-black text-slate-800 mt-1">--</p>
@@ -315,8 +315,48 @@
                         <p id="ind-materiais-biblioteca" class="text-3xl font-black text-saude-accent mt-1">--</p>
                     </div>
                     <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm text-center">
-                        <h4 class="text-[10px] font-bold text-slate-400 uppercase">Horas Validadas</h4>
+                        <h4 class="text-[10px] font-bold text-slate-400 uppercase">Horas Validadas (Mês)</h4>
                         <p id="ind-horas-validadas" class="text-3xl font-black text-slate-800 mt-1">--</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-saude-dark to-saude-prime p-5 rounded-2xl border border-teal-700 shadow-sm text-center">
+                        <h4 class="text-[10px] font-bold text-teal-100 uppercase">Carga Horária Total do Projeto</h4>
+                        <p id="ind-horas-total-projeto" class="text-3xl font-black text-white mt-1">--</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+                        <h4 class="font-bold text-sm text-slate-800 mb-1">🏆 Ranking Top 5 — Extensionistas</h4>
+                        <p class="text-[11px] text-slate-400 mb-4">Quem mais contribuiu com horas e ações homologadas.</p>
+                        <ol id="ranking-top5" class="space-y-2.5">
+                            <li class="text-center text-xs text-slate-400 py-4">Carregando...</li>
+                        </ol>
+                    </div>
+
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+                        <h4 class="font-bold text-sm text-slate-800 mb-1">📈 Sazonalidade — Ações por Mês</h4>
+                        <p class="text-[11px] text-slate-400 mb-4">Meses de pico de ações homologadas (últimos 6 meses).</p>
+                        <div id="grafico-sazonalidade" class="flex items-end justify-between h-36 gap-2 px-1">
+                            <span class="text-center text-xs text-slate-400 w-full self-center">Carregando...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+                        <h4 class="font-bold text-sm text-slate-800 mb-1">🧩 Distribuição de Atividades</h4>
+                        <p class="text-[11px] text-slate-400 mb-4">Onde a equipe concentra esforço: oficinas, reuniões ou digital.</p>
+                        <div id="grafico-distribuicao" class="space-y-3">
+                            <span class="text-center text-xs text-slate-400 block py-4">Carregando...</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+                        <h4 class="font-bold text-sm text-slate-800 mb-1">⚖️ Eficiência da Coordenação</h4>
+                        <p class="text-[11px] text-slate-400 mb-4">Taxa de deferimento vs. recusa nas homologações.</p>
+                        <div id="painel-eficiencia">
+                            <span class="text-center text-xs text-slate-400 block py-4">Carregando...</span>
+                        </div>
                     </div>
                 </div>
 
@@ -343,6 +383,34 @@
                             <div class="ml-3">
                                 <span class="text-xs font-bold text-slate-800 block">Produtividade de Materiais Pedagógicos</span>
                                 <span class="text-[11px] text-slate-400">Relação de dinâmicas aprovadas na Biblioteca.</span>
+                            </div>
+                        </label>
+                        <label class="flex items-start p-3 rounded-xl border border-slate-100 hover:border-teal-200 hover:bg-slate-50/50 cursor-pointer transition">
+                            <input type="checkbox" name="metricas" value="ranking_extensionistas" class="w-4 h-4 rounded border-slate-300 accent-teal-600 mt-0.5">
+                            <div class="ml-3">
+                                <span class="text-xs font-bold text-slate-800 block">Ranking de Extensionistas</span>
+                                <span class="text-[11px] text-slate-400">Lista nominal completa ordenada por horas e ações validadas.</span>
+                            </div>
+                        </label>
+                        <label class="flex items-start p-3 rounded-xl border border-slate-100 hover:border-teal-200 hover:bg-slate-50/50 cursor-pointer transition">
+                            <input type="checkbox" name="metricas" value="sazonalidade" class="w-4 h-4 rounded border-slate-300 accent-teal-600 mt-0.5">
+                            <div class="ml-3">
+                                <span class="text-xs font-bold text-slate-800 block">Sazonalidade de Ações</span>
+                                <span class="text-[11px] text-slate-400">Volume de ações homologadas mês a mês.</span>
+                            </div>
+                        </label>
+                        <label class="flex items-start p-3 rounded-xl border border-slate-100 hover:border-teal-200 hover:bg-slate-50/50 cursor-pointer transition">
+                            <input type="checkbox" name="metricas" value="distribuicao_atividades" class="w-4 h-4 rounded border-slate-300 accent-teal-600 mt-0.5">
+                            <div class="ml-3">
+                                <span class="text-xs font-bold text-slate-800 block">Distribuição de Atividades</span>
+                                <span class="text-[11px] text-slate-400">Proporção entre oficinas, reuniões e atividades digitais.</span>
+                            </div>
+                        </label>
+                        <label class="flex items-start p-3 rounded-xl border border-slate-100 hover:border-teal-200 hover:bg-slate-50/50 cursor-pointer transition">
+                            <input type="checkbox" name="metricas" value="eficiencia_coordenacao" class="w-4 h-4 rounded border-slate-300 accent-teal-600 mt-0.5">
+                            <div class="ml-3">
+                                <span class="text-xs font-bold text-slate-800 block">Eficiência da Coordenação</span>
+                                <span class="text-[11px] text-slate-400">Taxa de deferimento e de recusa por módulo de homologação.</span>
                             </div>
                         </label>
 
@@ -455,6 +523,22 @@
         const SUPABASE_URL = "https://hqckepxhcwvlwbhdlriy.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_Yc4xaOn65mSCBuj0rDPvtA_WfsrimeV";
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Guarda o perfil da coordenadora logada, usado na auditoria de autoria do PDF
+        let perfilAtual = null;
+
+        // Mapeamento das descrições tabeladas de horas_avulsas para categorias de atividade
+        const CATEGORIAS_ATIVIDADE = {
+            'Ação de Extensão Realizada': 'Intervenções / Oficinas',
+            'Preparação de Material Didático/Oficina': 'Intervenções / Oficinas',
+            'Reunião Ordinária/Geral': 'Reuniões',
+            'Preparação de Post para Redes Sociais': 'Digital / Comunicação',
+            'Pesquisa para Ação ou Post': 'Digital / Comunicação',
+            'Outros': 'Outros'
+        };
+        function categorizarDescricao(descricao) {
+            return CATEGORIAS_ATIVIDADE[descricao] || 'Outros';
+        }
 
         function iniciais(nome) {
             const partes = nome.trim().split(/\s+/);
@@ -1222,6 +1306,8 @@
             const perfil = await protegerPagina();
             if (!perfil) return;
 
+            perfilAtual = perfil;
+
             document.getElementById('header-user-name').innerText = perfil.nome;
             document.getElementById('header-user-avatar').innerText = iniciais(perfil.nome);
             document.getElementById('modal-avatar-initials').textContent = iniciais(perfil.nome);
@@ -1240,26 +1326,232 @@
             const elExt = document.getElementById('ind-extensionistas-ativos');
             const elAcoes = document.getElementById('ind-acoes-realizadas');
             const elMateriais = document.getElementById('ind-materiais-biblioteca');
-            const elHoras = document.getElementById('ind-horas-validadas');
+            const elHorasMes = document.getElementById('ind-horas-validadas');
+            const elHorasTotal = document.getElementById('ind-horas-total-projeto');
+
+            const agora = new Date();
+            const inicioMes = new Date(agora.getFullYear(), agora.getMonth(), 1).toISOString();
 
             const [
                 { count: countExt },
                 { count: countAcoes },
                 { count: countMateriais },
-                { data: horasDeferidas }
+                { data: horasDeferidas },
+                { data: horasDeferidasMes }
             ] = await Promise.all([
                 supabaseClient.from('perfis').select('*', { count: 'exact', head: true }).eq('papel', 'extensionista').eq('status', 'aprovado'),
                 supabaseClient.from('acoes_extensao').select('*', { count: 'exact', head: true }).eq('status', 'deferido'),
                 supabaseClient.from('biblioteca_atividades').select('*', { count: 'exact', head: true }).eq('status', 'aprovado'),
-                supabaseClient.from('horas_avulsas').select('horas').eq('status', 'deferido')
+                supabaseClient.from('horas_avulsas').select('horas').eq('status', 'deferido'),
+                supabaseClient.from('horas_avulsas').select('horas').eq('status', 'deferido').gte('created_at', inicioMes)
             ]);
 
             const totalHoras = (horasDeferidas || []).reduce((soma, h) => soma + Number(h.horas), 0);
+            const totalHorasMes = (horasDeferidasMes || []).reduce((soma, h) => soma + Number(h.horas), 0);
 
             if (elExt) elExt.innerText = countExt ?? 0;
             if (elAcoes) elAcoes.innerText = countAcoes ?? 0;
             if (elMateriais) elMateriais.innerText = countMateriais ?? 0;
-            if (elHoras) elHoras.innerText = totalHoras;
+            if (elHorasMes) elHorasMes.innerText = `${totalHorasMes}h`;
+            if (elHorasTotal) elHorasTotal.innerText = `${totalHoras}h`;
+
+            carregarPainelRanking();
+            carregarPainelSazonalidade();
+            carregarPainelDistribuicao();
+            carregarPainelEficiencia();
+        }
+
+        // ---- Ranking Top 5 ----
+        async function carregarPainelRanking() {
+            const container = document.getElementById('ranking-top5');
+            if (!container) return;
+
+            const [{ data: horas }, { data: acoes }] = await Promise.all([
+                supabaseClient.from('horas_avulsas').select('horas, perfis(nome)').eq('status', 'deferido'),
+                supabaseClient.from('acoes_extensao').select('id, perfis(nome)').eq('status', 'deferido')
+            ]);
+
+            const totais = {};
+            (horas || []).forEach(h => {
+                const nome = h.perfis?.nome || 'Desconhecido';
+                if (!totais[nome]) totais[nome] = { horas: 0, acoes: 0 };
+                totais[nome].horas += Number(h.horas);
+            });
+            (acoes || []).forEach(a => {
+                const nome = a.perfis?.nome || 'Desconhecido';
+                if (!totais[nome]) totais[nome] = { horas: 0, acoes: 0 };
+                totais[nome].acoes += 1;
+            });
+
+            const lista = Object.entries(totais)
+                .map(([nome, dados]) => ({ nome, ...dados }))
+                .sort((a, b) => b.horas - a.horas)
+                .slice(0, 5);
+
+            if (lista.length === 0) {
+                container.innerHTML = '<li class="text-center text-xs text-slate-400 py-4">Ainda não há dados suficientes para o ranking.</li>';
+                return;
+            }
+
+            const medalhas = ['🥇', '🥈', '🥉', '4º', '5º'];
+            container.innerHTML = lista.map((item, idx) => `
+                <li class="flex items-center justify-between p-2.5 rounded-xl ${idx === 0 ? 'bg-amber-50 border border-amber-100' : 'bg-slate-50 border border-slate-100'}">
+                    <div class="flex items-center space-x-3">
+                        <span class="text-sm font-bold w-6 text-center">${medalhas[idx]}</span>
+                        <span class="text-xs font-bold text-slate-800">${escapeHtml(item.nome)}</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xs font-black text-saude-prime">${item.horas}h</span>
+                        <span class="text-[10px] text-slate-400 block">${item.acoes} ação${item.acoes === 1 ? '' : 'ões'}</span>
+                    </div>
+                </li>
+            `).join('');
+        }
+
+        // ---- Sazonalidade (ações homologadas por mês, últimos 6 meses) ----
+        async function carregarPainelSazonalidade() {
+            const container = document.getElementById('grafico-sazonalidade');
+            if (!container) return;
+
+            const { data, error } = await supabaseClient
+                .from('acoes_extensao')
+                .select('created_at')
+                .eq('status', 'deferido');
+
+            if (error) {
+                container.innerHTML = `<span class="text-center text-xs text-rose-500 w-full">Erro ao carregar: ${escapeHtml(error.message)}</span>`;
+                return;
+            }
+
+            const meses = [];
+            const hoje = new Date();
+            for (let i = 5; i >= 0; i--) {
+                const d = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
+                meses.push({ chave: `${d.getFullYear()}-${d.getMonth()}`, label: d.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', ''), qtd: 0 });
+            }
+
+            (data || []).forEach(a => {
+                const d = new Date(a.created_at);
+                const chave = `${d.getFullYear()}-${d.getMonth()}`;
+                const mes = meses.find(m => m.chave === chave);
+                if (mes) mes.qtd += 1;
+            });
+
+            const max = Math.max(1, ...meses.map(m => m.qtd));
+
+            container.innerHTML = meses.map(m => `
+                <div class="flex flex-col items-center flex-1 h-full justify-end">
+                    <span class="text-[10px] font-bold text-slate-500 mb-1">${m.qtd || ''}</span>
+                    <div class="w-full rounded-t-md ${m.qtd === max && max > 0 ? 'bg-saude-prime' : 'bg-teal-100'}" style="height: ${max > 0 ? Math.max(6, (m.qtd / max) * 100) : 4}%"></div>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase mt-1.5">${m.label}</span>
+                </div>
+            `).join('');
+        }
+
+        // ---- Distribuição de Atividades ----
+        async function carregarPainelDistribuicao() {
+            const container = document.getElementById('grafico-distribuicao');
+            if (!container) return;
+
+            const { data, error } = await supabaseClient
+                .from('horas_avulsas')
+                .select('descricao')
+                .eq('status', 'deferido');
+
+            if (error) {
+                container.innerHTML = `<span class="text-center text-xs text-rose-500 block">Erro ao carregar: ${escapeHtml(error.message)}</span>`;
+                return;
+            }
+
+            const contagem = { 'Intervenções / Oficinas': 0, 'Reuniões': 0, 'Digital / Comunicação': 0, 'Outros': 0 };
+            (data || []).forEach(h => {
+                contagem[categorizarDescricao(h.descricao)] += 1;
+            });
+
+            const total = Object.values(contagem).reduce((a, b) => a + b, 0);
+
+            if (total === 0) {
+                container.innerHTML = '<span class="text-center text-xs text-slate-400 block py-4">Ainda não há lançamentos de horas homologados.</span>';
+                return;
+            }
+
+            const cores = {
+                'Intervenções / Oficinas': 'bg-saude-prime',
+                'Reuniões': 'bg-saude-accent',
+                'Digital / Comunicação': 'bg-amber-400',
+                'Outros': 'bg-slate-300'
+            };
+
+            container.innerHTML = Object.entries(contagem).map(([categoria, qtd]) => {
+                const pct = Math.round((qtd / total) * 100);
+                return `
+                <div>
+                    <div class="flex justify-between text-[11px] font-bold text-slate-600 mb-1">
+                        <span>${categoria}</span>
+                        <span>${pct}% <span class="text-slate-400 font-medium">(${qtd})</span></span>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-2.5">
+                        <div class="${cores[categoria]} h-2.5 rounded-full" style="width: ${pct}%"></div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        // ---- Eficiência da Coordenação (taxa de deferimento/recusa) ----
+        async function carregarPainelEficiencia() {
+            const container = document.getElementById('painel-eficiencia');
+            if (!container) return;
+
+            const [{ data: acoes }, { data: horas }, { data: biblioteca }] = await Promise.all([
+                supabaseClient.from('acoes_extensao').select('status').in('status', ['deferido', 'indeferido']),
+                supabaseClient.from('horas_avulsas').select('status').in('status', ['deferido', 'indeferido']),
+                supabaseClient.from('biblioteca_atividades').select('status').in('status', ['aprovado', 'indeferido'])
+            ]);
+
+            function taxa(lista, statusPositivo) {
+                const total = (lista || []).length;
+                const positivos = (lista || []).filter(x => x.status === statusPositivo).length;
+                return { total, positivos, recusados: total - positivos, pct: total > 0 ? Math.round((positivos / total) * 100) : null };
+            }
+
+            const rAcoes = taxa(acoes, 'deferido');
+            const rHoras = taxa(horas, 'deferido');
+            const rBiblioteca = taxa(biblioteca, 'aprovado');
+
+            const totalGeral = rAcoes.total + rHoras.total + rBiblioteca.total;
+            const positivosGeral = rAcoes.positivos + rHoras.positivos + rBiblioteca.positivos;
+            const pctGeral = totalGeral > 0 ? Math.round((positivosGeral / totalGeral) * 100) : null;
+
+            if (totalGeral === 0) {
+                container.innerHTML = '<span class="text-center text-xs text-slate-400 block py-4">Ainda não há homologações decididas.</span>';
+                return;
+            }
+
+            function linha(label, r) {
+                if (r.total === 0) {
+                    return `<div class="flex justify-between items-center text-[11px] text-slate-400 py-1.5"><span class="font-bold">${label}</span><span>Sem decisões ainda</span></div>`;
+                }
+                return `
+                <div class="py-1.5">
+                    <div class="flex justify-between text-[11px] font-bold text-slate-600 mb-1">
+                        <span>${label}</span>
+                        <span class="text-emerald-600">${r.pct}% deferido <span class="text-slate-400 font-medium">(${r.positivos}/${r.total})</span></span>
+                    </div>
+                    <div class="w-full bg-rose-100 rounded-full h-2">
+                        <div class="bg-emerald-500 h-2 rounded-full" style="width: ${r.pct}%"></div>
+                    </div>
+                </div>`;
+            }
+
+            container.innerHTML = `
+                <div class="text-center mb-4">
+                    <p class="text-4xl font-black text-emerald-600">${pctGeral}%</p>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Taxa Geral de Deferimento (${positivosGeral}/${totalGeral})</p>
+                </div>
+                ${linha('Ações de Extensão', rAcoes)}
+                ${linha('Horas Avulsas', rHoras)}
+                ${linha('Biblioteca de Atividades', rBiblioteca)}
+            `;
         }
 
         // ---- Seções do relatório PDF ----
@@ -1272,7 +1564,7 @@
             return y;
         }
 
-        async function adicionarSecaoConsolidadoHoras(doc, y) {
+        async function adicionarSecaoConsolidadoHoras(doc, y, numero) {
             const [{ data: horas }, { data: sessoes }] = await Promise.all([
                 supabaseClient.from('horas_avulsas').select('horas, status, perfis(nome)').eq('status', 'deferido'),
                 supabaseClient.from('sessoes_acesso').select('login_at, perfis(nome)').order('login_at', { ascending: false })
@@ -1300,7 +1592,7 @@
             y = verificarQuebraDePagina(doc, y);
             doc.setFontSize(12);
             doc.setTextColor(20);
-            doc.text('1. Consolidado de Carga Horária e Assiduidade', 14, y);
+            doc.text(`${numero}. Consolidado de Carga Horária e Assiduidade`, 14, y);
             y += 5;
 
             doc.autoTable({
@@ -1316,7 +1608,7 @@
             return doc.lastAutoTable.finalY + 12;
         }
 
-        async function adicionarSecaoMapaInstituicoes(doc, y) {
+        async function adicionarSecaoMapaInstituicoes(doc, y, numero) {
             const { data } = await supabaseClient
                 .from('acoes_extensao')
                 .select('local_intervencao, created_at, perfis(nome)')
@@ -1332,7 +1624,7 @@
             y = verificarQuebraDePagina(doc, y);
             doc.setFontSize(12);
             doc.setTextColor(20);
-            doc.text('2. Mapa de Instituições Atendidas (Ações Homologadas)', 14, y);
+            doc.text(`${numero}. Mapa de Instituições Atendidas (Ações Homologadas)`, 14, y);
             y += 5;
 
             doc.autoTable({
@@ -1348,7 +1640,7 @@
             return doc.lastAutoTable.finalY + 12;
         }
 
-        async function adicionarSecaoProdutividade(doc, y) {
+        async function adicionarSecaoProdutividade(doc, y, numero) {
             const { data } = await supabaseClient
                 .from('biblioteca_atividades')
                 .select('titulo, publico_alvo, created_at, perfis(nome)')
@@ -1365,7 +1657,7 @@
             y = verificarQuebraDePagina(doc, y);
             doc.setFontSize(12);
             doc.setTextColor(20);
-            doc.text('3. Produtividade de Materiais Pedagógicos (Biblioteca Aprovada)', 14, y);
+            doc.text(`${numero}. Produtividade de Materiais Pedagógicos (Biblioteca Aprovada)`, 14, y);
             y += 5;
 
             doc.autoTable({
@@ -1381,6 +1673,288 @@
             return doc.lastAutoTable.finalY + 12;
         }
 
+        async function adicionarSecaoRanking(doc, y, numero) {
+            const [{ data: horas }, { data: acoes }] = await Promise.all([
+                supabaseClient.from('horas_avulsas').select('horas, perfis(nome)').eq('status', 'deferido'),
+                supabaseClient.from('acoes_extensao').select('id, perfis(nome)').eq('status', 'deferido')
+            ]);
+
+            const totais = {};
+            (horas || []).forEach(h => {
+                const nome = h.perfis?.nome || 'Desconhecido';
+                if (!totais[nome]) totais[nome] = { horas: 0, acoes: 0 };
+                totais[nome].horas += Number(h.horas);
+            });
+            (acoes || []).forEach(a => {
+                const nome = a.perfis?.nome || 'Desconhecido';
+                if (!totais[nome]) totais[nome] = { horas: 0, acoes: 0 };
+                totais[nome].acoes += 1;
+            });
+
+            const linhas = Object.entries(totais)
+                .map(([nome, dados]) => [nome, `${dados.horas}h`, `${dados.acoes}`])
+                .sort((a, b) => parseFloat(b[1]) - parseFloat(a[1]));
+
+            linhas.forEach((linha, idx) => linha.unshift(`${idx + 1}º`));
+
+            y = verificarQuebraDePagina(doc, y);
+            doc.setFontSize(12);
+            doc.setTextColor(20);
+            doc.text(`${numero}. Ranking de Extensionistas`, 14, y);
+            y += 5;
+
+            doc.autoTable({
+                startY: y,
+                head: [['Posição', 'Extensionista', 'Horas Validadas', 'Ações Homologadas']],
+                body: linhas.length ? linhas : [['-', 'Nenhum dado disponível', '-', '-']],
+                theme: 'striped',
+                headStyles: { fillColor: [13, 148, 136] },
+                styles: { fontSize: 8, cellPadding: 2.5 },
+                margin: { left: 14, right: 14 }
+            });
+
+            return doc.lastAutoTable.finalY + 12;
+        }
+
+        async function adicionarSecaoSazonalidade(doc, y, numero) {
+            const { data } = await supabaseClient
+                .from('acoes_extensao')
+                .select('created_at')
+                .eq('status', 'deferido');
+
+            const contagemPorMes = {};
+            (data || []).forEach(a => {
+                const d = new Date(a.created_at);
+                const chave = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+                contagemPorMes[chave] = (contagemPorMes[chave] || 0) + 1;
+            });
+
+            const linhas = Object.entries(contagemPorMes)
+                .sort((a, b) => a[0].localeCompare(b[0]))
+                .map(([chave, qtd]) => {
+                    const [ano, mes] = chave.split('-');
+                    const label = new Date(Number(ano), Number(mes) - 1, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+                    return [label, `${qtd}`];
+                });
+
+            y = verificarQuebraDePagina(doc, y);
+            doc.setFontSize(12);
+            doc.setTextColor(20);
+            doc.text(`${numero}. Sazonalidade — Ações Homologadas por Mês`, 14, y);
+            y += 5;
+
+            doc.autoTable({
+                startY: y,
+                head: [['Mês', 'Ações Homologadas']],
+                body: linhas.length ? linhas : [['Nenhuma ação homologada até o momento', '-']],
+                theme: 'striped',
+                headStyles: { fillColor: [139, 92, 246] },
+                styles: { fontSize: 8, cellPadding: 2.5 },
+                margin: { left: 14, right: 14 }
+            });
+
+            return doc.lastAutoTable.finalY + 12;
+        }
+
+        async function adicionarSecaoDistribuicao(doc, y, numero) {
+            const { data } = await supabaseClient
+                .from('horas_avulsas')
+                .select('descricao')
+                .eq('status', 'deferido');
+
+            const contagem = { 'Intervenções / Oficinas': 0, 'Reuniões': 0, 'Digital / Comunicação': 0, 'Outros': 0 };
+            (data || []).forEach(h => { contagem[categorizarDescricao(h.descricao)] += 1; });
+            const total = Object.values(contagem).reduce((a, b) => a + b, 0);
+
+            const linhas = Object.entries(contagem).map(([categoria, qtd]) => [
+                categoria, `${qtd}`, total > 0 ? `${Math.round((qtd / total) * 100)}%` : '-'
+            ]);
+
+            y = verificarQuebraDePagina(doc, y);
+            doc.setFontSize(12);
+            doc.setTextColor(20);
+            doc.text(`${numero}. Distribuição de Atividades`, 14, y);
+            y += 5;
+
+            doc.autoTable({
+                startY: y,
+                head: [['Categoria', 'Lançamentos Homologados', '% do Total']],
+                body: total > 0 ? linhas : [['Nenhum lançamento homologado até o momento', '-', '-']],
+                theme: 'striped',
+                headStyles: { fillColor: [17, 94, 89] },
+                styles: { fontSize: 8, cellPadding: 2.5 },
+                margin: { left: 14, right: 14 }
+            });
+
+            return doc.lastAutoTable.finalY + 12;
+        }
+
+        async function adicionarSecaoEficiencia(doc, y, numero) {
+            const [{ data: acoes }, { data: horas }, { data: biblioteca }] = await Promise.all([
+                supabaseClient.from('acoes_extensao').select('status').in('status', ['deferido', 'indeferido']),
+                supabaseClient.from('horas_avulsas').select('status').in('status', ['deferido', 'indeferido']),
+                supabaseClient.from('biblioteca_atividades').select('status').in('status', ['aprovado', 'indeferido'])
+            ]);
+
+            function taxa(lista, statusPositivo) {
+                const total = (lista || []).length;
+                const positivos = (lista || []).filter(x => x.status === statusPositivo).length;
+                return { total, positivos, recusados: total - positivos, pct: total > 0 ? Math.round((positivos / total) * 100) : null };
+            }
+
+            const rAcoes = taxa(acoes, 'deferido');
+            const rHoras = taxa(horas, 'deferido');
+            const rBiblioteca = taxa(biblioteca, 'aprovado');
+
+            const linhas = [
+                ['Ações de Extensão', `${rAcoes.positivos}`, `${rAcoes.recusados}`, rAcoes.pct !== null ? `${rAcoes.pct}%` : '-'],
+                ['Horas Avulsas', `${rHoras.positivos}`, `${rHoras.recusados}`, rHoras.pct !== null ? `${rHoras.pct}%` : '-'],
+                ['Biblioteca de Atividades', `${rBiblioteca.positivos}`, `${rBiblioteca.recusados}`, rBiblioteca.pct !== null ? `${rBiblioteca.pct}%` : '-']
+            ];
+
+            y = verificarQuebraDePagina(doc, y);
+            doc.setFontSize(12);
+            doc.setTextColor(20);
+            doc.text(`${numero}. Eficiência da Coordenação`, 14, y);
+            y += 5;
+
+            doc.autoTable({
+                startY: y,
+                head: [['Módulo', 'Deferidos/Aprovados', 'Indeferidos', 'Taxa de Deferimento']],
+                body: linhas,
+                theme: 'striped',
+                headStyles: { fillColor: [180, 83, 9] },
+                styles: { fontSize: 8, cellPadding: 2.5 },
+                margin: { left: 14, right: 14 }
+            });
+
+            return doc.lastAutoTable.finalY + 12;
+        }
+
+        // Carrega uma imagem (mesma origem) e converte para base64, para uso no jsPDF
+        async function carregarImagemBase64(url) {
+            try {
+                const resp = await fetch(url);
+                if (!resp.ok) return null;
+                const blob = await resp.blob();
+                return await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = () => reject(new Error('Falha ao ler imagem'));
+                    reader.readAsDataURL(blob);
+                });
+            } catch (err) {
+                return null;
+            }
+        }
+
+        // Monta a página de capa: "dashboard impresso" com logos, autoria e resumo consolidado geral
+        async function montarCapaConsolidada(doc) {
+            const [logoExtenso, logoFensg, logoUpe] = await Promise.all([
+                carregarImagemBase64('imagens/logo-extenso.png'),
+                carregarImagemBase64('imagens/logo-fensg.png'),
+                carregarImagemBase64('imagens/logo-upe.png')
+            ]);
+
+            let yTopo = 15;
+
+            if (logoExtenso) {
+                try { doc.addImage(logoExtenso, 'PNG', 14, yTopo, 55, 16, undefined, 'FAST'); } catch (err) {}
+            }
+            if (logoFensg) {
+                try { doc.addImage(logoFensg, 'PNG', 145, yTopo, 20, 16, undefined, 'FAST'); } catch (err) {}
+            }
+            if (logoUpe) {
+                try { doc.addImage(logoUpe, 'PNG', 175, yTopo, 20, 16, undefined, 'FAST'); } catch (err) {}
+            }
+
+            let y = yTopo + 24;
+
+            doc.setDrawColor(226, 232, 240);
+            doc.line(14, y, 196, y);
+            y += 10;
+
+            doc.setFontSize(17);
+            doc.setTextColor(17, 94, 89);
+            doc.text('Relatório de Indicadores de Gestão', 14, y);
+            y += 6;
+            doc.setFontSize(10);
+            doc.setTextColor(100);
+            doc.text('Projeto de Extensão Adolescer com Saúde — UPE / FENSG', 14, y);
+            y += 10;
+
+            const nomeEmissor = perfilAtual?.nome || 'Coordenação';
+            const agora = new Date().toLocaleString('pt-BR');
+
+            doc.setFontSize(9);
+            doc.setTextColor(80);
+            doc.text(`Relatório emitido por: ${nomeEmissor} em ${agora}`, 14, y);
+            y += 12;
+
+            // Resumo consolidado (independente dos módulos marcados na tela)
+            const [
+                { count: countExt },
+                { count: countAcoesDeferidas },
+                { count: countAcoesIndeferidas },
+                { count: countMateriais },
+                { data: horasDeferidas },
+                { count: countHorasIndeferidas },
+                { count: countBibliotecaIndeferida }
+            ] = await Promise.all([
+                supabaseClient.from('perfis').select('*', { count: 'exact', head: true }).eq('papel', 'extensionista').eq('status', 'aprovado'),
+                supabaseClient.from('acoes_extensao').select('*', { count: 'exact', head: true }).eq('status', 'deferido'),
+                supabaseClient.from('acoes_extensao').select('*', { count: 'exact', head: true }).eq('status', 'indeferido'),
+                supabaseClient.from('biblioteca_atividades').select('*', { count: 'exact', head: true }).eq('status', 'aprovado'),
+                supabaseClient.from('horas_avulsas').select('horas').eq('status', 'deferido'),
+                supabaseClient.from('horas_avulsas').select('*', { count: 'exact', head: true }).eq('status', 'indeferido'),
+                supabaseClient.from('biblioteca_atividades').select('*', { count: 'exact', head: true }).eq('status', 'indeferido')
+            ]);
+
+            const totalHoras = (horasDeferidas || []).reduce((soma, h) => soma + Number(h.horas), 0);
+            const totalRecusas = (countAcoesIndeferidas ?? 0) + (countHorasIndeferidas ?? 0) + (countBibliotecaIndeferida ?? 0);
+
+            doc.setFontSize(11);
+            doc.setTextColor(20);
+            doc.text('Resumo Consolidado do Projeto', 14, y);
+            y += 5;
+
+            doc.autoTable({
+                startY: y,
+                head: [['Indicador', 'Valor']],
+                body: [
+                    ['Extensionistas Ativos', `${countExt ?? 0}`],
+                    ['Ações de Extensão Homologadas', `${countAcoesDeferidas ?? 0}`],
+                    ['Materiais na Biblioteca Aprovados', `${countMateriais ?? 0}`],
+                    ['Carga Horária Total do Projeto', `${totalHoras}h`],
+                    ['Total de Recusas/Indeferimentos (todos os módulos)', `${totalRecusas}`]
+                ],
+                theme: 'grid',
+                headStyles: { fillColor: [17, 94, 89] },
+                styles: { fontSize: 10, cellPadding: 4, fontStyle: 'bold' },
+                columnStyles: { 1: { halign: 'right' } },
+                margin: { left: 14, right: 14 }
+            });
+
+            return doc.lastAutoTable.finalY + 10;
+        }
+
+        // Carimba rodapé oficial em todas as páginas do documento
+        function aplicarRodapeEmTodasPaginas(doc) {
+            const totalPaginas = doc.internal.getNumberOfPages();
+            const largura = doc.internal.pageSize.getWidth();
+            const altura = doc.internal.pageSize.getHeight();
+
+            for (let i = 1; i <= totalPaginas; i++) {
+                doc.setPage(i);
+                doc.setDrawColor(226, 232, 240);
+                doc.line(14, altura - 15, largura - 14, altura - 15);
+                doc.setFontSize(7.5);
+                doc.setTextColor(150);
+                doc.text('Relatório gerado através do portal Adolescer com Saúde', 14, altura - 10);
+                doc.text(`Página ${i} de ${totalPaginas}`, largura - 14, altura - 10, { align: 'right' });
+            }
+        }
+
         async function gerarPDFCustomizado(e) {
             e.preventDefault();
             const btnExport = document.getElementById('btnExport');
@@ -1393,32 +1967,53 @@
             }
 
             btnExport.disabled = true;
-            btnExportText.innerText = "Extraindo dados do Supabase...";
+            btnExportText.innerText = "Montando capa e resumo...";
 
             try {
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
 
-                doc.setFontSize(16);
-                doc.setTextColor(17, 94, 89);
-                doc.text('Relatório de Indicadores — Adolescer com Saúde', 14, 18);
+                // Página 1 — Dashboard impresso: logos, autoria e resumo consolidado geral
+                await montarCapaConsolidada(doc);
 
-                doc.setFontSize(9);
-                doc.setTextColor(120);
-                doc.text(`Gerado em ${new Date().toLocaleString('pt-BR')} pela Coordenação (UPE/FENSG)`, 14, 24);
-                doc.setTextColor(20);
+                // Páginas seguintes — detalhamento dos módulos marcados pela coordenação
+                doc.addPage();
+                let y = 20;
+                let numeroSecao = 1;
 
-                let y = 34;
+                btnExportText.innerText = "Extraindo dados do Supabase...";
 
                 if (modulos.includes('consolidado_horas')) {
-                    y = await adicionarSecaoConsolidadoHoras(doc, y);
+                    y = await adicionarSecaoConsolidadoHoras(doc, y, numeroSecao);
+                    numeroSecao++;
                 }
                 if (modulos.includes('mapa_instituicoes')) {
-                    y = await adicionarSecaoMapaInstituicoes(doc, y);
+                    y = await adicionarSecaoMapaInstituicoes(doc, y, numeroSecao);
+                    numeroSecao++;
                 }
                 if (modulos.includes('produtividade_tecnica')) {
-                    y = await adicionarSecaoProdutividade(doc, y);
+                    y = await adicionarSecaoProdutividade(doc, y, numeroSecao);
+                    numeroSecao++;
                 }
+                if (modulos.includes('ranking_extensionistas')) {
+                    y = await adicionarSecaoRanking(doc, y, numeroSecao);
+                    numeroSecao++;
+                }
+                if (modulos.includes('sazonalidade')) {
+                    y = await adicionarSecaoSazonalidade(doc, y, numeroSecao);
+                    numeroSecao++;
+                }
+                if (modulos.includes('distribuicao_atividades')) {
+                    y = await adicionarSecaoDistribuicao(doc, y, numeroSecao);
+                    numeroSecao++;
+                }
+                if (modulos.includes('eficiencia_coordenacao')) {
+                    y = await adicionarSecaoEficiencia(doc, y, numeroSecao);
+                    numeroSecao++;
+                }
+
+                // Rodapé oficial em todas as páginas do documento
+                aplicarRodapeEmTodasPaginas(doc);
 
                 doc.save(`relatorio-indicadores-adolescer-${new Date().toISOString().slice(0,10)}.pdf`);
             } catch (err) {
