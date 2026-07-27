@@ -7,10 +7,6 @@
     <link rel="icon" type="image/png" href="imagens/logo-vetor.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-
     <script>
         tailwind.config = {
             theme: {
@@ -28,6 +24,9 @@
         }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- jsPDF + AutoTable: usados para gerar o Relatório de Carga Horária no navegador -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <style>
         @keyframes fadeSlideIn {
             from { opacity: 0; transform: translateY(4px); }
@@ -122,6 +121,19 @@
             
             <div id="tab-content-inicio" class="space-y-6">
                 
+                <div class="bg-gradient-to-r from-teal-600 to-emerald-600 p-6 rounded-2xl shadow-sm text-white relative overflow-hidden">
+                    <div class="absolute right-0 top-0 translate-x-4 -translate-y-4 w-32 h-32 bg-white/10 rounded-full filter blur-xl"></div>
+                    <div class="relative z-10 flex items-start space-x-4">
+                        <div class="bg-white/20 p-3 rounded-xl text-lg"><i class="fas fa-bullhorn"></i></div>
+                        <div>
+                            <h3 class="font-extrabold text-sm mb-1">Mural de Avisos da Coordenação</h3>
+                            <p class="text-xs text-teal-50 max-w-2xl leading-relaxed">
+                                Atenção extensionistas! Nossa próxima reunião geral ordinária acontecerá na sexta-feira às 14h via Google Meet para alinhar os preparativos da nova oficina do Eixo Escolar. Não faltem e lembrem-se de atualizar seus lançamentos de horas semanais.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
                     
                     <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
@@ -159,7 +171,7 @@
                                 <i class="fas fa-plus"></i> <span>Adicionar Carga Horária</span>
                             </button>
                             <button onclick="openModal('modal-relatorio')" class="flex-1 bg-white hover:bg-slate-50 text-saude-prime border border-slate-200 hover:border-saude-prime px-5 py-3.5 rounded-xl font-bold text-xs transition flex items-center justify-center space-x-2">
-                                <i class="fas fa-file-pdf"></i> <span id="text-relatorio">Gerar Relatório de Horas</span>
+                                <i class="fas fa-file-invoice"></i> <span id="text-relatorio">Gerar Relatório de Horas</span>
                             </button>
                         </div>
                     </div>
@@ -362,7 +374,7 @@
                 <div class="pt-4 flex gap-2">
                     <button type="button" onclick="closeModal('modal-relatorio')" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold py-3 rounded-xl transition">Cancelar</button>
                     <button type="submit" id="btn-submit-relatorio" class="flex-1 bg-saude-prime hover:bg-saude-dark text-white text-xs font-bold py-3 rounded-xl transition shadow-sm flex justify-center items-center gap-2">
-                        <i class="fas fa-file-pdf"></i> <span id="text-btn-relatorio">Gerar PDF Oficial</span>
+                        <i class="fas fa-file-pdf"></i> <span id="text-btn-relatorio">Gerar PDF</span>
                     </button>
                 </div>
             </form>
@@ -501,7 +513,7 @@
             return div.innerHTML;
         }
 
-        // GUARDA DE SESSÃO E PERFIL
+        // GUARDA DE SESSÃO
         async function protegerPagina() {
             const { data: { session } } = await supabaseClient.auth.getSession();
 
@@ -512,7 +524,7 @@
 
             const { data: perfil, error } = await supabaseClient
                 .from('perfis')
-                .select('id, nome, email, papel, status, bio')
+                .select('id, nome, email, papel, status, bio') // <-- ID FOI INSERIDO AQUI
                 .eq('id', session.user.id)
                 .single();
 
@@ -537,7 +549,7 @@
             if (error || !data) return;
             sessaoAtualId = data.id;
 
-            setInterval(atualizarPing, 60000); 
+            setInterval(atualizarPing, 60000); // heartbeat a cada 1 min
             document.addEventListener('visibilitychange', () => {
                 if (document.visibilityState === 'hidden') atualizarPing();
             });
@@ -546,34 +558,54 @@
 
         async function atualizarPing() {
             if (!sessaoAtualId) return;
-            await supabaseClient.from('sessoes_acesso').update({ last_ping_at: new Date().toISOString() }).eq('id', sessaoAtualId);
+            await supabaseClient
+                .from('sessoes_acesso')
+                .update({ last_ping_at: new Date().toISOString() })
+                .eq('id', sessaoAtualId);
         }
 
         function atualizarPingSync() {
             if (!sessaoAtualId) return;
-            navigator.sendBeacon(`${SUPABASE_URL}/rest/v1/sessoes_acesso?id=eq.${sessaoAtualId}`, new Blob([JSON.stringify({ last_ping_at: new Date().toISOString() })], { type: 'application/json' }));
+            navigator.sendBeacon(
+                `${SUPABASE_URL}/rest/v1/sessoes_acesso?id=eq.${sessaoAtualId}`,
+                new Blob([JSON.stringify({ last_ping_at: new Date().toISOString() })], { type: 'application/json' })
+            );
         }
+        // -------------------------------------
 
         async function salvarPerfil(e) {
             e.preventDefault();
+
             const btn = document.getElementById('btn-salvar-perfil');
             const nome = document.getElementById('modal-user-name').value.trim();
             const bio = document.getElementById('modal-user-bio').value.trim();
 
-            if (!nome) { alert('O nome não pode ficar em branco.'); return; }
+            if (!nome) {
+                alert('O nome não pode ficar em branco.');
+                return;
+            }
 
             btn.disabled = true;
             btn.innerText = 'Salvando...';
 
             const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) { window.location.href = 'login.html'; return; }
+            if (!session) {
+                window.location.href = 'login.html';
+                return;
+            }
 
-            const { error } = await supabaseClient.from('perfis').update({ nome: nome, bio: bio }).eq('id', session.user.id);
+            const { error } = await supabaseClient
+                .from('perfis')
+                .update({ nome: nome, bio: bio })
+                .eq('id', session.user.id);
 
             btn.disabled = false;
             btn.innerText = 'Salvar Alterações';
 
-            if (error) { alert('Erro ao salvar perfil: ' + error.message); return; }
+            if (error) {
+                alert('Erro ao salvar perfil: ' + error.message);
+                return;
+            }
 
             document.getElementById('header-user-name').innerText = nome;
             document.getElementById('header-user-avatar').innerText = iniciais(nome);
@@ -583,40 +615,57 @@
             closeModal('modal-perfil');
         }
 
-        // Lança um registro de horas avulsas
+        // Lança um registro de horas avulsas com DATA e LOCAL
         async function lancarHoras(e) {
             e.preventDefault();
+
             const btn = document.getElementById('btn-enviar-horas');
             const select = document.getElementById('tipo-atividade');
-            const tipo = select.value === 'Outros' ? document.getElementById('input-outros').value.trim() : select.value;
+            const tipo = select.value === 'Outros'
+                ? document.getElementById('input-outros').value.trim()
+                : select.value;
+            
             const dataAtividade = document.getElementById('input-data-horas').value;
             const localAtividade = document.getElementById('input-local-horas').value.trim() || 'Não informado';
             const horas = document.getElementById('input-horas').value;
             const detalhes = document.getElementById('input-descricao-horas').value.trim();
 
-            if (!tipo || !dataAtividade || !horas) { alert('Preencha os campos obrigatórios.'); return; }
+            if (!tipo || !dataAtividade || !horas) {
+                alert('Preencha os campos obrigatórios.');
+                return;
+            }
 
-            const descricaoCompleta = detalhes ? `${tipo} (${dataAtividade}): ${detalhes}` : `${tipo} (${dataAtividade})`;
+            const descricaoCompleta = detalhes
+                ? `${tipo} (${dataAtividade}): ${detalhes}`
+                : `${tipo} (${dataAtividade})`;
 
             btn.disabled = true;
             btn.innerText = 'Enviando...';
 
             const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) { window.location.href = 'login.html'; return; }
+            if (!session) {
+                window.location.href = 'login.html';
+                return;
+            }
 
-            const { error } = await supabaseClient.from('horas_avulsas').insert({
-                extensionista_id: session.user.id,
-                descricao: descricaoCompleta,
-                horas: Number(horas),
-                status: 'pendente',
-                data_atividade: dataAtividade,
-                local: localAtividade
-            });
+            const { error } = await supabaseClient
+                .from('horas_avulsas')
+                .insert({
+                    extensionista_id: session.user.id,
+                    descricao: descricaoCompleta,
+                    horas: Number(horas),
+                    status: 'pendente',
+                    data_atividade: dataAtividade,
+                    local: localAtividade
+                });
 
             btn.disabled = false;
             btn.innerText = 'Enviar Registro';
 
-            if (error) { alert('Erro ao lançar horas: ' + error.message); return; }
+            if (error) {
+                alert('Erro ao lançar horas: ' + error.message);
+                return;
+            }
 
             alert('Lançamento enviado com sucesso!');
             document.getElementById('form-horas').reset();
@@ -625,6 +674,7 @@
             carregarHistoricoHoras();
         }
 
+        // Busca o histórico de horas e formata a exibição do novo Local e Data
         async function carregarHistoricoHoras() {
             const tbody = document.getElementById('tbody-historico-horas');
             tbody.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Carregando...</td></tr>';
@@ -632,11 +682,16 @@
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (!session) return;
 
-            const { data, error } = await supabaseClient.from('horas_avulsas')
+            const { data, error } = await supabaseClient
+                .from('horas_avulsas')
                 .select('id, descricao, horas, status, motivo_recusa, created_at, data_atividade, local')
-                .eq('extensionista_id', session.user.id).order('created_at', { ascending: false });
+                .eq('extensionista_id', session.user.id)
+                .order('created_at', { ascending: false });
 
-            if (error) { tbody.innerHTML = `<tr><td class="py-6 px-6 text-center text-rose-500" colspan="4">Erro: ${escapeHtml(error.message)}</td></tr>`; return; }
+            if (error) {
+                tbody.innerHTML = `<tr><td class="py-6 px-6 text-center text-rose-500" colspan="4">Erro ao carregar: ${escapeHtml(error.message)}</td></tr>`;
+                return;
+            }
 
             const badge = {
                 pendente: '<span class="bg-amber-50 text-amber-700 border border-amber-100 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide">Pendente</span>',
@@ -645,19 +700,37 @@
             };
 
             if (data.length === 0) {
-                tbody.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Nenhum lançamento.</td></tr>';
+                tbody.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Nenhum lançamento ainda. Use "Adicionar Carga Horária" para começar.</td></tr>';
             } else {
                 tbody.innerHTML = data.map(h => {
-                    let extra = h.status === 'indeferido' ? `<div class="mt-2 text-[10px] bg-red-50 border border-red-100 p-2 rounded-lg"><span class="block font-bold text-red-700">Recusa:</span><span class="block text-red-600">${escapeHtml(h.motivo_recusa || '')}</span></div>` : '';
+                    let extra = '';
+                    if (h.status === 'indeferido') {
+                        extra = `
+                            <div class="mt-2 text-[10px] bg-red-50 border border-red-100 p-2 rounded-lg leading-relaxed animate-fadeIn">
+                                <span class="block font-bold text-red-700 mb-0.5">Motivo da recusa:</span>
+                                <span class="block text-red-600">${escapeHtml(h.motivo_recusa || 'Não informado.')}</span>
+                                <span class="block text-red-500 mt-1.5 font-semibold not-italic">Faça um novo lançamento corrigido em "Adicionar Carga Horária".</span>
+                            </div>
+                        `;
+                    }
+                    
                     let strTipo = h.descricao.split(' (')[0];
-                    let dateToShow = h.data_atividade ? new Date(h.data_atividade + 'T12:00:00').toLocaleDateString('pt-BR') : new Date(h.created_at).toLocaleDateString('pt-BR');
+                    let dateToShow = h.data_atividade 
+                        ? new Date(h.data_atividade + 'T12:00:00').toLocaleDateString('pt-BR') 
+                        : new Date(h.created_at).toLocaleDateString('pt-BR');
 
-                    return `<tr class="animate-fadeIn hover:bg-slate-50">
+                    return `
+                    <tr class="animate-fadeIn hover:bg-slate-50">
                         <td class="py-4 px-6 font-semibold align-top text-slate-600">${dateToShow}</td>
-                        <td class="py-4 px-6 align-top"><p class="font-bold text-slate-800">${escapeHtml(strTipo)}</p><p class="text-[10px] text-slate-400 mt-0.5"><i class="fas fa-map-marker-alt"></i> ${escapeHtml(h.local || 'Não informado')}</p>${extra}</td>
+                        <td class="py-4 px-6 align-top">
+                            <p class="font-bold text-slate-800">${escapeHtml(strTipo)}</p>
+                            <p class="text-[10px] text-slate-400 mt-0.5"><i class="fas fa-map-marker-alt"></i> ${escapeHtml(h.local || 'Não informado')}</p>
+                            ${extra}
+                        </td>
                         <td class="py-4 px-6 text-center font-bold text-slate-800 align-top">${h.horas}h</td>
                         <td class="py-4 px-6 align-top">${badge[h.status] || badge.pendente}</td>
-                    </tr>`;
+                    </tr>
+                `;
                 }).join('');
             }
 
@@ -666,63 +739,118 @@
 
             document.getElementById('stat-horas-pendentes').innerText = `${pendentes}h`;
             document.getElementById('stat-horas-aprovadas').innerText = `${aprovadas}h`;
-            const progresso = Math.min(100, Math.round((aprovadas / 60) * 100));
+
+            const meta = 60;
+            const progresso = Math.min(100, Math.round((aprovadas / meta) * 100));
             document.getElementById('barra-progresso-horas').style.width = `${progresso}%`;
         }
 
         async function carregarMinhasAcoes() {
             const tbody = document.getElementById('tbody-minhas-acoes');
             tbody.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Carregando...</td></tr>';
+
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (!session) return;
 
-            const { data, error } = await supabaseClient.from('acoes_extensao').select('id, local_intervencao, url_ata, url_relatoria, status, motivo_recusa, created_at').eq('extensionista_id', session.user.id).order('created_at', { ascending: false });
+            const { data, error } = await supabaseClient
+                .from('acoes_extensao')
+                .select('id, local_intervencao, url_ata, url_relatoria, status, motivo_recusa, created_at')
+                .eq('extensionista_id', session.user.id)
+                .order('created_at', { ascending: false });
 
-            if (error) { tbody.innerHTML = `<tr><td class="py-6 px-6 text-center text-rose-500" colspan="4">Erro: ${escapeHtml(error.message)}</td></tr>`; return; }
+            if (error) {
+                tbody.innerHTML = `<tr><td class="py-6 px-6 text-center text-rose-500" colspan="4">Erro ao carregar: ${escapeHtml(error.message)}</td></tr>`;
+                return;
+            }
 
-            const badge = { pendente: '<span class="bg-amber-50 text-amber-700 border border-amber-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Aguardando</span>', deferido: '<span class="bg-emerald-50 text-emerald-700 border border-emerald-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Homologado</span>', indeferido: '<span class="bg-red-50 text-red-700 border border-red-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Indeferido</span>' };
+            const badge = {
+                pendente: '<span class="bg-amber-50 text-amber-700 border border-amber-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Aguardando</span>',
+                deferido: '<span class="bg-emerald-50 text-emerald-700 border border-emerald-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Homologado</span>',
+                indeferido: '<span class="bg-red-50 text-red-700 border border-red-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Indeferido</span>'
+            };
 
             if (data.length === 0) {
-                tbody.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Nenhuma ação cadastrada.</td></tr>'; return;
+                tbody.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Nenhuma ação cadastrada ainda.</td></tr>';
+                return;
             }
 
             tbody.innerHTML = data.map(acao => {
-                let extra = acao.status === 'indeferido' ? `<div class="mt-2 text-[10px] bg-red-50 border border-red-100 p-2 rounded-lg max-w-xs"><span class="block font-bold text-red-700">Recusa:</span><span class="block text-red-600">${escapeHtml(acao.motivo_recusa || '')}</span></div>` : '';
+                let extra = '';
+                if (acao.status === 'indeferido') {
+                    extra = `
+                        <div class="mt-2 text-[10px] bg-red-50 border border-red-100 p-2 rounded-lg leading-relaxed animate-fadeIn max-w-xs">
+                            <span class="block font-bold text-red-700 mb-0.5">Motivo da recusa:</span>
+                            <span class="block text-red-600">${escapeHtml(acao.motivo_recusa || 'Não informado.')}</span>
+                            <span class="block text-red-500 mt-1.5 font-semibold not-italic">Cadastre uma nova ação com a documentação corrigida.</span>
+                        </div>
+                    `;
+                }
                 return `
                 <tr class="hover:bg-slate-50/50 transition-all animate-fadeIn">
-                    <td class="py-4 px-6 align-top"><span class="font-bold text-slate-800 block">${escapeHtml(acao.local_intervencao)}</span><span class="text-[10px] text-slate-400">Em: ${new Date(acao.created_at).toLocaleDateString('pt-BR')}</span>${extra}</td>
-                    <td class="py-4 px-6 align-top">${acao.url_ata ? `<a href="${escapeHtml(acao.url_ata)}" target="_blank" class="text-saude-prime font-semibold hover:underline">Ver ata</a>` : '—'}</td>
-                    <td class="py-4 px-6 align-top">${acao.url_relatoria ? `<a href="${escapeHtml(acao.url_relatoria)}" target="_blank" class="text-saude-prime font-semibold hover:underline">Ver relatoria</a>` : '—'}</td>
+                    <td class="py-4 px-6 align-top">
+                        <span class="font-bold text-slate-800 block">${escapeHtml(acao.local_intervencao)}</span>
+                        <span class="text-[10px] text-slate-400">Enviado em: ${new Date(acao.created_at).toLocaleDateString('pt-BR')}</span>
+                        ${extra}
+                    </td>
+                    <td class="py-4 px-6 align-top">
+                        ${acao.url_ata ? `<a href="${escapeHtml(acao.url_ata)}" target="_blank" class="text-saude-prime font-semibold hover:underline"><i class="fas fa-paperclip mr-1"></i>Ver ata</a>` : '<span class="text-slate-300">—</span>'}
+                    </td>
+                    <td class="py-4 px-6 align-top">
+                        ${acao.url_relatoria ? `<a href="${escapeHtml(acao.url_relatoria)}" target="_blank" class="text-saude-prime font-semibold hover:underline"><i class="fas fa-file-invoice mr-1"></i>Ver relatoria</a>` : '<span class="text-slate-300">—</span>'}
+                    </td>
                     <td class="py-4 px-6 align-top">${badge[acao.status] || badge.pendente}</td>
-                </tr>`;
+                </tr>
+            `;
             }).join('');
         }
 
         // CONTROLES DE INTERFACE COMUM
-        function toggleUserMenu() { document.getElementById('user-dropdown').classList.toggle('hidden'); }
+        function toggleUserMenu() {
+            document.getElementById('user-dropdown').classList.toggle('hidden');
+        }
+
         window.addEventListener('click', function(e) {
             const dropdown = document.getElementById('user-dropdown');
             const btn = dropdown.previousElementSibling;
-            if (!dropdown.contains(e.target) && !btn.contains(e.target)) dropdown.classList.add('hidden');
+            if (!dropdown.contains(e.target) && !btn.contains(e.target)) {
+                dropdown.classList.add('hidden');
+            }
         });
 
-        function openModal(modalId) { document.getElementById(modalId).classList.remove('hidden'); document.getElementById('user-dropdown').classList.add('hidden'); }
-        function closeModal(modalId) { document.getElementById(modalId).classList.add('hidden'); }
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+            document.getElementById('user-dropdown').classList.add('hidden');
+        }
 
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        // FECHAR TODOS OS MODAIS AO CLICAR FORA
         ['modal-horas', 'modal-atividades', 'modal-nova-acao', 'modal-perfil', 'modal-relatorio'].forEach(id => {
             const el = document.getElementById(id);
-            if(el) el.addEventListener('click', function(e) { if (e.target === this) closeModal(id); });
+            if(el) {
+                el.addEventListener('click', function(e) {
+                    if (e.target === this) closeModal(id);
+                });
+            }
         });
 
         function toggleOutrosCampo() {
             const select = document.getElementById('tipo-atividade');
             const inputOutros = document.getElementById('wrapper-outros');
-            if (select.value === 'Outros') inputOutros.classList.remove('hidden'); else inputOutros.classList.add('hidden');
+            if (select.value === 'Outros') {
+                inputOutros.classList.remove('hidden');
+            } else {
+                inputOutros.classList.add('hidden');
+            }
         }
 
         const APPS_SCRIPT_DOCS_URL = 'https://script.google.com/macros/s/AKfycbyByjs75MeRhRmr1ZUl4b-KCRKTe6RJO12huK6xE2kfWJLBcwcNPn4_m5mNLou9toTE/exec'; 
         const APPS_SCRIPT_UPLOAD_URL = 'https://script.google.com/macros/s/AKfycbygy2Dd9OkM4KFTkXzUT0Z8mku6UM_6kP_UCf2LX-mH2sVkzQ8x9CAGBwnz1BEXSgez8g/exec';
         const APPS_SCRIPT_ATIVIDADE_UPLOAD_URL = 'https://script.google.com/macros/s/AKfycbyK2ZCTs35IPZWdT4RFryauHuK2J7OZjvhHhlLiny87Xr1WaDlGFFGE_6vc-RFwkKDQ/exec';
+        // Observação: o antigo APPS_SCRIPT_RELATORIO_URL não é mais necessário —
+        // o relatório de horas agora é gerado 100% no navegador com jsPDF + AutoTable.
 
         function fileParaBase64(file) {
             return new Promise((resolve, reject) => {
@@ -735,112 +863,248 @@
 
         async function enviarArquivoParaDrive(file) {
             const base64 = await fileParaBase64(file);
-            const response = await fetch(APPS_SCRIPT_UPLOAD_URL, { method: 'POST', mode: 'cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ base64: base64, nomeArquivo: file.name, mimeType: file.type }) });
+            const response = await fetch(APPS_SCRIPT_UPLOAD_URL, {
+                method: 'POST',
+                mode: 'cors',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({
+                    base64: base64,
+                    nomeArquivo: file.name,
+                    mimeType: file.type
+                })
+            });
             const resultado = await response.json();
-            if (!resultado.success) throw new Error(resultado.error || 'Falha no upload.');
+            if (!resultado.success) throw new Error(resultado.error || 'Falha no upload do arquivo.');
             return resultado.url;
         }
 
+        // Upload do arquivo de uma nova atividade da biblioteca para o Drive (script dedicado)
         async function enviarArquivoAtividadeParaDrive(file) {
             const base64 = await fileParaBase64(file);
-            const response = await fetch(APPS_SCRIPT_ATIVIDADE_UPLOAD_URL, { method: 'POST', mode: 'cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ base64: base64, nomeArquivo: file.name, mimeType: file.type }) });
+            const response = await fetch(APPS_SCRIPT_ATIVIDADE_UPLOAD_URL, {
+                method: 'POST',
+                mode: 'cors',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({
+                    base64: base64,
+                    nomeArquivo: file.name,
+                    mimeType: file.type
+                })
+            });
             const resultado = await response.json();
-            if (!resultado.success) throw new Error(resultado.error || 'Falha no upload.');
+            if (!resultado.success) throw new Error(resultado.error || 'Falha no upload do arquivo.');
             return resultado.url;
         }
 
         async function cadastrarAcao(e) {
             e.preventDefault();
-            if (APPS_SCRIPT_UPLOAD_URL.includes('COLOQUE_AQUI')) { alert('O upload de arquivos não foi configurado.'); return; }
+
+            if (APPS_SCRIPT_UPLOAD_URL.includes('COLOQUE_AQUI')) {
+                alert('O upload de arquivos ainda não foi configurado. Peça ao responsável pelo site para finalizar essa parte.');
+                return;
+            }
 
             const btn = document.getElementById('btn-enviar-acao');
             const local = document.getElementById('input-local-acao').value.trim();
             const arquivoAta = document.getElementById('file-ata').files[0];
             const arquivoRelatoria = document.getElementById('file-relatoria').files[0];
 
-            if (!local || !arquivoAta || !arquivoRelatoria) { alert('Preencha o local e selecione os arquivos.'); return; }
+            if (!local || !arquivoAta || !arquivoRelatoria) {
+                alert('Preencha o local e selecione os dois arquivos.');
+                return;
+            }
 
             btn.disabled = true;
 
             try {
                 const { data: { session } } = await supabaseClient.auth.getSession();
-                if (!session) { window.location.href = 'login.html'; return; }
+                if (!session) {
+                    window.location.href = 'login.html';
+                    return;
+                }
 
-                btn.innerText = 'Enviando ata...';
+                btn.innerText = 'Enviando ata para o Drive...';
                 const urlAta = await enviarArquivoParaDrive(arquivoAta);
-                btn.innerText = 'Enviando relatoria...';
+
+                btn.innerText = 'Enviando relatoria para o Drive...';
                 const urlRelatoria = await enviarArquivoParaDrive(arquivoRelatoria);
 
                 btn.innerText = 'Salvando...';
-                const { error } = await supabaseClient.from('acoes_extensao').insert({ extensionista_id: session.user.id, local_intervencao: local, url_ata: urlAta, url_relatoria: urlRelatoria, status: 'pendente' });
+                const { error } = await supabaseClient
+                    .from('acoes_extensao')
+                    .insert({
+                        extensionista_id: session.user.id,
+                        local_intervencao: local,
+                        url_ata: urlAta,
+                        url_relatoria: urlRelatoria,
+                        status: 'pendente'
+                    });
 
                 if (error) throw error;
-                alert('Ação enviada com sucesso!');
+
+                alert('Documentação da ação enviada! Aguardando homologação da ata e relatoria.');
                 document.getElementById('form-nova-acao').reset();
-                document.getElementById('label-file-ata').innerHTML = 'Selecionar Ata';
-                document.getElementById('label-file-relatoria').innerHTML = 'Selecionar Relatoria';
+                document.getElementById('label-file-ata').innerHTML = '<i class="fas fa-file-signature mr-1 text-slate-400"></i>Selecionar Ata da Ação';
+                document.getElementById('label-file-relatoria').innerHTML = '<i class="fas fa-file-invoice mr-1 text-slate-400"></i>Selecionar Relatoria';
                 closeModal('modal-nova-acao');
                 carregarMinhasAcoes();
-            } catch (erro) { alert('Erro: ' + erro.message); } finally { btn.disabled = false; btn.innerText = 'Enviar Documentos'; }
+
+            } catch (erro) {
+                alert('Erro ao enviar: ' + erro.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Enviar Documentos';
+            }
         }
 
-        document.getElementById('file-ata').addEventListener('change', function() { if (this.files[0]) document.getElementById('label-file-ata').innerHTML = `<i class="fas fa-check text-emerald-500 mr-1"></i>${escapeHtml(this.files[0].name)}`; });
-        document.getElementById('file-relatoria').addEventListener('change', function() { if (this.files[0]) document.getElementById('label-file-relatoria').innerHTML = `<i class="fas fa-check text-emerald-500 mr-1"></i>${escapeHtml(this.files[0].name)}`; });
-        document.getElementById('file-atividade').addEventListener('change', function() { const l = document.getElementById('label-file-atividade'); if (this.files[0]) { l.innerHTML = `<i class="fas fa-check text-emerald-500 mr-1"></i>${escapeHtml(this.files[0].name)}`; } else { l.innerHTML = '<i class="fas fa-cloud-upload-alt text-slate-400 block"></i>Clique para selecionar o arquivo'; } });
+        document.getElementById('file-ata').addEventListener('change', function() {
+            if (this.files[0]) document.getElementById('label-file-ata').innerHTML = `<i class="fas fa-check text-emerald-500 mr-1"></i>${escapeHtml(this.files[0].name)}`;
+        });
+        document.getElementById('file-relatoria').addEventListener('change', function() {
+            if (this.files[0]) document.getElementById('label-file-relatoria').innerHTML = `<i class="fas fa-check text-emerald-500 mr-1"></i>${escapeHtml(this.files[0].name)}`;
+        });
+        document.getElementById('file-atividade').addEventListener('change', function() {
+            const label = document.getElementById('label-file-atividade');
+            if (this.files[0]) {
+                label.innerHTML = `<i class="fas fa-check text-emerald-500 mr-1 block text-lg"></i><span class="text-xs font-semibold text-slate-600 block">${escapeHtml(this.files[0].name)}</span>`;
+            } else {
+                label.innerHTML = '<i class="fas fa-cloud-upload-alt text-slate-400 text-xl block"></i><span class="text-xs font-semibold text-slate-600 block">Clique para selecionar o arquivo</span>';
+            }
+        });
 
+        // Envia uma nova atividade para homologação (arquivo -> Drive, metadados -> Supabase)
         async function compartilharAtividade(e) {
             e.preventDefault();
+
+            if (APPS_SCRIPT_ATIVIDADE_UPLOAD_URL.includes('COLOQUE_AQUI')) {
+                alert('O upload de atividades ainda não foi configurado. Peça ao responsável pelo site para finalizar essa parte.');
+                return;
+            }
+
             const btn = document.getElementById('btn-compartilhar-atividade');
             const titulo = document.getElementById('input-titulo-atividade').value.trim();
             const publico = document.getElementById('input-publico-atividade').value.trim();
             const objetivo = document.getElementById('input-objetivo-atividade').value.trim();
             const arquivo = document.getElementById('file-atividade').files[0];
 
-            if (!titulo || !publico || !objetivo || !arquivo) return;
-            btn.disabled = true; btn.innerText = 'Enviando...';
+            if (!titulo || !publico || !objetivo || !arquivo) {
+                alert('Preencha todos os campos e selecione um arquivo.');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = 'Enviando arquivo...';
 
             try {
                 const { data: { session } } = await supabaseClient.auth.getSession();
-                if (!session) { window.location.href = 'login.html'; return; }
+                if (!session) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+
                 const urlArquivo = await enviarArquivoAtividadeParaDrive(arquivo);
-                const { error } = await supabaseClient.from('biblioteca_atividades').insert({ extensionista_id: session.user.id, titulo: titulo, publico_alvo: publico, objetivo: objetivo, url_arquivo: urlArquivo, status: 'pendente' });
+
+                btn.innerText = 'Salvando...';
+                const { error } = await supabaseClient
+                    .from('biblioteca_atividades')
+                    .insert({
+                        extensionista_id: session.user.id,
+                        titulo: titulo,
+                        publico_alvo: publico,
+                        objetivo: objetivo,
+                        url_arquivo: urlArquivo,
+                        status: 'pendente'
+                    });
+
                 if (error) throw error;
 
-                alert('Atividade enviada para moderação!');
+                alert('Atividade enviada! Ela aparecerá na biblioteca assim que for homologada pela coordenação.');
                 document.getElementById('form-nova-atividade').reset();
+                document.getElementById('label-file-atividade').innerHTML = '<i class="fas fa-cloud-upload-alt text-slate-400 text-xl block"></i><span class="text-xs font-semibold text-slate-600 block">Clique para selecionar o arquivo</span>';
                 closeModal('modal-atividades');
                 carregarBibliotecaAtividades();
-            } catch (erro) { alert('Erro: ' + erro.message); } finally { btn.disabled = false; btn.innerText = 'Compartilhar'; }
+
+            } catch (erro) {
+                alert('Erro ao compartilhar atividade: ' + erro.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Compartilhar';
+            }
         }
 
+        // Carrega a biblioteca: atividades aprovadas (de todos) + as próprias (mesmo pendentes/recusadas)
         async function carregarBibliotecaAtividades() {
             const grid = document.getElementById('grid-biblioteca-atividades');
             const loading = document.getElementById('loading-atividades');
+            const errorContainer = document.getElementById('error-atividades');
             const emptyContainer = document.getElementById('empty-atividades');
-            grid.innerHTML = ''; loading.classList.remove('hidden'); emptyContainer.classList.add('hidden');
+
+            grid.innerHTML = '';
+            loading.classList.remove('hidden');
+            errorContainer.classList.add('hidden');
+            emptyContainer.classList.add('hidden');
 
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (!session) return;
 
-            const { data, error } = await supabaseClient.from('biblioteca_atividades').select('id, titulo, publico_alvo, objetivo, url_arquivo, status, motivo_recusa, extensionista_id, perfis(nome)').or(`status.eq.aprovado,extensionista_id.eq.${session.user.id}`).order('created_at', { ascending: false });
+            const { data, error } = await supabaseClient
+                .from('biblioteca_atividades')
+                .select('id, titulo, publico_alvo, objetivo, url_arquivo, status, motivo_recusa, extensionista_id, created_at, perfis(nome)')
+                .or(`status.eq.aprovado,extensionista_id.eq.${session.user.id}`)
+                .order('created_at', { ascending: false });
+
             loading.classList.add('hidden');
 
-            if (error || !data || data.length === 0) { emptyContainer.classList.remove('hidden'); return; }
+            if (error) {
+                errorContainer.classList.remove('hidden');
+                console.error('Erro ao carregar biblioteca:', error.message);
+                return;
+            }
+
+            if (!data || data.length === 0) {
+                emptyContainer.classList.remove('hidden');
+                return;
+            }
+
+            const statusBadge = {
+                pendente: '<span class="bg-amber-50 text-amber-700 border border-amber-100 px-2.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wide">Em análise</span>',
+                indeferido: '<span class="bg-red-50 text-red-700 border border-red-100 px-2.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wide">Recusada</span>'
+            };
 
             grid.innerHTML = data.map(item => {
                 const ehPropria = item.extensionista_id === session.user.id;
+                const autorNome = item.perfis ? item.perfis.nome : 'Extensionista';
+
                 let extraStatus = '';
                 if (ehPropria && item.status !== 'aprovado') {
-                    const cor = item.status === 'pendente' ? 'amber' : 'red';
-                    extraStatus = `<div class="pt-1"><span class="bg-${cor}-50 text-${cor}-700 px-2 py-0.5 rounded text-[9px] font-bold uppercase">${item.status}</span></div>`;
+                    extraStatus = `<div class="pt-1">${statusBadge[item.status] || ''}</div>`;
+                    if (item.status === 'indeferido' && item.motivo_recusa) {
+                        extraStatus += `
+                            <div class="mt-2 text-[10px] bg-red-50 border border-red-100 p-2 rounded-lg leading-relaxed">
+                                <span class="block font-bold text-red-700 mb-0.5">Motivo da recusa:</span>
+                                <span class="block text-red-600">${escapeHtml(item.motivo_recusa)}</span>
+                            </div>
+                        `;
+                    }
                 }
-                return `<div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm hover:shadow-md transition">
-                    <h4 class="font-extrabold text-sm text-slate-800">${escapeHtml(item.titulo)}</h4>
-                    <p class="text-[11px] text-slate-400 mt-1">Autor: ${escapeHtml(item.perfis?.nome || '—')}</p>
-                    <p class="text-[11px] text-slate-400 mt-1">Público: ${escapeHtml(item.publico_alvo)}</p>
-                    ${extraStatus}
-                    <a href="${escapeHtml(item.url_arquivo)}" target="_blank" class="mt-4 w-full bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold py-2 rounded-xl flex items-center justify-center">Baixar</a>
-                </div>`;
+
+                return `
+                    <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm flex flex-col justify-between hover:shadow-md transition animate-fadeIn">
+                        <div class="space-y-3">
+                            <div class="text-saude-prime text-xl"><i class="fas fa-folder-open"></i></div>
+                            <h4 class="font-extrabold text-sm text-slate-800 leading-snug">${escapeHtml(item.titulo)}</h4>
+                            <p class="text-[11px] text-slate-400 font-medium"><strong>Autor:</strong> ${escapeHtml(autorNome)}</p>
+                            <p class="text-[11px] text-slate-400 font-medium"><strong>Objetivo:</strong> ${escapeHtml(item.objetivo)}</p>
+                            <span class="inline-block bg-teal-50 text-saude-prime font-bold text-[10px] px-2.5 py-0.5 rounded-md">Público: ${escapeHtml(item.publico_alvo)}</span>
+                            ${extraStatus}
+                        </div>
+                        <div class="pt-5 border-t border-slate-100 mt-4">
+                            <a href="${escapeHtml(item.url_arquivo)}" target="_blank" class="w-full bg-slate-50 hover:bg-teal-50 text-slate-700 hover:text-saude-prime border border-slate-200 hover:border-teal-200 text-xs font-bold py-2 rounded-xl transition flex items-center justify-center space-x-1">
+                                <i class="fas fa-download text-[10px]"></i> <span>Baixar Atividade</span>
+                            </a>
+                        </div>
+                    </div>
+                `;
             }).join('');
         }
 
@@ -848,46 +1112,154 @@
         let atividadesCarregadas = false;
 
         function switchTab(tabName) {
-            ['inicio', 'acoes', 'atividades', 'documentos'].forEach(tab => {
-                document.getElementById(`tab-content-${tab}`).classList.add('hidden');
-                document.getElementById(`btn-tab-${tab}`).className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 text-slate-500 hover:bg-slate-50";
-            });
-
-            document.getElementById(`tab-content-${tabName}`).classList.remove('hidden');
-            document.getElementById(`btn-tab-${tabName}`).className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 bg-teal-50 text-saude-prime";
-
-            if (tabName === 'acoes' && !acoesCarregadas) { acoesCarregadas = true; carregarMinhasAcoes(); }
-            if (tabName === 'atividades' && !atividadesCarregadas) { atividadesCarregadas = true; carregarBibliotecaAtividades(); }
-            if (tabName === 'documentos' && document.getElementById('docs-grid').children.length === 0) fetchDriveFiles();
+            const tabInicio = document.getElementById('tab-content-inicio');
+            const tabAcoes = document.getElementById('tab-content-acoes');
+            const tabAtividades = document.getElementById('tab-content-atividades');
+            const tabDocumentos = document.getElementById('tab-content-documentos');
             
-            const pt = { 'inicio': 'Página Inicial', 'acoes': 'Minhas Ações', 'atividades': 'Biblioteca', 'documentos': 'Documentos' };
-            document.getElementById('page-title').innerText = pt[tabName];
+            const btnInicio = document.getElementById('btn-tab-inicio');
+            const btnAcoes = document.getElementById('btn-tab-acoes');
+            const btnAtividades = document.getElementById('btn-tab-atividades');
+            const btnDocumentos = document.getElementById('btn-tab-documentos');
+            const pageTitle = document.getElementById('page-title');
+
+            if (tabName === 'acoes' && !acoesCarregadas) {
+                acoesCarregadas = true;
+                carregarMinhasAcoes();
+            }
+
+            // Esconde todas as abas
+            tabInicio.classList.add('hidden');
+            tabAcoes.classList.add('hidden');
+            tabAtividades.classList.add('hidden');
+            tabDocumentos.classList.add('hidden');
+
+            // Reseta classes de seleção dos botões
+            const btnClassPadrao = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 text-slate-500 hover:bg-slate-50 hover:text-slate-800";
+            btnInicio.className = btnClassPadrao;
+            btnAcoes.className = btnClassPadrao;
+            btnAtividades.className = btnClassPadrao;
+            btnDocumentos.className = btnClassPadrao;
+
+            if (tabName === 'inicio') {
+                tabInicio.classList.remove('hidden');
+                btnInicio.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 bg-teal-50 text-saude-prime";
+                pageTitle.innerHTML = "Página Inicial";
+            } else if (tabName === 'acoes') {
+                tabAcoes.classList.remove('hidden');
+                btnAcoes.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 bg-teal-50 text-saude-prime";
+                pageTitle.innerHTML = "Minhas Ações";
+            } else if (tabName === 'atividades') {
+                tabAtividades.classList.remove('hidden');
+                btnAtividades.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 bg-teal-50 text-saude-prime";
+                pageTitle.innerHTML = "Biblioteca de Atividades";
+
+                if (!atividadesCarregadas) {
+                    atividadesCarregadas = true;
+                    carregarBibliotecaAtividades();
+                }
+            } else if (tabName === 'documentos') {
+                tabDocumentos.classList.remove('hidden');
+                btnDocumentos.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-semibold text-sm transition duration-200 bg-teal-50 text-saude-prime";
+                pageTitle.innerHTML = "Documentos Acadêmicos";
+                
+                // Realiza a busca automática na nuvem ao entrar na aba pela primeira vez
+                if (document.getElementById('docs-grid').children.length === 0) {
+                    fetchDriveFiles();
+                }
+            }
             document.getElementById('user-dropdown').classList.add('hidden');
         }
 
+        // BUSCA DINÂMICA DE ARQUIVOS DO GOOGLE DRIVE (Aba Documentos)
         async function fetchDriveFiles() {
             const grid = document.getElementById('docs-grid');
             const loading = document.getElementById('loading-docs');
-            grid.innerHTML = ''; loading.classList.remove('hidden');
+            const errorContainer = document.getElementById('error-docs');
+            const emptyContainer = document.getElementById('empty-docs');
+            const syncIcon = document.getElementById('sync-icon');
+            const syncText = document.getElementById('sync-text');
+
+            grid.innerHTML = '';
+            loading.classList.remove('hidden');
+            errorContainer.classList.add('hidden');
+            emptyContainer.classList.add('hidden');
+            syncIcon.classList.add('animate-spin');
+            syncText.innerText = "Sincronizando...";
+
             try {
                 const response = await fetch(APPS_SCRIPT_DOCS_URL);
                 const data = await response.json();
+
                 loading.classList.add('hidden');
-                if (data.success && data.files && data.files.length > 0) {
+                syncIcon.classList.remove('animate-spin');
+                syncText.innerText = "Sincronizar com Drive";
+
+                if (data.success) {
+                    if (!data.files || data.files.length === 0) {
+                        emptyContainer.classList.remove('hidden');
+                        return;
+                    }
+
                     data.files.forEach(file => {
-                        grid.innerHTML += `<div class="bg-white border border-slate-200 p-6 rounded-2xl flex flex-col justify-between">
-                            <h4 class="font-extrabold text-sm text-slate-800">${file.name}</h4>
-                            <a href="${file.url}" target="_blank" class="mt-4 bg-slate-50 border border-slate-200 text-xs font-bold py-2 rounded-xl text-center">Abrir</a>
-                        </div>`;
+                        let iconClass = 'fa-file-alt';
+                        let colorClass = 'text-slate-400';
+                        
+                        if (file.mimeType.includes('pdf')) {
+                            iconClass = 'fa-file-pdf';
+                            colorClass = 'text-red-500';
+                        } else if (file.mimeType.includes('word') || file.mimeType.includes('document')) {
+                            iconClass = 'fa-file-word';
+                            colorClass = 'text-blue-500';
+                        } else if (file.mimeType.includes('sheet') || file.mimeType.includes('excel')) {
+                            iconClass = 'fa-file-excel';
+                            colorClass = 'text-emerald-500';
+                        } else if (file.mimeType.includes('presentation') || file.mimeType.includes('powerpoint')) {
+                            iconClass = 'fa-file-powerpoint';
+                            colorClass = 'text-orange-500';
+                        } else if (file.mimeType.includes('image')) {
+                            iconClass = 'fa-file-image';
+                            colorClass = 'text-purple-500';
+                        }
+
+                        const cardHTML = `
+                            <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm flex flex-col justify-between hover:shadow-md transition">
+                                <div class="space-y-3">
+                                    <div class="${colorClass} text-2xl"><i class="fas ${iconClass}"></i></div>
+                                    <h4 class="font-extrabold text-sm text-slate-800 leading-snug">${file.name}</h4>
+                                    <div class="flex flex-wrap gap-2 text-[10px] text-slate-400 font-medium">
+                                        <span><i class="far fa-calendar-alt"></i> ${file.dateCreated}</span>
+                                        <span>•</span>
+                                        <span><i class="fas fa-weight-hanging"></i> ${file.size}</span>
+                                    </div>
+                                </div>
+                                <div class="pt-5 border-t border-slate-100 mt-4 flex gap-2">
+                                    <a href="${file.url}" target="_blank" class="flex-1 bg-slate-50 hover:bg-teal-50 text-slate-700 hover:text-saude-prime border border-slate-200 hover:border-teal-200 text-xs font-bold py-2 rounded-xl transition flex items-center justify-center space-x-1">
+                                        <i class="fas fa-external-link-alt text-[10px]"></i> <span>Abrir no Drive</span>
+                                    </a>
+                                </div>
+                            </div>
+                        `;
+                        grid.innerHTML += cardHTML;
                     });
+                } else {
+                    errorContainer.classList.remove('hidden');
                 }
-            } catch (err) { loading.classList.add('hidden'); }
+            } catch (error) {
+                console.error("Erro na requisição:", error);
+                loading.classList.add('hidden');
+                errorContainer.classList.remove('hidden');
+                syncIcon.classList.remove('animate-spin');
+                syncText.innerText = "Sincronizar com Drive";
+            }
         }
 
-        // ==============================================================
-        // NOVO GERADOR DE RELATÓRIO DO EXTENSIONISTA (JSPDF + AUTOTABLE)
-        // ==============================================================
-        
+        // ===================================================================
+        // GERAÇÃO DO RELATÓRIO DE CARGA HORÁRIA — 100% NO NAVEGADOR
+        // Usa jsPDF + AutoTable (CDN). Substitui o antigo fluxo via Apps Script.
+        // ===================================================================
+
+        // Carrega uma imagem local e converte para base64 (necessário para o jsPDF.addImage)
         async function carregarImagemBase64(url) {
             try {
                 const resp = await fetch(url);
@@ -896,20 +1268,173 @@
                 return await new Promise((resolve, reject) => {
                     const reader = new FileReader();
                     reader.onload = () => resolve(reader.result);
-                    reader.onerror = () => reject(new Error('Falha ao ler imagem'));
+                    reader.onerror = reject;
                     reader.readAsDataURL(blob);
                 });
             } catch (err) {
+                console.warn('Não foi possível carregar a logo:', url, err);
                 return null;
             }
         }
 
+        // Monta o PDF com timbre (logos + código/aprovação/data/versão), dados do
+        // projeto, tabela de atividades e os campos de assinatura no rodapé.
+        async function gerarPDFRelatorio(nomeAluno, atividades) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
+            const margin = 12;
+            const usableWidth = pageWidth - margin * 2;
+
+            const [logoAdolescer, logoFensg, logoUpe] = await Promise.all([
+                carregarImagemBase64('imagens/logo-vetor.png'),
+                carregarImagemBase64('imagens/logo-fensg.png'),
+                carregarImagemBase64('imagens/logo-upe.png')
+            ]);
+
+            const dataDocumento = new Date().toLocaleDateString('pt-BR');
+
+            // ===== CABEÇALHO / TIMBRE =====
+            const headerY = margin;
+            const headerH = 28;
+            const colLogosW = 50;
+            const colInfoW = 50;
+            const colTituloW = usableWidth - colLogosW - colInfoW;
+
+            // Moldura geral do cabeçalho
+            doc.setLineWidth(0.3);
+            doc.rect(margin, headerY, usableWidth, headerH);
+            // Divisórias verticais
+            doc.line(margin + colLogosW, headerY, margin + colLogosW, headerY + headerH);
+            doc.line(margin + colLogosW + colTituloW, headerY, margin + colLogosW + colTituloW, headerY + headerH);
+
+            // -- Coluna das logos (Adolescer, FENSG, UPE) --
+            const logos = [logoAdolescer, logoFensg, logoUpe].filter(Boolean);
+            if (logos.length > 0) {
+                const logoSize = 16;
+                const espacamento = (colLogosW - logos.length * logoSize) / (logos.length + 1);
+                let lx = margin + espacamento;
+                const ly = headerY + (headerH - logoSize) / 2;
+                logos.forEach(logoData => {
+                    try {
+                        doc.addImage(logoData, 'PNG', lx, ly, logoSize, logoSize, undefined, 'FAST');
+                    } catch (err) { console.warn('Falha ao desenhar logo', err); }
+                    lx += logoSize + espacamento;
+                });
+            }
+
+            // -- Coluna central: instituição / título do documento --
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(8);
+            doc.text('FACULDADE DE ENFERMAGEM NOSSA SENHORA DAS GRAÇAS/UPE',
+                margin + colLogosW + colTituloW / 2, headerY + 8, { align: 'center', maxWidth: colTituloW - 4 });
+            doc.setFontSize(7.5);
+            doc.setFont('helvetica', 'normal');
+            doc.text('COORDENAÇÃO SETORIAL DE EXTENSÃO E CULTURA',
+                margin + colLogosW + colTituloW / 2, headerY + 15, { align: 'center', maxWidth: colTituloW - 4 });
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(9);
+            doc.text('RELATÓRIO DE CARGA HORÁRIA',
+                margin + colLogosW + colTituloW / 2, headerY + 23, { align: 'center', maxWidth: colTituloW - 4 });
+
+            // -- Coluna direita: código / aprovado por / data / versão --
+            const infoX = margin + colLogosW + colTituloW;
+            const linhas4 = headerH / 4;
+            for (let i = 1; i <= 3; i++) {
+                doc.line(infoX, headerY + linhas4 * i, infoX + colInfoW, headerY + linhas4 * i);
+            }
+            doc.setFontSize(6.8);
+            doc.setFont('helvetica', 'normal');
+            const infoTextY = (linha) => headerY + linhas4 * linha - linhas4 / 2 + 1.5;
+            doc.text('CÓDIGO: ADLCR-002', infoX + colInfoW / 2, infoTextY(1), { align: 'center' });
+            doc.text('APROVADO POR:', infoX + colInfoW / 2, infoTextY(2) - 2, { align: 'center' });
+            doc.text('ANA VIRGINIA RODRIGUES VERISSIMO', infoX + colInfoW / 2, infoTextY(2) + 2, { align: 'center', maxWidth: colInfoW - 2 });
+            doc.text(`DATA: ${dataDocumento}`, infoX + colInfoW / 2, infoTextY(3), { align: 'center' });
+            doc.text('VERSÃO 00', infoX + colInfoW / 2, infoTextY(4), { align: 'center' });
+
+            // ===== DADOS DO PROJETO =====
+            let y = headerY + headerH + 8;
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'bold');
+            doc.text('TÍTULO DO PROJETO:', margin, y);
+            doc.setFont('helvetica', 'normal');
+            doc.text('ADOLESCER SAUDÁVEL: CUIDADO EDUCATIVO EM SAÚDE NO CONTEXTO ESCOLAR E DIGITAL',
+                margin, y + 5, { maxWidth: usableWidth });
+
+            y += 13;
+            doc.setFont('helvetica', 'bold');
+            doc.text('COORDENADOR DO PROJETO:', margin, y);
+            doc.setFont('helvetica', 'normal');
+            doc.text('ANA VIRGINIA RODRIGUES VERISSIMO', margin + 48, y);
+
+            y += 7;
+            doc.setFont('helvetica', 'bold');
+            doc.text('EDITAL PIAEXT:', margin, y);
+            doc.setFont('helvetica', 'normal');
+            doc.text('2026', margin + 30, y);
+
+            y += 9;
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(10);
+            doc.text(`EXTENSIONISTA: ${nomeAluno.toUpperCase()}`, margin, y);
+
+            // ===== TABELA DE ATIVIDADES =====
+            doc.autoTable({
+                startY: y + 5,
+                margin: { left: margin, right: margin },
+                theme: 'grid',
+                head: [['ATIVIDADE REALIZADA', 'LOCAL', 'DATA', 'C.H', 'ASSINATURA']],
+                body: atividades.map(a => [a.tipo, a.local, a.data, `${a.horas}h`, '']),
+                styles: { fontSize: 8, cellPadding: 2.5, valign: 'middle' },
+                headStyles: { fillColor: [13, 148, 136], textColor: 255, fontStyle: 'bold', halign: 'center' },
+                columnStyles: {
+                    0: { cellWidth: 'auto' },
+                    1: { cellWidth: 38 },
+                    2: { cellWidth: 22, halign: 'center' },
+                    3: { cellWidth: 14, halign: 'center' },
+                    4: { cellWidth: 34 }
+                }
+            });
+
+            // ===== ASSINATURAS (rodapé) =====
+            let finalY = doc.lastAutoTable.finalY + 20;
+            const assinaturaW = (usableWidth - 20) / 2;
+
+            // Se não houver espaço suficiente na página atual, pula para a próxima
+            if (finalY + 25 > pageHeight - margin) {
+                doc.addPage();
+                finalY = margin + 15;
+            }
+
+            doc.setLineWidth(0.2);
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(8);
+
+            // Bloco 1: Coordenador(a) do Projeto de Extensão
+            doc.line(margin, finalY, margin + assinaturaW, finalY);
+            doc.text('Coordenador(a) do Projeto de Extensão', margin + assinaturaW / 2, finalY + 5, { align: 'center' });
+            doc.text('Ana Virginia Rodrigues Verissimo', margin + assinaturaW / 2, finalY + 9.5, { align: 'center' });
+
+            // Bloco 2: Coordenador(a) Setorial de Extensão e Cultura
+            const x2 = margin + assinaturaW + 20;
+            doc.line(x2, finalY, x2 + assinaturaW, finalY);
+            doc.text('Coordenador(a) Setorial de Extensão e Cultura', x2 + assinaturaW / 2, finalY + 5, { align: 'center' });
+            doc.text('FENSG/UPE', x2 + assinaturaW / 2, finalY + 9.5, { align: 'center' });
+
+            // ===== SALVAR / BAIXAR =====
+            doc.save(`Relatorio_${nomeAluno.replace(/\s+/g, '_')}.pdf`);
+        }
+
+        // Consulta as horas aprovadas do extensionista (com filtro de período opcional)
+        // e dispara a geração do PDF.
         async function gerarRelatorioOficial(e) {
             e.preventDefault();
             const btnText = document.getElementById('text-btn-relatorio');
             const textoOriginal = btnText.innerText;
             const btnSubmit = document.getElementById('btn-submit-relatorio');
-            
+
             btnText.innerText = "Consultando dados...";
             btnSubmit.disabled = true;
 
@@ -920,11 +1445,9 @@
                 const { data: { session } } = await supabaseClient.auth.getSession();
                 if (!session) { window.location.href = 'login.html'; return; }
 
-                // Puxa o nome do aluno do banco
                 const { data: perfil } = await supabaseClient.from('perfis').select('nome').eq('id', session.user.id).single();
-                const nomeAluno = perfil ? perfil.nome : 'EXTENSIONISTA';
 
-                // Busca as horas homologadas
+                // Monta a consulta de horas aprovadas no Supabase, com ou sem filtro de data
                 let query = supabaseClient
                     .from('horas_avulsas')
                     .select('descricao, horas, status, created_at, data_atividade, local')
@@ -938,180 +1461,43 @@
 
                 if (error) throw error;
                 if (!horas || horas.length === 0) {
-                    alert("Nenhuma hora validada encontrada no período selecionado.");
-                    btnText.innerText = textoOriginal;
-                    btnSubmit.disabled = false;
+                    alert("Nenhuma hora aprovada encontrada no período selecionado.");
                     return;
                 }
 
-                btnText.innerText = "Gerando Documento Oficial...";
+                btnText.innerText = "Gerando PDF...";
 
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-                
-                let y = 15;
-
-                // --- 1. LOGOS ---
-                const [logoExtenso, logoFensg, logoUpe] = await Promise.all([
-                    carregarImagemBase64('imagens/logo-extenso.png'),
-                    carregarImagemBase64('imagens/logo-fensg.png'),
-                    carregarImagemBase64('imagens/logo-upe.png')
-                ]);
-
-                if (logoExtenso) { try { doc.addImage(logoExtenso, 'PNG', 14, y, 45, 12, undefined, 'FAST'); } catch(e){} }
-                if (logoFensg) { try { doc.addImage(logoFensg, 'PNG', 150, y, 15, 12, undefined, 'FAST'); } catch(e){} }
-                if (logoUpe) { try { doc.addImage(logoUpe, 'PNG', 170, y, 15, 12, undefined, 'FAST'); } catch(e){} }
-                y += 20;
-
-                // --- 2. CABEÇALHO DA INSTITUIÇÃO ---
-                doc.setFontSize(10);
-                doc.setFont("helvetica", "bold");
-                doc.text("FACULDADE DE ENFERMAGEM NOSSA SENHORA DAS GRAÇAS / UPE", 105, y, { align: "center" });
-                y += 5;
-                doc.setFont("helvetica", "normal");
-                doc.text("COORDENAÇÃO SETORIAL DE EXTENSÃO E CULTURA", 105, y, { align: "center" });
-                y += 10;
-                
-                // Título
-                doc.setFontSize(12);
-                doc.setFont("helvetica", "bold");
-                doc.text("RELATÓRIO DE CARGA HORÁRIA", 105, y, { align: "center" });
-                y += 10;
-
-                // --- 3. METADADOS DO DOCUMENTO ---
-                doc.setFontSize(8);
-                doc.setFont("helvetica", "bold");
-                doc.text("CÓDIGO:", 14, y);
-                doc.setFont("helvetica", "normal");
-                doc.text("ADLCR-002", 30, y);
-                
-                doc.setFont("helvetica", "bold");
-                doc.text("VERSÃO:", 160, y);
-                doc.setFont("helvetica", "normal");
-                doc.text("00", 175, y);
-                y += 5;
-
-                doc.setFont("helvetica", "bold");
-                doc.text("APROVADO POR:", 14, y);
-                doc.setFont("helvetica", "normal");
-                doc.text("ANA VIRGINIA RODRIGUES VERISSIMO", 40, y);
-                
-                doc.setFont("helvetica", "bold");
-                doc.text("DATA DA EMISSÃO:", 145, y);
-                doc.setFont("helvetica", "normal");
-                doc.text(new Date().toLocaleDateString('pt-BR'), 175, y);
-                y += 8;
-
-                // --- 4. CAIXA DE DADOS DO PROJETO E DO ALUNO ---
-                doc.setDrawColor(200);
-                doc.setFillColor(248, 250, 252); // slate-50
-                doc.rect(14, y, 182, 28, 'FD'); // Desenha um retângulo
-                y += 6;
-                
-                doc.setFont("helvetica", "bold");
-                doc.text("TÍTULO DO PROJETO:", 18, y);
-                doc.setFont("helvetica", "normal");
-                doc.text("ADOLESCER SAUDÁVEL: CUIDADO EDUCATIVO EM SAÚDE NO CONTEXTO ESCOLAR E DIGITAL", 52, y);
-                y += 6;
-
-                doc.setFont("helvetica", "bold");
-                doc.text("COORDENADOR DO PROJETO:", 18, y);
-                doc.setFont("helvetica", "normal");
-                doc.text("ANA VIRGINIA RODRIGUES VERISSIMO", 66, y);
-                y += 6;
-
-                doc.setFont("helvetica", "bold");
-                doc.text("EDITAL PIAEXT:", 18, y);
-                doc.setFont("helvetica", "normal");
-                doc.text("2026", 42, y);
-
-                doc.setFont("helvetica", "bold");
-                doc.text("EXTENSIONISTA:", 100, y);
-                doc.setFont("helvetica", "normal");
-                doc.text(nomeAluno.toUpperCase(), 127, y);
-
-                y += 14; // Desce a caneta para baixo da caixa
-
-                // --- 5. PREPARANDO OS DADOS DA TABELA ---
-                const totalH = horas.reduce((soma, h) => soma + Number(h.horas), 0);
-                const linhasTabela = horas.map(h => {
-                    // Pega só o texto "Oficina" ou "Reunião" removendo a data que o sistema embute
+                const atividades = horas.map(h => {
+                    // Limpa a descrição para pegar só o tipo puro da atividade (removendo a data do texto)
                     const tipoPuro = h.descricao.split(' (')[0].trim();
-                    const dataAtv = h.data_atividade ? new Date(h.data_atividade + 'T12:00:00').toLocaleDateString('pt-BR') : new Date(h.created_at).toLocaleDateString('pt-BR');
-                    
-                    // A última coluna ("") fica vazia para o preceptor assinar à caneta
-                    return [tipoPuro, h.local || "Não informado", dataAtv, h.horas, ""]; 
+                    return {
+                        data: h.data_atividade ? new Date(h.data_atividade + 'T12:00:00').toLocaleDateString('pt-BR') : new Date(h.created_at).toLocaleDateString('pt-BR'),
+                        tipo: tipoPuro,
+                        local: h.local || "Não informado",
+                        horas: h.horas
+                    };
                 });
 
-                // Cria uma linha extra no final com o Somatório das Horas
-                linhasTabela.push([
-                    { content: 'TOTAL GERAL DE HORAS', colSpan: 3, styles: { halign: 'right', fontStyle: 'bold' } }, 
-                    { content: `${totalH}h`, styles: { halign: 'center', fontStyle: 'bold' } }, 
-                    "" // Célula vazia abaixo de Assinatura
-                ]);
+                await gerarPDFRelatorio(perfil ? perfil.nome : 'Extensionista', atividades);
 
-                // --- 6. DESENHANDO A TABELA (AutoTable) ---
-                doc.autoTable({
-                    startY: y,
-                    head: [['ATIVIDADE REALIZADA', 'LOCAL', 'DATA', 'C.H', 'ASSINATURA']],
-                    body: linhasTabela,
-                    theme: 'grid',
-                    headStyles: { fillColor: [241, 245, 249], textColor: [51, 65, 85], fontStyle: 'bold', halign: 'center', lineWidth: 0.1, lineColor: [200,200,200] },
-                    styles: { fontSize: 8, cellPadding: 3, valign: 'middle', lineColor: [200,200,200], lineWidth: 0.1 },
-                    columnStyles: {
-                        0: { cellWidth: 50 },
-                        1: { cellWidth: 40 },
-                        2: { cellWidth: 20, halign: 'center' },
-                        3: { cellWidth: 15, halign: 'center' },
-                        4: { cellWidth: 57 } // Espaço largo para assinatura manual
-                    },
-                    margin: { left: 14, right: 14 }
-                });
-
-                // --- 7. ASSINATURAS FINAIS ---
-                let finalY = doc.lastAutoTable.finalY + 30; // Distância da tabela até a linha de assinatura
-
-                // Se não houver espaço na folha atual para as assinaturas, criamos uma folha nova
-                if (finalY > 260) {
-                    doc.addPage();
-                    finalY = 40;
-                }
-
-                doc.setDrawColor(0); // Cor preta para a linha
-                
-                // Assinatura 1 (Esquerda)
-                doc.line(20, finalY, 90, finalY);
-                doc.setFontSize(8);
-                doc.setFont("helvetica", "bold");
-                doc.text("ANA VIRGINIA RODRIGUES VERISSIMO", 55, finalY + 4, { align: "center" });
-                doc.setFont("helvetica", "normal");
-                doc.text("Coordenadora do Projeto", 55, finalY + 8, { align: "center" });
-
-                // Assinatura 2 (Direita)
-                doc.line(120, finalY, 190, finalY);
-                doc.setFontSize(8);
-                doc.setFont("helvetica", "bold");
-                doc.text("COORDENAÇÃO SETORIAL DE EXTENSÃO E CULTURA", 155, finalY + 4, { align: "center" });
-                doc.setFont("helvetica", "normal");
-                doc.text("FENSG / UPE", 155, finalY + 8, { align: "center" });
-
-                // --- 8. SALVANDO O ARQUIVO ---
-                doc.save(`Carga_Horaria_${nomeAluno.replace(/\s+/g, '_')}.pdf`);
                 closeModal('modal-relatorio');
-
-            } catch (error) {
-                console.error("Erro na geração do PDF:", error);
-                alert("Erro ao gerar PDF: " + error.message);
+            } catch (erro) {
+                console.error("Erro ao gerar relatório:", erro);
+                alert("Erro ao gerar o relatório em PDF: " + erro.message);
             } finally {
                 btnText.innerText = textoOriginal;
                 btnSubmit.disabled = false;
             }
         }
 
+        // INICIALIZAÇÃO DA PÁGINA (AQUI É ONDE O RASTREIO É LIGADO!)
         document.addEventListener('DOMContentLoaded', async () => {
              const perfil = await protegerPagina();
              if (!perfil) return;
+
+             // CHAMA O RASTREIO AQUI!
              iniciarRastreioAcesso(perfil.id);
+
              document.getElementById('header-user-name').innerText = perfil.nome;
              document.getElementById('header-user-avatar').innerText = iniciais(perfil.nome);
              document.getElementById('modal-avatar-initials').textContent = iniciais(perfil.nome);
