@@ -121,7 +121,7 @@
         <main class="p-8 flex-grow max-w-5xl w-full mx-auto space-y-8">
             
             <div id="tab-content-inicio" class="space-y-6">
-
+                
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
                     
                     <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
@@ -159,7 +159,7 @@
                                 <i class="fas fa-plus"></i> <span>Adicionar Carga Horária</span>
                             </button>
                             <button onclick="openModal('modal-relatorio')" class="flex-1 bg-white hover:bg-slate-50 text-saude-prime border border-slate-200 hover:border-saude-prime px-5 py-3.5 rounded-xl font-bold text-xs transition flex items-center justify-center space-x-2">
-                                <i class="fas fa-file-pdf"></i> <span id="text-relatorio">Gerar Relatório de Horas Oficial</span>
+                                <i class="fas fa-file-pdf"></i> <span id="text-relatorio">Gerar Relatório de Horas</span>
                             </button>
                         </div>
                     </div>
@@ -348,7 +348,7 @@
                 <button onclick="closeModal('modal-relatorio')" class="text-slate-400 hover:text-slate-600 text-lg" aria-label="Fechar"><i class="fas fa-times"></i></button>
             </div>
             <form onsubmit="gerarRelatorioOficial(event)" class="p-6 space-y-4">
-                <p class="text-xs text-slate-500 mb-2">Preencha o período para exportar suas horas validadas. Deixe em branco para exportar todo o histórico.</p>
+                <p class="text-xs text-slate-500 mb-2">Preencha o período do ciclo que deseja exportar. Deixe em branco para exportar todo o histórico de horas aprovadas.</p>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Data Inicial</label>
@@ -887,6 +887,23 @@
         // ==============================================================
         // NOVO GERADOR DE RELATÓRIO DO EXTENSIONISTA (JSPDF + AUTOTABLE)
         // ==============================================================
+        
+        async function carregarImagemBase64(url) {
+            try {
+                const resp = await fetch(url);
+                if (!resp.ok) return null;
+                const blob = await resp.blob();
+                return await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = () => reject(new Error('Falha ao ler imagem'));
+                    reader.readAsDataURL(blob);
+                });
+            } catch (err) {
+                return null;
+            }
+        }
+
         async function gerarRelatorioOficial(e) {
             e.preventDefault();
             const btnText = document.getElementById('text-btn-relatorio');
@@ -932,68 +949,91 @@
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
                 
-                let y = 20;
+                let y = 15;
 
-                // --- 1. CABEÇALHO DA INSTITUIÇÃO ---
-                doc.setFont("helvetica", "bold");
-                doc.setFontSize(12);
-                doc.text("FACULDADE DE ENFERMAGEM NOSSA SENHORA DAS GRAÇAS / UPE", 105, y, { align: "center" });
-                y += 6;
+                // --- 1. LOGOS ---
+                const [logoExtenso, logoFensg, logoUpe] = await Promise.all([
+                    carregarImagemBase64('imagens/logo-extenso.png'),
+                    carregarImagemBase64('imagens/logo-fensg.png'),
+                    carregarImagemBase64('imagens/logo-upe.png')
+                ]);
+
+                if (logoExtenso) { try { doc.addImage(logoExtenso, 'PNG', 14, y, 45, 12, undefined, 'FAST'); } catch(e){} }
+                if (logoFensg) { try { doc.addImage(logoFensg, 'PNG', 150, y, 15, 12, undefined, 'FAST'); } catch(e){} }
+                if (logoUpe) { try { doc.addImage(logoUpe, 'PNG', 170, y, 15, 12, undefined, 'FAST'); } catch(e){} }
+                y += 20;
+
+                // --- 2. CABEÇALHO DA INSTITUIÇÃO ---
                 doc.setFontSize(10);
-                doc.text("COORDENAÇÃO SETORIAL DE EXTENSÃO E CULTURA", 105, y, { align: "center" });
-                y += 12;
-
-                // Título
-                doc.setFontSize(14);
-                doc.text("RELATÓRIO DE CARGA HORÁRIA", 105, y, { align: "center" });
-                y += 12;
-
-                // Metadados do doc
-                doc.setFontSize(9);
+                doc.setFont("helvetica", "bold");
+                doc.text("FACULDADE DE ENFERMAGEM NOSSA SENHORA DAS GRAÇAS / UPE", 105, y, { align: "center" });
+                y += 5;
                 doc.setFont("helvetica", "normal");
+                doc.text("COORDENAÇÃO SETORIAL DE EXTENSÃO E CULTURA", 105, y, { align: "center" });
+                y += 10;
                 
-                doc.text("CÓDIGO: ADLCR-002", 14, y);
-                doc.text("VERSÃO: 00", 160, y);
-                y += 6;
+                // Título
+                doc.setFontSize(12);
+                doc.setFont("helvetica", "bold");
+                doc.text("RELATÓRIO DE CARGA HORÁRIA", 105, y, { align: "center" });
+                y += 10;
+
+                // --- 3. METADADOS DO DOCUMENTO ---
+                doc.setFontSize(8);
+                doc.setFont("helvetica", "bold");
+                doc.text("CÓDIGO:", 14, y);
+                doc.setFont("helvetica", "normal");
+                doc.text("ADLCR-002", 30, y);
                 
-                doc.text("APROVADO POR: ANA VIRGINIA RODRIGUES VERISSIMO", 14, y);
-                const dataDoc = new Date().toLocaleDateString('pt-BR');
-                doc.text(`DATA DA EMISSÃO: ${dataDoc}`, 160, y);
+                doc.setFont("helvetica", "bold");
+                doc.text("VERSÃO:", 160, y);
+                doc.setFont("helvetica", "normal");
+                doc.text("00", 175, y);
+                y += 5;
+
+                doc.setFont("helvetica", "bold");
+                doc.text("APROVADO POR:", 14, y);
+                doc.setFont("helvetica", "normal");
+                doc.text("ANA VIRGINIA RODRIGUES VERISSIMO", 40, y);
+                
+                doc.setFont("helvetica", "bold");
+                doc.text("DATA DA EMISSÃO:", 145, y);
+                doc.setFont("helvetica", "normal");
+                doc.text(new Date().toLocaleDateString('pt-BR'), 175, y);
                 y += 8;
 
-                // --- 2. CAIXA DE DADOS DO PROJETO E DO ALUNO ---
-                doc.setDrawColor(180, 180, 180); // Cor da borda
-                doc.setFillColor(250, 250, 250); // Cor de fundo
-                doc.rect(14, y, 182, 34, 'FD'); // Desenha um retângulo
-                y += 7;
+                // --- 4. CAIXA DE DADOS DO PROJETO E DO ALUNO ---
+                doc.setDrawColor(200);
+                doc.setFillColor(248, 250, 252); // slate-50
+                doc.rect(14, y, 182, 28, 'FD'); // Desenha um retângulo
+                y += 6;
                 
                 doc.setFont("helvetica", "bold");
                 doc.text("TÍTULO DO PROJETO:", 18, y);
                 doc.setFont("helvetica", "normal");
-                doc.text("ADOLESCER SAUDÁVEL: CUIDADO EDUCATIVO EM SAÚDE", 58, y);
-                y += 5;
-                doc.text("NO CONTEXTO ESCOLAR E DIGITAL", 58, y);
-                y += 7;
+                doc.text("ADOLESCER SAUDÁVEL: CUIDADO EDUCATIVO EM SAÚDE NO CONTEXTO ESCOLAR E DIGITAL", 52, y);
+                y += 6;
 
                 doc.setFont("helvetica", "bold");
                 doc.text("COORDENADOR DO PROJETO:", 18, y);
                 doc.setFont("helvetica", "normal");
-                doc.text("ANA VIRGINIA RODRIGUES VERISSIMO", 74, y);
-                y += 7;
+                doc.text("ANA VIRGINIA RODRIGUES VERISSIMO", 66, y);
+                y += 6;
 
                 doc.setFont("helvetica", "bold");
                 doc.text("EDITAL PIAEXT:", 18, y);
                 doc.setFont("helvetica", "normal");
-                doc.text("2026", 48, y);
+                doc.text("2026", 42, y);
 
                 doc.setFont("helvetica", "bold");
-                doc.text("EXTENSIONISTA:", 74, y);
+                doc.text("EXTENSIONISTA:", 100, y);
                 doc.setFont("helvetica", "normal");
-                doc.text(nomeAluno.toUpperCase(), 106, y);
+                doc.text(nomeAluno.toUpperCase(), 127, y);
 
-                y += 15; // Desce a caneta para baixo da caixa
+                y += 14; // Desce a caneta para baixo da caixa
 
-                // --- 3. PREPARANDO OS DADOS DA TABELA ---
+                // --- 5. PREPARANDO OS DADOS DA TABELA ---
+                const totalH = horas.reduce((soma, h) => soma + Number(h.horas), 0);
                 const linhasTabela = horas.map(h => {
                     // Pega só o texto "Oficina" ou "Reunião" removendo a data que o sistema embute
                     const tipoPuro = h.descricao.split(' (')[0].trim();
@@ -1004,21 +1044,20 @@
                 });
 
                 // Cria uma linha extra no final com o Somatório das Horas
-                const totalH = horas.reduce((soma, h) => soma + Number(h.horas), 0);
                 linhasTabela.push([
                     { content: 'TOTAL GERAL DE HORAS', colSpan: 3, styles: { halign: 'right', fontStyle: 'bold' } }, 
                     { content: `${totalH}h`, styles: { halign: 'center', fontStyle: 'bold' } }, 
                     "" // Célula vazia abaixo de Assinatura
                 ]);
 
-                // --- 4. DESENHANDO A TABELA (AutoTable) ---
+                // --- 6. DESENHANDO A TABELA (AutoTable) ---
                 doc.autoTable({
                     startY: y,
                     head: [['ATIVIDADE REALIZADA', 'LOCAL', 'DATA', 'C.H', 'ASSINATURA']],
                     body: linhasTabela,
                     theme: 'grid',
-                    headStyles: { fillColor: [230, 230, 230], textColor: [0, 0, 0], fontStyle: 'bold', halign: 'center' },
-                    styles: { fontSize: 8, cellPadding: 3, valign: 'middle' },
+                    headStyles: { fillColor: [241, 245, 249], textColor: [51, 65, 85], fontStyle: 'bold', halign: 'center', lineWidth: 0.1, lineColor: [200,200,200] },
+                    styles: { fontSize: 8, cellPadding: 3, valign: 'middle', lineColor: [200,200,200], lineWidth: 0.1 },
                     columnStyles: {
                         0: { cellWidth: 50 },
                         1: { cellWidth: 40 },
@@ -1029,8 +1068,8 @@
                     margin: { left: 14, right: 14 }
                 });
 
-                // --- 5. ASSINATURAS FINAIS ---
-                let finalY = doc.lastAutoTable.finalY + 35; // Distância da tabela até a linha de assinatura
+                // --- 7. ASSINATURAS FINAIS ---
+                let finalY = doc.lastAutoTable.finalY + 30; // Distância da tabela até a linha de assinatura
 
                 // Se não houver espaço na folha atual para as assinaturas, criamos uma folha nova
                 if (finalY > 260) {
@@ -1044,18 +1083,19 @@
                 doc.line(20, finalY, 90, finalY);
                 doc.setFontSize(8);
                 doc.setFont("helvetica", "bold");
-                doc.text("ANA VIRGINIA RODRIGUES VERISSIMO", 55, finalY + 5, { align: "center" });
+                doc.text("ANA VIRGINIA RODRIGUES VERISSIMO", 55, finalY + 4, { align: "center" });
                 doc.setFont("helvetica", "normal");
-                doc.text("Coordenadora do Projeto", 55, finalY + 10, { align: "center" });
+                doc.text("Coordenadora do Projeto", 55, finalY + 8, { align: "center" });
 
                 // Assinatura 2 (Direita)
                 doc.line(120, finalY, 190, finalY);
                 doc.setFontSize(8);
                 doc.setFont("helvetica", "bold");
-                doc.text("COORDENAÇÃO SETORIAL DE EXTENSÃO E CULTURA", 155, finalY + 5, { align: "center" });
-                doc.text("FENSG / UPE", 155, finalY + 10, { align: "center" });
+                doc.text("COORDENAÇÃO SETORIAL DE EXTENSÃO E CULTURA", 155, finalY + 4, { align: "center" });
+                doc.setFont("helvetica", "normal");
+                doc.text("FENSG / UPE", 155, finalY + 8, { align: "center" });
 
-                // --- 6. SALVANDO O ARQUIVO ---
+                // --- 8. SALVANDO O ARQUIVO ---
                 doc.save(`Carga_Horaria_${nomeAluno.replace(/\s+/g, '_')}.pdf`);
                 closeModal('modal-relatorio');
 
