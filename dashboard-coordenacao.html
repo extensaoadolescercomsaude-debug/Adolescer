@@ -600,6 +600,15 @@
             closeModal('modal-perfil-coord');
         }
 
+        // Extrai apenas o título da atividade a partir de "descricao", descartando a
+        // data "(2026-07-11)" e o detalhamento livre após ":" que o extensionista digitou.
+        // Ex: "Ação de Extensão Realizada (2026-07-11): fizemos tal coisa" -> "Ação de Extensão Realizada"
+        function extrairTituloAtividade(descricao) {
+            if (!descricao) return 'Outros';
+            const semData = descricao.split(' (')[0];
+            return semData.trim() || 'Outros';
+        }
+
         function escapeHtml(str) {
             const div = document.createElement('div');
             div.textContent = str ?? '';
@@ -1466,8 +1475,8 @@
 
             const contagem = {};
             (data || []).forEach(h => {
-                const descricao = h.descricao || 'Outros';
-                contagem[descricao] = (contagem[descricao] || 0) + 1;
+                const titulo = extrairTituloAtividade(h.descricao);
+                contagem[titulo] = (contagem[titulo] || 0) + 1;
             });
 
             const total = Object.values(contagem).reduce((a, b) => a + b, 0);
@@ -1765,15 +1774,15 @@
 
             const contagem = {};
             (data || []).forEach(h => {
-                const descricao = h.descricao || 'Outros';
-                contagem[descricao] = (contagem[descricao] || 0) + 1;
+                const titulo = extrairTituloAtividade(h.descricao);
+                contagem[titulo] = (contagem[titulo] || 0) + 1;
             });
             const total = Object.values(contagem).reduce((a, b) => a + b, 0);
 
             const linhas = Object.entries(contagem)
                 .sort((a, b) => b[1] - a[1])
-                .map(([descricao, qtd]) => [
-                    descricao, `${qtd}`, total > 0 ? `${Math.round((qtd / total) * 100)}%` : '-'
+                .map(([titulo, qtd]) => [
+                    titulo, `${qtd}`, total > 0 ? `${Math.round((qtd / total) * 100)}%` : '-'
                 ]);
 
             y = verificarQuebraDePagina(doc, y);
@@ -1784,7 +1793,7 @@
 
             doc.autoTable({
                 startY: y,
-                head: [['Descrição (horas_avulsas)', 'Lançamentos Homologados', '% do Total']],
+                head: [['Tipo de Atividade (horas_avulsas)', 'Lançamentos Homologados', '% do Total']],
                 body: total > 0 ? linhas : [['Nenhum lançamento homologado até o momento', '-', '-']],
                 theme: 'striped',
                 headStyles: { fillColor: [17, 94, 89] },
