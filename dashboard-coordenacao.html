@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">a
     <title>Painel da Coordenação - Adolescer com Saúde</title>
     <link rel="icon" type="image/png" href="imagens/logo-vetor.png">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -113,7 +113,7 @@
                 <button onclick="toggleUserMenu()" class="flex items-center space-x-3 focus:outline-none group cursor-pointer">
                     <div class="text-right">
                         <p id="header-user-name" class="text-xs font-bold text-slate-800 group-hover:text-saude-prime transition">Carregando...</p>
-                        <p class="text-[10px] text-purple-600 font-bold uppercase tracking-wider">Coordenadora Geral</p>
+                        <p class="text-[10px] text-purple-600 font-bold uppercase tracking-wider">Coordenação</p>
                     </div>
                     <div id="header-user-avatar" class="w-10 h-10 rounded-full bg-purple-50 border-2 border-purple-200 flex items-center justify-center text-saude-accent font-bold text-xs shadow-sm">
                         --
@@ -156,7 +156,7 @@
                     <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-white">
                         <div>
                             <h4 class="font-bold text-sm text-slate-800">Monitoramento de Acessos Recentes</h4>
-                            <p class="text-[11px] text-slate-400 mt-0.5">Histórico em tempo real de atividade dos extensionistas dentro do portal.</p>
+                            <p class="text-[11px] text-slate-400 mt-0.5">Visão consolidada dos extensionistas cadastrados e do último acesso de cada um ao portal.</p>
                         </div>
                         <span class="text-[10px] font-bold text-saude-prime bg-teal-50 px-2 py-1 rounded border border-teal-100 uppercase tracking-wider">Conexões</span>
                     </div>
@@ -167,11 +167,10 @@
                                     <th class="py-3 px-6">Extensionista</th>
                                     <th class="py-3 px-6">E-mail de Cadastro</th>
                                     <th class="py-3 px-6 text-center">Último Acesso</th>
-                                    <th class="py-3 px-6 text-center">Tempo de Permanência</th>
                                 </tr>
                             </thead>
                             <tbody id="tbody-acessos-recentes" class="text-xs font-medium text-slate-600 divide-y divide-slate-100">
-                                <tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Carregando...</td></tr>
+                                <tr><td class="py-6 px-6 text-center text-slate-400" colspan="3">Carregando...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -345,7 +344,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
                         <h4 class="font-bold text-sm text-slate-800 mb-1">🧩 Distribuição de Atividades</h4>
-                        <p class="text-[11px] text-slate-400 mb-4">Onde a equipe concentra esforço: oficinas, reuniões ou digital.</p>
+                        <p class="text-[11px] text-slate-400 mb-4">Onde a equipe concentra esforço, por tipo de lançamento de horas.</p>
                         <div id="grafico-distribuicao" class="space-y-3">
                             <span class="text-center text-xs text-slate-400 block py-4">Carregando...</span>
                         </div>
@@ -403,7 +402,7 @@
                             <input type="checkbox" name="metricas" value="distribuicao_atividades" class="w-4 h-4 rounded border-slate-300 accent-teal-600 mt-0.5">
                             <div class="ml-3">
                                 <span class="text-xs font-bold text-slate-800 block">Distribuição de Atividades</span>
-                                <span class="text-[11px] text-slate-400">Proporção entre oficinas, reuniões e atividades digitais.</span>
+                                <span class="text-[11px] text-slate-400">Proporção entre os tipos de lançamento de horas registrados.</span>
                             </div>
                         </label>
                         <label class="flex items-start p-3 rounded-xl border border-slate-100 hover:border-teal-200 hover:bg-slate-50/50 cursor-pointer transition">
@@ -526,19 +525,6 @@
 
         // Guarda o perfil da coordenadora logada, usado na auditoria de autoria do PDF
         let perfilAtual = null;
-
-        // Mapeamento das descrições tabeladas de horas_avulsas para categorias de atividade
-        const CATEGORIAS_ATIVIDADE = {
-            'Ação de Extensão Realizada': 'Intervenções / Oficinas',
-            'Preparação de Material Didático/Oficina': 'Intervenções / Oficinas',
-            'Reunião Ordinária/Geral': 'Reuniões',
-            'Preparação de Post para Redes Sociais': 'Digital / Comunicação',
-            'Pesquisa para Ação ou Post': 'Digital / Comunicação',
-            'Outros': 'Outros'
-        };
-        function categorizarDescricao(descricao) {
-            return CATEGORIAS_ATIVIDADE[descricao] || 'Outros';
-        }
 
         function iniciais(nome) {
             const partes = nome.trim().split(/\s+/);
@@ -825,17 +811,10 @@
         }
 
         // ========================== MONITORAMENTO DE ACESSOS (VISÃO GERAL) ==========================
-        function formatarPermanencia(inicio, fim) {
-            const ms = new Date(fim) - new Date(inicio);
-            if (isNaN(ms) || ms < 0) return '--';
-            const minutosTotais = Math.round(ms / 60000);
-            if (minutosTotais < 1) return '< 1 min';
-            const horas = Math.floor(minutosTotais / 60);
-            const minutos = minutosTotais % 60;
-            return horas > 0 ? `${horas}h ${minutos}m` : `${minutos} min`;
-        }
-
+        // Mostra apenas os extensionistas cadastrados (um registro por pessoa) com o
+        // último acesso já feito ao portal, sem detalhar cada sessão/login individual.
         function formatarDataAcesso(dataIso) {
+            if (!dataIso) return null;
             const data = new Date(dataIso);
             const hoje = new Date();
             const ontem = new Date();
@@ -854,34 +833,54 @@
             const tbody = document.getElementById('tbody-acessos-recentes');
             if (!tbody) return;
 
-            const { data, error } = await supabaseClient
-                .from('sessoes_acesso')
-                .select('login_at, last_ping_at, perfis(nome, email)')
-                .order('login_at', { ascending: false })
-                .limit(20);
+            const [{ data: perfis, error: erroPerfis }, { data: sessoes, error: erroSessoes }] = await Promise.all([
+                supabaseClient
+                    .from('perfis')
+                    .select('id, nome, email')
+                    .eq('papel', 'extensionista')
+                    .eq('status', 'aprovado')
+                    .order('nome', { ascending: true }),
+                supabaseClient
+                    .from('sessoes_acesso')
+                    .select('login_at, perfis(id)')
+                    .order('login_at', { ascending: false })
+            ]);
 
-            if (error) {
-                tbody.innerHTML = `<tr><td class="py-6 px-6 text-center text-rose-500" colspan="4">Erro ao carregar acessos: ${escapeHtml(error.message)}</td></tr>`;
+            if (erroPerfis) {
+                tbody.innerHTML = `<tr><td class="py-6 px-6 text-center text-rose-500" colspan="3">Erro ao carregar extensionistas: ${escapeHtml(erroPerfis.message)}</td></tr>`;
                 return;
             }
 
-            if (!data || data.length === 0) {
-                tbody.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Nenhum acesso registrado ainda.</td></tr>';
+            if (!perfis || perfis.length === 0) {
+                tbody.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="3">Nenhum extensionista cadastrado ainda.</td></tr>';
                 return;
             }
 
-            tbody.innerHTML = data.map(sessao => {
-                const nome = sessao.perfis?.nome || 'Desconhecido';
-                const email = sessao.perfis?.email || '—';
-                const ultimoAcesso = formatarDataAcesso(sessao.login_at);
-                const permanencia = formatarPermanencia(sessao.login_at, sessao.last_ping_at);
+            // Como as sessões já vêm ordenadas da mais recente para a mais antiga,
+            // o primeiro login encontrado para cada perfil é o último acesso dele.
+            const ultimoAcessoPorPerfil = {};
+            if (!erroSessoes) {
+                (sessoes || []).forEach(s => {
+                    const perfilId = s.perfis?.id;
+                    if (perfilId && !ultimoAcessoPorPerfil[perfilId]) {
+                        ultimoAcessoPorPerfil[perfilId] = s.login_at;
+                    }
+                });
+            }
+
+            tbody.innerHTML = perfis.map(p => {
+                const ultimoAcessoIso = ultimoAcessoPorPerfil[p.id];
+                const ultimoAcesso = formatarDataAcesso(ultimoAcessoIso);
 
                 return `
                 <tr class="hover:bg-slate-50/40 transition-colors">
-                    <td class="py-3.5 px-6 font-bold text-slate-800">${escapeHtml(nome)}</td>
-                    <td class="py-3.5 px-6 text-slate-500">${escapeHtml(email)}</td>
-                    <td class="py-3.5 px-6 text-center text-slate-500">${ultimoAcesso}</td>
-                    <td class="py-3.5 px-6 text-center"><span class="bg-teal-50 text-saude-prime font-bold px-2 py-1 rounded text-[11px]">${permanencia}</span></td>
+                    <td class="py-3.5 px-6 font-bold text-slate-800">${escapeHtml(p.nome)}</td>
+                    <td class="py-3.5 px-6 text-slate-500">${escapeHtml(p.email)}</td>
+                    <td class="py-3.5 px-6 text-center">
+                        ${ultimoAcesso
+                            ? `<span class="bg-teal-50 text-saude-prime font-bold px-2 py-1 rounded text-[11px]">${ultimoAcesso}</span>`
+                            : `<span class="bg-slate-100 text-slate-400 font-bold px-2 py-1 rounded text-[11px]">Nunca acessou</span>`}
+                    </td>
                 </tr>`;
             }).join('');
         }
@@ -1449,6 +1448,8 @@
         }
 
         // ---- Distribuição de Atividades ----
+        // Usa exatamente a mesma nomenclatura cadastrada em horas_avulsas.descricao,
+        // sem agrupar em categorias artificiais, para manter o indicador fidedigno.
         async function carregarPainelDistribuicao() {
             const container = document.getElementById('grafico-distribuicao');
             if (!container) return;
@@ -1463,9 +1464,10 @@
                 return;
             }
 
-            const contagem = { 'Intervenções / Oficinas': 0, 'Reuniões': 0, 'Digital / Comunicação': 0, 'Outros': 0 };
+            const contagem = {};
             (data || []).forEach(h => {
-                contagem[categorizarDescricao(h.descricao)] += 1;
+                const descricao = h.descricao || 'Outros';
+                contagem[descricao] = (contagem[descricao] || 0) + 1;
             });
 
             const total = Object.values(contagem).reduce((a, b) => a + b, 0);
@@ -1475,23 +1477,20 @@
                 return;
             }
 
-            const cores = {
-                'Intervenções / Oficinas': 'bg-saude-prime',
-                'Reuniões': 'bg-saude-accent',
-                'Digital / Comunicação': 'bg-amber-400',
-                'Outros': 'bg-slate-300'
-            };
+            const paletaCores = ['bg-saude-prime', 'bg-saude-accent', 'bg-amber-400', 'bg-sky-400', 'bg-rose-400', 'bg-slate-400'];
+            const categoriasOrdenadas = Object.entries(contagem).sort((a, b) => b[1] - a[1]);
 
-            container.innerHTML = Object.entries(contagem).map(([categoria, qtd]) => {
+            container.innerHTML = categoriasOrdenadas.map(([descricao, qtd], idx) => {
                 const pct = Math.round((qtd / total) * 100);
+                const cor = paletaCores[idx % paletaCores.length];
                 return `
                 <div>
                     <div class="flex justify-between text-[11px] font-bold text-slate-600 mb-1">
-                        <span>${categoria}</span>
+                        <span>${escapeHtml(descricao)}</span>
                         <span>${pct}% <span class="text-slate-400 font-medium">(${qtd})</span></span>
                     </div>
                     <div class="w-full bg-slate-100 rounded-full h-2.5">
-                        <div class="${cores[categoria]} h-2.5 rounded-full" style="width: ${pct}%"></div>
+                        <div class="${cor} h-2.5 rounded-full" style="width: ${pct}%"></div>
                     </div>
                 </div>`;
             }).join('');
@@ -1756,19 +1755,26 @@
             return doc.lastAutoTable.finalY + 12;
         }
 
+        // Distribuição de Atividades no PDF: mesma nomenclatura literal salva em
+        // horas_avulsas.descricao, sem categorias agrupadas.
         async function adicionarSecaoDistribuicao(doc, y, numero) {
             const { data } = await supabaseClient
                 .from('horas_avulsas')
                 .select('descricao')
                 .eq('status', 'deferido');
 
-            const contagem = { 'Intervenções / Oficinas': 0, 'Reuniões': 0, 'Digital / Comunicação': 0, 'Outros': 0 };
-            (data || []).forEach(h => { contagem[categorizarDescricao(h.descricao)] += 1; });
+            const contagem = {};
+            (data || []).forEach(h => {
+                const descricao = h.descricao || 'Outros';
+                contagem[descricao] = (contagem[descricao] || 0) + 1;
+            });
             const total = Object.values(contagem).reduce((a, b) => a + b, 0);
 
-            const linhas = Object.entries(contagem).map(([categoria, qtd]) => [
-                categoria, `${qtd}`, total > 0 ? `${Math.round((qtd / total) * 100)}%` : '-'
-            ]);
+            const linhas = Object.entries(contagem)
+                .sort((a, b) => b[1] - a[1])
+                .map(([descricao, qtd]) => [
+                    descricao, `${qtd}`, total > 0 ? `${Math.round((qtd / total) * 100)}%` : '-'
+                ]);
 
             y = verificarQuebraDePagina(doc, y);
             doc.setFontSize(12);
@@ -1778,7 +1784,7 @@
 
             doc.autoTable({
                 startY: y,
-                head: [['Categoria', 'Lançamentos Homologados', '% do Total']],
+                head: [['Descrição (horas_avulsas)', 'Lançamentos Homologados', '% do Total']],
                 body: total > 0 ? linhas : [['Nenhum lançamento homologado até o momento', '-', '-']],
                 theme: 'striped',
                 headStyles: { fillColor: [17, 94, 89] },
