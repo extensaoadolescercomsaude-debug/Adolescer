@@ -600,13 +600,25 @@
             closeModal('modal-perfil-coord');
         }
 
+        // Tipos de lançamento fixos do formulário do extensionista. Quando a opção
+        // "Outros" é escolhida, o texto livre digitado vira o próprio "descricao"
+        // (sem prefixo), então ele não deve ser tratado como um título de atividade.
+        const TITULOS_ATIVIDADE_CONHECIDOS = [
+            'Ação de Extensão Realizada',
+            'Preparação de Material Didático/Oficina',
+            'Reunião Ordinária/Geral',
+            'Preparação de Post para Redes Sociais',
+            'Pesquisa para Ação ou Post'
+        ];
+
         // Extrai apenas o título da atividade a partir de "descricao", descartando a
         // data "(2026-07-11)" e o detalhamento livre após ":" que o extensionista digitou.
         // Ex: "Ação de Extensão Realizada (2026-07-11): fizemos tal coisa" -> "Ação de Extensão Realizada"
+        // Qualquer texto que não bata com um dos tipos conhecidos (ex: texto livre de "Outros") vira "Outros".
         function extrairTituloAtividade(descricao) {
             if (!descricao) return 'Outros';
-            const semData = descricao.split(' (')[0];
-            return semData.trim() || 'Outros';
+            const semData = descricao.split(' (')[0].trim();
+            return TITULOS_ATIVIDADE_CONHECIDOS.includes(semData) ? semData : 'Outros';
         }
 
         function escapeHtml(str) {
