@@ -98,8 +98,9 @@
                         <p id="header-user-name" class="text-xs font-bold text-slate-800 group-hover:text-saude-prime transition">Carregando...</p>
                         <p class="text-[10px] text-slate-400 font-medium">Extensionista</p>
                     </div>
-                    <div id="header-user-avatar" class="w-10 h-10 rounded-full bg-teal-50 border-2 border-teal-100 flex items-center justify-center text-saude-prime font-bold text-xs shadow-sm">
-                        --
+                    <div id="header-user-avatar" class="w-10 h-10 rounded-full bg-teal-50 border-2 border-teal-100 flex items-center justify-center text-saude-prime font-bold text-xs shadow-sm relative overflow-hidden">
+                        <span id="header-avatar-initials">--</span>
+                        <img id="header-avatar-img" src="" class="hidden absolute inset-0 w-full h-full object-cover rounded-full" alt="Foto de perfil">
                     </div>
                 </button>
 
@@ -184,6 +185,18 @@
                             </tbody>
                         </table>
                     </div>
+                    <div id="paginacao-horas" class="hidden flex items-center justify-between px-6 py-4 border-t border-slate-100">
+                        <span id="paginacao-horas-info" class="text-[11px] font-semibold text-slate-400"></span>
+                        <div class="flex items-center gap-2">
+                            <button onclick="mudarPaginaHoras(-1)" id="btn-pagina-anterior-horas" class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed text-xs">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <span id="paginacao-horas-atual" class="text-xs font-bold text-slate-600 px-2"></span>
+                            <button onclick="mudarPaginaHoras(1)" id="btn-pagina-proxima-horas" class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed text-xs">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -193,7 +206,7 @@
                         <h3 class="font-extrabold text-slate-800 text-base">Minhas Ações</h3>
                         <p class="text-xs text-slate-400 mt-0.5">Gerencie e envie as atas e relatorias das atividades de extensão executadas.</p>
                     </div>
-                    <button onclick="openModal('modal-nova-acao')" class="bg-saude-prime hover:bg-saude-dark text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm transition flex items-center space-x-1.5">
+                    <button onclick="abrirNovaAcao()" class="bg-saude-prime hover:bg-saude-dark text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm transition flex items-center space-x-1.5">
                         <i class="fas fa-plus"></i> <span>Cadastrar uma ação</span>
                     </button>
                 </div>
@@ -230,7 +243,7 @@
                         <a href="https://docs.google.com/uc?export=download&id=1IZwXz2pz8FdvCjjYZAOh1LJv94KDXzUI" target="_blank" class="bg-teal-50 text-saude-prime hover:bg-saude-prime hover:text-white text-xs font-bold px-4 py-2.5 rounded-xl border border-teal-100 transition flex items-center space-x-1.5 shadow-sm">
                             <i class="fas fa-download"></i> <span>Baixar Modelo Padrão</span>
                         </a>
-                        <button onclick="openModal('modal-atividades')" class="bg-saude-accent hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm transition flex items-center space-x-1.5">
+                        <button onclick="abrirNovaAtividade()" class="bg-saude-accent hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm transition flex items-center space-x-1.5">
                             <i class="fas fa-plus"></i> <span>Adicionar Nova Atividade</span>
                         </button>
                     </div>
@@ -413,14 +426,15 @@
             </div>
             <form id="form-perfil" onsubmit="salvarPerfil(event)" class="p-6 space-y-4">
                 <div class="flex flex-col items-center space-y-2 mb-2">
-                    <div id="modal-user-avatar" class="w-20 h-20 rounded-full bg-teal-50 border-2 border-teal-100 flex items-center justify-center text-saude-prime font-bold text-xl relative shadow-md">
+                    <div id="modal-user-avatar" class="w-20 h-20 rounded-full bg-teal-50 border-2 border-teal-100 flex items-center justify-center text-saude-prime font-bold text-xl relative shadow-md overflow-hidden">
                         <span id="modal-avatar-initials">--</span>
-                        <label for="avatar-input" class="absolute bottom-0 right-0 bg-saude-prime text-white w-6 h-6 rounded-full flex items-center justify-center text-[10px] cursor-pointer hover:bg-saude-dark shadow">
+                        <img id="modal-avatar-img" src="" class="hidden absolute inset-0 w-full h-full object-cover rounded-full" alt="Foto de perfil">
+                        <label for="avatar-input" class="absolute bottom-0 right-0 bg-saude-prime text-white w-6 h-6 rounded-full flex items-center justify-center text-[10px] cursor-pointer hover:bg-saude-dark shadow z-10">
                             <i class="fas fa-camera"></i>
                         </label>
-                        <input type="file" id="avatar-input" class="hidden">
+                        <input type="file" id="avatar-input" accept="image/*" class="hidden">
                     </div>
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Alterar Foto</span>
+                    <span id="avatar-upload-status" class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Alterar Foto (máx. 5MB)</span>
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Nome Completo</label>
@@ -500,6 +514,33 @@
             return div.innerHTML;
         }
 
+        // Mostra a foto de perfil (se existir) ou volta para as iniciais, tanto no
+        // cabeçalho quanto no modal de perfil.
+        function definirAvatarUI(url, nome) {
+            const headerImg = document.getElementById('header-avatar-img');
+            const headerInitials = document.getElementById('header-avatar-initials');
+            const modalImg = document.getElementById('modal-avatar-img');
+            const modalInitials = document.getElementById('modal-avatar-initials');
+
+            if (url) {
+                headerImg.src = url;
+                headerImg.classList.remove('hidden');
+                headerInitials.classList.add('hidden');
+
+                modalImg.src = url;
+                modalImg.classList.remove('hidden');
+                modalInitials.classList.add('hidden');
+            } else {
+                headerImg.classList.add('hidden');
+                headerInitials.classList.remove('hidden');
+                headerInitials.innerText = iniciais(nome);
+
+                modalImg.classList.add('hidden');
+                modalInitials.classList.remove('hidden');
+                modalInitials.innerText = iniciais(nome);
+            }
+        }
+
         // GUARDA DE SESSÃO
         async function protegerPagina() {
             const { data: { session } } = await supabaseClient.auth.getSession();
@@ -511,7 +552,7 @@
 
             const { data: perfil, error } = await supabaseClient
                 .from('perfis')
-                .select('id, nome, email, papel, status, bio') // <-- ID FOI INSERIDO AQUI
+                .select('id, nome, email, papel, status, bio, avatar_url') // <-- ID e AVATAR_URL FORAM INSERIDOS AQUI
                 .eq('id', session.user.id)
                 .single();
 
@@ -595,12 +636,132 @@
             }
 
             document.getElementById('header-user-name').innerText = nome;
-            document.getElementById('header-user-avatar').innerText = iniciais(nome);
-            document.getElementById('modal-avatar-initials').textContent = iniciais(nome);
+            // Só reforça as iniciais se ainda não houver foto carregada
+            if (document.getElementById('header-avatar-img').classList.contains('hidden')) {
+                document.getElementById('header-avatar-initials').innerText = iniciais(nome);
+                document.getElementById('modal-avatar-initials').textContent = iniciais(nome);
+            }
 
             alert('Perfil atualizado com sucesso!');
             closeModal('modal-perfil');
         }
+
+        // ===================================================================
+        // UPLOAD DE FOTO DE PERFIL (com compressão no navegador para não
+        // pesar no Storage/armazenamento do Supabase)
+        // ===================================================================
+        const AVATAR_BUCKET = 'avatars';
+        const AVATAR_MAX_MB_ORIGINAL = 5;   // limite do arquivo bruto selecionado
+        const AVATAR_MAX_KB_FINAL = 500;    // limite do arquivo já comprimido, antes do upload
+        const AVATAR_TAMANHO_MAX_PX = 400;  // maior lado da imagem final, em pixels
+
+        // Redimensiona e comprime a imagem via <canvas> antes de enviar ao Supabase.
+        function comprimirImagemAvatar(file, tamanhoMax = AVATAR_TAMANHO_MAX_PX, qualidade = 0.75) {
+            return new Promise((resolve, reject) => {
+                const leitor = new FileReader();
+                leitor.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        let { width, height } = img;
+                        if (width > height && width > tamanhoMax) {
+                            height = Math.round(height * (tamanhoMax / width));
+                            width = tamanhoMax;
+                        } else if (height >= width && height > tamanhoMax) {
+                            width = Math.round(width * (tamanhoMax / height));
+                            height = tamanhoMax;
+                        }
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                        canvas.toBlob(blob => {
+                            if (!blob) return reject(new Error('Falha ao processar a imagem.'));
+                            resolve(blob);
+                        }, 'image/jpeg', qualidade);
+                    };
+                    img.onerror = () => reject(new Error('Não foi possível ler a imagem selecionada.'));
+                    img.src = e.target.result;
+                };
+                leitor.onerror = () => reject(new Error('Falha ao ler o arquivo.'));
+                leitor.readAsDataURL(file);
+            });
+        }
+
+        document.getElementById('avatar-input').addEventListener('change', async function() {
+            const file = this.files[0];
+            const statusEl = document.getElementById('avatar-upload-status');
+            if (!file) return;
+
+            if (!file.type.startsWith('image/')) {
+                alert('Selecione um arquivo de imagem válido (JPG, PNG, etc).');
+                this.value = '';
+                return;
+            }
+
+            if (file.size > AVATAR_MAX_MB_ORIGINAL * 1024 * 1024) {
+                alert(`A imagem selecionada deve ter no máximo ${AVATAR_MAX_MB_ORIGINAL}MB.`);
+                this.value = '';
+                return;
+            }
+
+            const textoOriginal = statusEl.innerText;
+            statusEl.innerText = 'Processando imagem...';
+
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (!session) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                const blobComprimido = await comprimirImagemAvatar(file);
+
+                // Segurança extra: garante que o arquivo final (já comprimido) seja pequeno,
+                // para não pesar no armazenamento do Supabase.
+                if (blobComprimido.size > AVATAR_MAX_KB_FINAL * 1024) {
+                    alert('Não foi possível reduzir a imagem o suficiente. Tente uma foto mais simples ou com menor resolução.');
+                    statusEl.innerText = textoOriginal;
+                    this.value = '';
+                    return;
+                }
+
+                statusEl.innerText = 'Enviando foto...';
+
+                const caminhoArquivo = `${session.user.id}/avatar-${Date.now()}.jpg`;
+
+                const { error: erroUpload } = await supabaseClient
+                    .storage
+                    .from(AVATAR_BUCKET)
+                    .upload(caminhoArquivo, blobComprimido, { contentType: 'image/jpeg', upsert: true });
+
+                if (erroUpload) throw erroUpload;
+
+                const { data: urlData } = supabaseClient
+                    .storage
+                    .from(AVATAR_BUCKET)
+                    .getPublicUrl(caminhoArquivo);
+
+                const novaUrl = urlData.publicUrl;
+
+                const { error: erroPerfil } = await supabaseClient
+                    .from('perfis')
+                    .update({ avatar_url: novaUrl })
+                    .eq('id', session.user.id);
+
+                if (erroPerfil) throw erroPerfil;
+
+                definirAvatarUI(novaUrl, document.getElementById('modal-user-name').value);
+                statusEl.innerText = 'Foto atualizada!';
+                setTimeout(() => { statusEl.innerText = 'Alterar Foto (máx. 5MB)'; }, 2500);
+
+            } catch (erro) {
+                console.error(erro);
+                alert('Erro ao enviar a foto: ' + erro.message);
+                statusEl.innerText = textoOriginal;
+            } finally {
+                this.value = '';
+            }
+        });
 
         // Lança um registro de horas avulsas com DATA e LOCAL
         async function lancarHoras(e) {
@@ -661,7 +822,15 @@
             carregarHistoricoHoras();
         }
 
-        // Busca o histórico de horas e formata a exibição do novo Local e Data
+        // ===================================================================
+        // HISTÓRICO DE HORAS — com paginação (15 itens por página)
+        // ===================================================================
+        const ITENS_POR_PAGINA_HORAS = 15;
+        let historicoHorasCompleto = [];
+        let paginaAtualHoras = 1;
+
+        // Busca todo o histórico de horas e delega a exibição paginada para
+        // renderizarPaginaHoras().
         async function carregarHistoricoHoras() {
             const tbody = document.getElementById('tbody-historico-horas');
             tbody.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Carregando...</td></tr>';
@@ -677,52 +846,15 @@
 
             if (error) {
                 tbody.innerHTML = `<tr><td class="py-6 px-6 text-center text-rose-500" colspan="4">Erro ao carregar: ${escapeHtml(error.message)}</td></tr>`;
+                document.getElementById('paginacao-horas').classList.add('hidden');
                 return;
             }
 
-            const badge = {
-                pendente: '<span class="bg-amber-50 text-amber-700 border border-amber-100 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide">Pendente</span>',
-                deferido: '<span class="bg-emerald-50 text-emerald-700 border border-emerald-100 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide">Aprovado</span>',
-                indeferido: '<span class="bg-red-50 text-red-700 border border-red-100 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide">Recusado</span>'
-            };
+            historicoHorasCompleto = data || [];
 
-            if (data.length === 0) {
-                tbody.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Nenhum lançamento ainda. Use "Adicionar Carga Horária" para começar.</td></tr>';
-            } else {
-                tbody.innerHTML = data.map(h => {
-                    let extra = '';
-                    if (h.status === 'indeferido') {
-                        extra = `
-                            <div class="mt-2 text-[10px] bg-red-50 border border-red-100 p-2 rounded-lg leading-relaxed animate-fadeIn">
-                                <span class="block font-bold text-red-700 mb-0.5">Motivo da recusa:</span>
-                                <span class="block text-red-600">${escapeHtml(h.motivo_recusa || 'Não informado.')}</span>
-                                <span class="block text-red-500 mt-1.5 font-semibold not-italic">Faça um novo lançamento corrigido em "Adicionar Carga Horária".</span>
-                            </div>
-                        `;
-                    }
-                    
-                    let strTipo = h.descricao.split(' (')[0];
-                    let dateToShow = h.data_atividade 
-                        ? new Date(h.data_atividade + 'T12:00:00').toLocaleDateString('pt-BR') 
-                        : new Date(h.created_at).toLocaleDateString('pt-BR');
-
-                    return `
-                    <tr class="animate-fadeIn hover:bg-slate-50">
-                        <td class="py-4 px-6 font-semibold align-top text-slate-600">${dateToShow}</td>
-                        <td class="py-4 px-6 align-top">
-                            <p class="font-bold text-slate-800">${escapeHtml(strTipo)}</p>
-                            <p class="text-[10px] text-slate-400 mt-0.5"><i class="fas fa-map-marker-alt"></i> ${escapeHtml(h.local || 'Não informado')}</p>
-                            ${extra}
-                        </td>
-                        <td class="py-4 px-6 text-center font-bold text-slate-800 align-top">${h.horas}h</td>
-                        <td class="py-4 px-6 align-top">${badge[h.status] || badge.pendente}</td>
-                    </tr>
-                `;
-                }).join('');
-            }
-
-            const pendentes = data.filter(h => h.status === 'pendente').reduce((s, h) => s + Number(h.horas), 0);
-            const aprovadas = data.filter(h => h.status === 'deferido').reduce((s, h) => s + Number(h.horas), 0);
+            // Estatísticas usam sempre o histórico completo, não apenas a página atual
+            const pendentes = historicoHorasCompleto.filter(h => h.status === 'pendente').reduce((s, h) => s + Number(h.horas), 0);
+            const aprovadas = historicoHorasCompleto.filter(h => h.status === 'deferido').reduce((s, h) => s + Number(h.horas), 0);
 
             document.getElementById('stat-horas-pendentes').innerText = `${pendentes}h`;
             document.getElementById('stat-horas-aprovadas').innerText = `${aprovadas}h`;
@@ -730,7 +862,84 @@
             const meta = 60;
             const progresso = Math.min(100, Math.round((aprovadas / meta) * 100));
             document.getElementById('barra-progresso-horas').style.width = `${progresso}%`;
+
+            renderizarPaginaHoras(1);
         }
+
+        // Renderiza somente a fatia de 15 lançamentos correspondente à página pedida.
+        function renderizarPaginaHoras(pagina) {
+            const tbody = document.getElementById('tbody-historico-horas');
+            const paginacao = document.getElementById('paginacao-horas');
+            const data = historicoHorasCompleto;
+
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Nenhum lançamento ainda. Use "Adicionar Carga Horária" para começar.</td></tr>';
+                paginacao.classList.add('hidden');
+                return;
+            }
+
+            const totalPaginas = Math.max(1, Math.ceil(data.length / ITENS_POR_PAGINA_HORAS));
+            paginaAtualHoras = Math.min(Math.max(1, pagina), totalPaginas);
+
+            const badge = {
+                pendente: '<span class="bg-amber-50 text-amber-700 border border-amber-100 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide">Pendente</span>',
+                deferido: '<span class="bg-emerald-50 text-emerald-700 border border-emerald-100 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide">Aprovado</span>',
+                indeferido: '<span class="bg-red-50 text-red-700 border border-red-100 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide">Recusado</span>'
+            };
+
+            const inicio = (paginaAtualHoras - 1) * ITENS_POR_PAGINA_HORAS;
+            const fim = inicio + ITENS_POR_PAGINA_HORAS;
+            const paginaDados = data.slice(inicio, fim);
+
+            tbody.innerHTML = paginaDados.map(h => {
+                let extra = '';
+                if (h.status === 'indeferido') {
+                    extra = `
+                        <div class="mt-2 text-[10px] bg-red-50 border border-red-100 p-2 rounded-lg leading-relaxed animate-fadeIn">
+                            <span class="block font-bold text-red-700 mb-0.5">Motivo da recusa:</span>
+                            <span class="block text-red-600">${escapeHtml(h.motivo_recusa || 'Não informado.')}</span>
+                            <span class="block text-red-500 mt-1.5 font-semibold not-italic">Faça um novo lançamento corrigido em "Adicionar Carga Horária".</span>
+                        </div>
+                    `;
+                }
+                
+                let strTipo = h.descricao.split(' (')[0];
+                let dateToShow = h.data_atividade 
+                    ? new Date(h.data_atividade + 'T12:00:00').toLocaleDateString('pt-BR') 
+                    : new Date(h.created_at).toLocaleDateString('pt-BR');
+
+                return `
+                <tr class="animate-fadeIn hover:bg-slate-50">
+                    <td class="py-4 px-6 font-semibold align-top text-slate-600">${dateToShow}</td>
+                    <td class="py-4 px-6 align-top">
+                        <p class="font-bold text-slate-800">${escapeHtml(strTipo)}</p>
+                        <p class="text-[10px] text-slate-400 mt-0.5"><i class="fas fa-map-marker-alt"></i> ${escapeHtml(h.local || 'Não informado')}</p>
+                        ${extra}
+                    </td>
+                    <td class="py-4 px-6 text-center font-bold text-slate-800 align-top">${h.horas}h</td>
+                    <td class="py-4 px-6 align-top">${badge[h.status] || badge.pendente}</td>
+                </tr>
+            `;
+            }).join('');
+
+            paginacao.classList.toggle('hidden', data.length <= ITENS_POR_PAGINA_HORAS);
+            document.getElementById('paginacao-horas-info').innerText =
+                `Mostrando ${inicio + 1}–${Math.min(fim, data.length)} de ${data.length} lançamentos`;
+            document.getElementById('paginacao-horas-atual').innerText = `Página ${paginaAtualHoras} de ${totalPaginas}`;
+            document.getElementById('btn-pagina-anterior-horas').disabled = paginaAtualHoras === 1;
+            document.getElementById('btn-pagina-proxima-horas').disabled = paginaAtualHoras === totalPaginas;
+        }
+
+        function mudarPaginaHoras(delta) {
+            renderizarPaginaHoras(paginaAtualHoras + delta);
+        }
+
+        // ===================================================================
+        // MINHAS AÇÕES — só é possível editar/reenviar quando a ação foi
+        // indeferida pela coordenação
+        // ===================================================================
+        let minhasAcoesCompletas = [];
+        let acaoEditandoId = null;
 
         async function carregarMinhasAcoes() {
             const tbody = document.getElementById('tbody-minhas-acoes');
@@ -750,26 +959,30 @@
                 return;
             }
 
+            minhasAcoesCompletas = data || [];
+
             const badge = {
                 pendente: '<span class="bg-amber-50 text-amber-700 border border-amber-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Aguardando</span>',
                 deferido: '<span class="bg-emerald-50 text-emerald-700 border border-emerald-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Homologado</span>',
                 indeferido: '<span class="bg-red-50 text-red-700 border border-red-100 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide">Indeferido</span>'
             };
 
-            if (data.length === 0) {
+            if (minhasAcoesCompletas.length === 0) {
                 tbody.innerHTML = '<tr><td class="py-6 px-6 text-center text-slate-400" colspan="4">Nenhuma ação cadastrada ainda.</td></tr>';
                 return;
             }
 
-            tbody.innerHTML = data.map(acao => {
+            tbody.innerHTML = minhasAcoesCompletas.map(acao => {
                 let extra = '';
                 if (acao.status === 'indeferido') {
                     extra = `
                         <div class="mt-2 text-[10px] bg-red-50 border border-red-100 p-2 rounded-lg leading-relaxed animate-fadeIn max-w-xs">
                             <span class="block font-bold text-red-700 mb-0.5">Motivo da recusa:</span>
                             <span class="block text-red-600">${escapeHtml(acao.motivo_recusa || 'Não informado.')}</span>
-                            <span class="block text-red-500 mt-1.5 font-semibold not-italic">Cadastre uma nova ação com a documentação corrigida.</span>
                         </div>
+                        <button onclick="corrigirAcao('${acao.id}')" class="mt-2 text-[10px] font-bold text-saude-prime hover:underline flex items-center gap-1">
+                            <i class="fas fa-redo"></i> Corrigir e Reenviar
+                        </button>
                     `;
                 }
                 return `
@@ -791,6 +1004,33 @@
             }).join('');
         }
 
+        // Abre o modal de nova ação já limpo (usado pelo botão "Cadastrar uma ação")
+        function abrirNovaAcao() {
+            acaoEditandoId = null;
+            document.querySelector('#modal-nova-acao h3').innerText = 'Cadastrar Nova Ação de Extensão';
+            document.getElementById('btn-enviar-acao').innerText = 'Enviar Documentos';
+            document.getElementById('form-nova-acao').reset();
+            document.getElementById('label-file-ata').innerHTML = '<i class="fas fa-file-signature mr-1 text-slate-400"></i>Selecionar Ata da Ação';
+            document.getElementById('label-file-relatoria').innerHTML = '<i class="fas fa-file-invoice mr-1 text-slate-400"></i>Selecionar Relatoria';
+            openModal('modal-nova-acao');
+        }
+
+        // Abre o modal de ação já preenchido com os dados da ação indeferida, para correção.
+        function corrigirAcao(id) {
+            const acao = minhasAcoesCompletas.find(a => String(a.id) === String(id));
+            if (!acao) return;
+
+            acaoEditandoId = acao.id;
+            document.getElementById('input-local-acao').value = acao.local_intervencao || '';
+            document.getElementById('file-ata').value = '';
+            document.getElementById('file-relatoria').value = '';
+            document.getElementById('label-file-ata').innerHTML = '<i class="fas fa-file-signature mr-1 text-slate-400"></i>Selecionar novo arquivo de Ata';
+            document.getElementById('label-file-relatoria').innerHTML = '<i class="fas fa-file-invoice mr-1 text-slate-400"></i>Selecionar nova Relatoria';
+            document.querySelector('#modal-nova-acao h3').innerText = 'Corrigir e Reenviar Ação';
+            document.getElementById('btn-enviar-acao').innerText = 'Reenviar Documentos';
+            openModal('modal-nova-acao');
+        }
+
         // CONTROLES DE INTERFACE COMUM
         function toggleUserMenu() {
             document.getElementById('user-dropdown').classList.toggle('hidden');
@@ -809,8 +1049,27 @@
             document.getElementById('user-dropdown').classList.add('hidden');
         }
 
+        // Fecha o modal e, para os modais de "ação" e "atividade", reseta o estado
+        // de edição/correção para que a próxima abertura comece limpa (modo "novo").
         function closeModal(modalId) {
             document.getElementById(modalId).classList.add('hidden');
+
+            if (modalId === 'modal-nova-acao') {
+                acaoEditandoId = null;
+                document.querySelector('#modal-nova-acao h3').innerText = 'Cadastrar Nova Ação de Extensão';
+                document.getElementById('btn-enviar-acao').innerText = 'Enviar Documentos';
+                document.getElementById('form-nova-acao').reset();
+                document.getElementById('label-file-ata').innerHTML = '<i class="fas fa-file-signature mr-1 text-slate-400"></i>Selecionar Ata da Ação';
+                document.getElementById('label-file-relatoria').innerHTML = '<i class="fas fa-file-invoice mr-1 text-slate-400"></i>Selecionar Relatoria';
+            }
+
+            if (modalId === 'modal-atividades') {
+                atividadeEditandoId = null;
+                document.querySelector('#modal-atividades h3').innerText = 'Adicionar Atividade Pronta';
+                document.getElementById('btn-compartilhar-atividade').innerText = 'Compartilhar';
+                document.getElementById('form-nova-atividade').reset();
+                document.getElementById('label-file-atividade').innerHTML = '<i class="fas fa-cloud-upload-alt text-slate-400 text-xl block"></i><span class="text-xs font-semibold text-slate-600 block">Clique para selecionar o arquivo</span>';
+            }
         }
 
         // FECHAR TODOS OS MODAIS AO CLICAR FORA
@@ -901,6 +1160,7 @@
                 return;
             }
 
+            const idEmEdicao = acaoEditandoId;
             btn.disabled = true;
 
             try {
@@ -917,22 +1177,38 @@
                 const urlRelatoria = await enviarArquivoParaDrive(arquivoRelatoria);
 
                 btn.innerText = 'Salvando...';
-                const { error } = await supabaseClient
-                    .from('acoes_extensao')
-                    .insert({
-                        extensionista_id: session.user.id,
-                        local_intervencao: local,
-                        url_ata: urlAta,
-                        url_relatoria: urlRelatoria,
-                        status: 'pendente'
-                    });
 
-                if (error) throw error;
+                if (idEmEdicao) {
+                    // Só é possível chegar aqui se a ação estava "indeferido" (regra reforçada no fluxo da UI)
+                    const { error } = await supabaseClient
+                        .from('acoes_extensao')
+                        .update({
+                            local_intervencao: local,
+                            url_ata: urlAta,
+                            url_relatoria: urlRelatoria,
+                            status: 'pendente',
+                            motivo_recusa: null
+                        })
+                        .eq('id', idEmEdicao)
+                        .eq('extensionista_id', session.user.id);
 
-                alert('Documentação da ação enviada! Aguardando homologação da ata e relatoria.');
-                document.getElementById('form-nova-acao').reset();
-                document.getElementById('label-file-ata').innerHTML = '<i class="fas fa-file-signature mr-1 text-slate-400"></i>Selecionar Ata da Ação';
-                document.getElementById('label-file-relatoria').innerHTML = '<i class="fas fa-file-invoice mr-1 text-slate-400"></i>Selecionar Relatoria';
+                    if (error) throw error;
+                    alert('Correção enviada! Aguardando nova homologação da ata e relatoria.');
+                } else {
+                    const { error } = await supabaseClient
+                        .from('acoes_extensao')
+                        .insert({
+                            extensionista_id: session.user.id,
+                            local_intervencao: local,
+                            url_ata: urlAta,
+                            url_relatoria: urlRelatoria,
+                            status: 'pendente'
+                        });
+
+                    if (error) throw error;
+                    alert('Documentação da ação enviada! Aguardando homologação da ata e relatoria.');
+                }
+
                 closeModal('modal-nova-acao');
                 carregarMinhasAcoes();
 
@@ -940,7 +1216,7 @@
                 alert('Erro ao enviar: ' + erro.message);
             } finally {
                 btn.disabled = false;
-                btn.innerText = 'Enviar Documentos';
+                btn.innerText = idEmEdicao ? 'Reenviar Documentos' : 'Enviar Documentos';
             }
         }
 
@@ -959,7 +1235,41 @@
             }
         });
 
-        // Envia uma nova atividade para homologação (arquivo -> Drive, metadados -> Supabase)
+        // ===================================================================
+        // BIBLIOTECA DE ATIVIDADES — só é possível editar/reenviar quando a
+        // atividade foi indeferida pela coordenação
+        // ===================================================================
+        let bibliotecaAtividadesCompleta = [];
+        let atividadeEditandoId = null;
+
+        // Abre o modal de nova atividade já limpo (usado pelo botão "Adicionar Nova Atividade")
+        function abrirNovaAtividade() {
+            atividadeEditandoId = null;
+            document.querySelector('#modal-atividades h3').innerText = 'Adicionar Atividade Pronta';
+            document.getElementById('btn-compartilhar-atividade').innerText = 'Compartilhar';
+            document.getElementById('form-nova-atividade').reset();
+            document.getElementById('label-file-atividade').innerHTML = '<i class="fas fa-cloud-upload-alt text-slate-400 text-xl block"></i><span class="text-xs font-semibold text-slate-600 block">Clique para selecionar o arquivo</span>';
+            openModal('modal-atividades');
+        }
+
+        // Abre o modal de atividade já preenchido com os dados da atividade indeferida, para correção.
+        function corrigirAtividade(id) {
+            const item = bibliotecaAtividadesCompleta.find(a => String(a.id) === String(id));
+            if (!item) return;
+
+            atividadeEditandoId = item.id;
+            document.getElementById('input-titulo-atividade').value = item.titulo || '';
+            document.getElementById('input-publico-atividade').value = item.publico_alvo || '';
+            document.getElementById('input-objetivo-atividade').value = item.objetivo || '';
+            document.getElementById('file-atividade').value = '';
+            document.getElementById('label-file-atividade').innerHTML = '<i class="fas fa-cloud-upload-alt text-slate-400 text-xl block"></i><span class="text-xs font-semibold text-slate-600 block">Selecione o arquivo corrigido</span>';
+            document.querySelector('#modal-atividades h3').innerText = 'Corrigir e Reenviar Atividade';
+            document.getElementById('btn-compartilhar-atividade').innerText = 'Reenviar';
+            openModal('modal-atividades');
+        }
+
+        // Envia uma nova atividade para homologação (arquivo -> Drive, metadados -> Supabase),
+        // ou atualiza uma atividade indeferida existente para reenvio.
         async function compartilharAtividade(e) {
             e.preventDefault();
 
@@ -979,6 +1289,7 @@
                 return;
             }
 
+            const idEmEdicao = atividadeEditandoId;
             btn.disabled = true;
             btn.innerText = 'Enviando arquivo...';
 
@@ -992,22 +1303,40 @@
                 const urlArquivo = await enviarArquivoAtividadeParaDrive(arquivo);
 
                 btn.innerText = 'Salvando...';
-                const { error } = await supabaseClient
-                    .from('biblioteca_atividades')
-                    .insert({
-                        extensionista_id: session.user.id,
-                        titulo: titulo,
-                        publico_alvo: publico,
-                        objetivo: objetivo,
-                        url_arquivo: urlArquivo,
-                        status: 'pendente'
-                    });
 
-                if (error) throw error;
+                if (idEmEdicao) {
+                    // Só é possível chegar aqui se a atividade estava "indeferido" (regra reforçada no fluxo da UI)
+                    const { error } = await supabaseClient
+                        .from('biblioteca_atividades')
+                        .update({
+                            titulo: titulo,
+                            publico_alvo: publico,
+                            objetivo: objetivo,
+                            url_arquivo: urlArquivo,
+                            status: 'pendente',
+                            motivo_recusa: null
+                        })
+                        .eq('id', idEmEdicao)
+                        .eq('extensionista_id', session.user.id);
 
-                alert('Atividade enviada! Ela aparecerá na biblioteca assim que for homologada pela coordenação.');
-                document.getElementById('form-nova-atividade').reset();
-                document.getElementById('label-file-atividade').innerHTML = '<i class="fas fa-cloud-upload-alt text-slate-400 text-xl block"></i><span class="text-xs font-semibold text-slate-600 block">Clique para selecionar o arquivo</span>';
+                    if (error) throw error;
+                    alert('Correção enviada! A atividade aparecerá na biblioteca assim que for homologada novamente.');
+                } else {
+                    const { error } = await supabaseClient
+                        .from('biblioteca_atividades')
+                        .insert({
+                            extensionista_id: session.user.id,
+                            titulo: titulo,
+                            publico_alvo: publico,
+                            objetivo: objetivo,
+                            url_arquivo: urlArquivo,
+                            status: 'pendente'
+                        });
+
+                    if (error) throw error;
+                    alert('Atividade enviada! Ela aparecerá na biblioteca assim que for homologada pela coordenação.');
+                }
+
                 closeModal('modal-atividades');
                 carregarBibliotecaAtividades();
 
@@ -1015,7 +1344,7 @@
                 alert('Erro ao compartilhar atividade: ' + erro.message);
             } finally {
                 btn.disabled = false;
-                btn.innerText = 'Compartilhar';
+                btn.innerText = idEmEdicao ? 'Reenviar' : 'Compartilhar';
             }
         }
 
@@ -1048,7 +1377,9 @@
                 return;
             }
 
-            if (!data || data.length === 0) {
+            bibliotecaAtividadesCompleta = data || [];
+
+            if (bibliotecaAtividadesCompleta.length === 0) {
                 emptyContainer.classList.remove('hidden');
                 return;
             }
@@ -1058,19 +1389,26 @@
                 indeferido: '<span class="bg-red-50 text-red-700 border border-red-100 px-2.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wide">Recusada</span>'
             };
 
-            grid.innerHTML = data.map(item => {
+            grid.innerHTML = bibliotecaAtividadesCompleta.map(item => {
                 const ehPropria = item.extensionista_id === session.user.id;
                 const autorNome = item.perfis ? item.perfis.nome : 'Extensionista';
 
                 let extraStatus = '';
                 if (ehPropria && item.status !== 'aprovado') {
                     extraStatus = `<div class="pt-1">${statusBadge[item.status] || ''}</div>`;
-                    if (item.status === 'indeferido' && item.motivo_recusa) {
+                    if (item.status === 'indeferido') {
+                        if (item.motivo_recusa) {
+                            extraStatus += `
+                                <div class="mt-2 text-[10px] bg-red-50 border border-red-100 p-2 rounded-lg leading-relaxed">
+                                    <span class="block font-bold text-red-700 mb-0.5">Motivo da recusa:</span>
+                                    <span class="block text-red-600">${escapeHtml(item.motivo_recusa)}</span>
+                                </div>
+                            `;
+                        }
                         extraStatus += `
-                            <div class="mt-2 text-[10px] bg-red-50 border border-red-100 p-2 rounded-lg leading-relaxed">
-                                <span class="block font-bold text-red-700 mb-0.5">Motivo da recusa:</span>
-                                <span class="block text-red-600">${escapeHtml(item.motivo_recusa)}</span>
-                            </div>
+                            <button onclick="corrigirAtividade('${item.id}')" class="mt-2 text-[10px] font-bold text-saude-accent hover:underline flex items-center gap-1">
+                                <i class="fas fa-redo"></i> Corrigir e Reenviar
+                            </button>
                         `;
                     }
                 }
@@ -1500,8 +1838,7 @@
              iniciarRastreioAcesso(perfil.id);
 
              document.getElementById('header-user-name').innerText = perfil.nome;
-             document.getElementById('header-user-avatar').innerText = iniciais(perfil.nome);
-             document.getElementById('modal-avatar-initials').textContent = iniciais(perfil.nome);
+             definirAvatarUI(perfil.avatar_url || null, perfil.nome);
              document.getElementById('modal-user-name').value = perfil.nome;
              document.getElementById('modal-user-email').value = perfil.email;
              document.getElementById('modal-user-bio').value = perfil.bio || '';
